@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+    --color-BGcolor: #F5F5DC;
+}
+
+/* Development help tool -Frankie*/
+body {
+    background-color: rgb(211, 211, 211);
+}
