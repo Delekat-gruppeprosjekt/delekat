@@ -33,11 +33,5 @@ export const userType = defineType({
       title: 'Avatar',
       type: 'image',
     }),
-    defineField({
-      name: 'posts',
-      title: 'Posts',
-      type: 'array',
-      of: [{ type: 'reference', to: [{ type: 'post' }] }],
-    }),
   ],
 });
