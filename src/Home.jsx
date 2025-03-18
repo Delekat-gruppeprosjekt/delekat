@@ -1,5 +1,5 @@
 import React from 'react'
-import HomeList from './HomeList'
+import HomeList from './pages/home/HomeList'
 
 export default function Home() {
   return (
