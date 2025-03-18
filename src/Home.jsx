@@ -1,8 +1,12 @@
 import React from 'react'
+<<<<<<< HEAD:src/pages/Home.jsx
 import HomeList from '../components/home/HomeList'
 import Logo from '../components/header/Logo'
 
 
+=======
+import HomeList from './pages/home/HomeList'
+>>>>>>> main:src/Home.jsx
 
 export default function Home() {
   return (
