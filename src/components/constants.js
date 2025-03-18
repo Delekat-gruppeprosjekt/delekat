@@ -1,4 +1,3 @@
-
 export const projectId = "jab3uxlh";
 export const dataset = "production";
 
@@ -10,6 +9,4 @@ export const API_ALL_POSTS = `https://${projectId}.api.sanity.io/v2025-03-17/dat
 
 export const SANITY_TOKEN = import.meta.env.VITE_SANITY_TOKEN;
 
-
 export const API_URL = `https://${projectId}.api.sanity.io/v2025-03-17/data/query/${dataset}?query=`;
-
