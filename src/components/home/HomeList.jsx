@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import HomeCard from './HomeCard'
-import { API_ALL_POSTS, SANITY_TOKEN } from '../../components/constants.js'
+import HomeCard from './HomeCard.jsx'
+import { API_ALL_POSTS, SANITY_TOKEN } from '../constants.js'
 
 export default function HomeList() {
   const [posts, setPosts] = useState([])
