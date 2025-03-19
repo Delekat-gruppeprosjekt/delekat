@@ -3,7 +3,7 @@ import Header from '../components/Header'
 const Layout = () => {
     return (
         <div>
-            <main>
+            <main className="xl:ml-100">
                 <Outlet />
             </main>
             <Header />
