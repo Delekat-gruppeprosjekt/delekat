@@ -4,6 +4,8 @@ import { IoChatbubbleOutline } from "react-icons/io5";
 import { PiChefHat } from "react-icons/pi";
 import LesMer from "./Homebtn.jsx";
 import PortionControl from "./PortionControl.jsx";
+import Instructions from './Instructions';
+import Comments from './Comments';
 
 export default function HomeCard({ post }) {
   const [portions, setPortions] = useState(1);
@@ -81,59 +83,37 @@ export default function HomeCard({ post }) {
       <PortionControl onPortionChange={handlePortionChange} />
 
       {/* Ingredienser */}
-{/* Ingredienser */}
-{post.ingredients && post.ingredients.length > 0 && (
-  <div className="mb-4">
-    <h3 className="font-light text-lg mb-2">Ingredienser</h3>
-    <ul className="list-none text-sm space-y-1 text-gray-600 flex flex-col">
-      {post.ingredients.map((ing, index) => (
-        <li key={`${ing.ingredient}-${index}`}>
-          <span className="text-black font-regular">
-            {formatQuantity(ing.value * portions)}
-          </span>
-          <span className="text-gray-500">
-            {" "}{ing.unit} {ing.ingredient}
-          </span>
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
+      {post.ingredients && post.ingredients.length > 0 && (
+        <div className="mb-4">
+          <h3 className="font-light text-lg mb-2">Ingredienser</h3>
+          <ul className="list-none text-sm space-y-3 text-gray-600 flex flex-col">
+            {post.ingredients.map((ing, index) => (
+              <li
+                key={`${ing.ingredient}-${index}`}
+                className="flex items-center whitespace-nowrap"
+              >
+                <span className="w-20 text-black font-regular mr-2">
+                  {formatQuantity(ing.value * portions)} {ing.unit}
+                </span>
+                <span className="text-gray-500">
+                  {ing.ingredient.charAt(0).toUpperCase() + ing.ingredient.slice(1)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Fremgangsmåte */}
       <div className="mb-4">
-        <h3 className="font-light mb-2 ">Slik gjør du</h3>
+        <h3 className="font-light mb-2">Slik gjør du</h3>
         {!expanded && (
           <LesMer expanded={expanded} onClick={toggleExpanded} />
         )}
         {expanded && (
           <>
-            <p>{post.instructions || "Ingen instruksjoner tilgjengelig."}</p>
-            {post.comments && post.comments.length > 0 && (
-              <div className="mt-4 ">
-                <h3 className="font-regular mb-2 ">Kommentarer</h3>
-                {post.comments.map((comment, index) => (
-                  <div key={comment._id || index} className="flex items-start mb-2">
-                    {comment.author?.avatarUrl ? (
-                      <img
-                        src={comment.author.avatarUrl}
-                        alt={comment.author.username}
-                        className="w-6 h-6 rounded-full mr-2"
-                      />
-                    ) : (
-                      <FaUserCircle className="text-lg mr-2" />
-                    )}
-                    <div>
-                      <span className="font-regular">
-                        {comment.author?.username || 'Anonym'}
-                      </span>
-                      <p className="font-light">{comment.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-           
+            <Instructions instructions={post.instructions} />
+            <Comments comments={post.comments} />
             <LesMer expanded={expanded} onClick={toggleExpanded} />
           </>
         )}
