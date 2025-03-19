@@ -1,6 +1,6 @@
-import { SignIn } from "@clerk/clerk-react";
+import { SignUp } from "@clerk/clerk-react";
 
-const Login = () => {
+const SignUpPage = () => {
   return (
     <div
       style={{
@@ -11,9 +11,9 @@ const Login = () => {
       }}
     >
       <h1></h1>
-      <SignIn />
+      <SignUp />
     </div>
   );
 };
 
-export default Login;
+export default SignUpPage;
