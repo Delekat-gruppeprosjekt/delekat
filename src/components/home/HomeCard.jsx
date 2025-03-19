@@ -113,7 +113,8 @@ export default function HomeCard({ post }) {
         {expanded && (
           <>
             <Instructions instructions={post.instructions} />
-            <Comments comments={post.comments} />
+            <Comments comments={post.comments} owner={post.user} />
+
             <LesMer expanded={expanded} onClick={toggleExpanded} />
           </>
         )}

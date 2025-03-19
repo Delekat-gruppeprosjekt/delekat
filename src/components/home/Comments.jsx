@@ -1,62 +1,76 @@
 import React from 'react';
 import { FaUserCircle } from 'react-icons/fa';
 
-// Funksjon som sjekker om kommentaren er skrevet av post-eieren
-function renderComment(comment, ownerUsername) {
-  const isOwner = comment.author?.username === ownerUsername;
-  const username = comment.author?.username || 'Anonym';
-
-  // Velg riktig avatar
-  const avatarElement = comment.author?.avatarUrl ? (
-    <img
-      src={comment.author.avatarUrl}
-      alt={username}
-      className={`w-8 h-8 rounded-full ${isOwner ? 'ml-3' : 'mr-3'}`}
-    />
-  ) : (
-    <FaUserCircle className={`w-8 h-8 text-gray-400 ${isOwner ? 'ml-3' : 'mr-3'}`} />
-  );
-
-  // Kommentarboblen med tekst og metainfo
-  const commentBubble = (
-    <div
-      className={`max-w-xs p-3 rounded-lg shadow-sm ${
-        isOwner ? 'bg-blue-100 text-right' : 'bg-gray-100 text-left'
-      }`}
-    >
-      <div className="flex items-center justify-between mb-1">
-        <span className="font-semibold text-sm">{username}</span>
-        {comment.createdAt && (
-          <span className="text-xs text-gray-500">
-            {new Date(comment.createdAt).toLocaleString()}
-          </span>
-        )}
-      </div>
-      <p className="text-sm text-gray-700">{comment.text}</p>
-    </div>
-  );
-
-  // Ved eier, flytt avataren til høyre ved å bruke flex-row-reverse
-  return (
-    <div
-      key={comment._id}
-      className={`flex items-start mb-4 ${
-        isOwner ? 'flex-row-reverse justify-end' : 'flex-row justify-start'
-      }`}
-    >
-      {avatarElement}
-      {commentBubble}
-    </div>
-  );
-}
-
-export default function Comments({ comments, ownerUsername }) {
+export default function Comments({ comments, owner = null }) {
   if (!comments || comments.length === 0) return null;
 
+  const renderComment = (comment) => {
+  
+    const isOwner =
+      owner &&
+      ((comment.author?._id && owner._id && comment.author._id === owner._id) ||
+       (comment.author?.username && owner.username && comment.author.username === owner.username));
+
+  
+    console.log(`Kommentar fra ${comment.author?.username || 'Anonym'}: isOwner=${isOwner}`);
+
+    const username = comment.author?.username || 'Anonym';
+
+    const avatarElement = comment.author?.avatarUrl ? (
+      <img
+        src={comment.author.avatarUrl}
+        alt={username}
+        className={`w-10 h-10 rounded-full object-cover ${isOwner ? 'ml-4' : 'mr-4'}`}
+      />
+    ) : (
+      <FaUserCircle
+        className={`w-10 h-10 ${isOwner ? 'ml-4 text-[var(--color-PMgreen)]' : 'mr-4 text-gray-500'}`}
+      />
+    );
+
+    const commentBubble = (
+      <div
+        className={`max-w-md p-4 rounded-lg shadow transition-all duration-200 ${
+          isOwner ? 'bg-green-50 text-right' : 'bg-gray-50 text-left'
+        }`}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center">
+            <span className="font-semibold text-sm">{username}</span>
+            {isOwner && (
+              <span
+                className="ml-2 inline-block px-2 py-1 text-xs font-medium rounded-full uppercase"
+                style={{ backgroundColor: 'var(--color-SGgreen)', color: 'var(--color-PMgreen)' }}
+              >
+                Eier
+              </span>
+            )}
+          </div>
+          {comment.createdAt && (
+            <span className="text-xs text-gray-600">
+              {new Date(comment.createdAt).toLocaleString()}
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-gray-700">{comment.text}</p>
+      </div>
+    );
+
+    return (
+      <div
+        key={comment._id || Math.random()}
+        className={`flex items-start mb-6 ${isOwner ? 'flex-row-reverse' : 'flex-row'}`}
+      >
+        {avatarElement}
+        {commentBubble}
+      </div>
+    );
+  };
+
   return (
-    <div className="mt-4">
-      <h3 className="font-semibold mb-2">Kommentarer</h3>
-      {comments.map((comment) => renderComment(comment, ownerUsername))}
+    <div className="mt-6">
+      <h3 className="font-bold text-lg mb-4">Kommentarer</h3>
+      {comments.map(renderComment)}
     </div>
   );
 }
