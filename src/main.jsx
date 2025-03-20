@@ -10,7 +10,7 @@ if (!clerkPublishableKey) {
   throw new Error(
     "Missing Clerk publishable key. Please add it to your .env file."
   );
-}
+} 
 
 createRoot(document.getElementById("root")).render(
   <ClerkProvider publishableKey={clerkPublishableKey}>
