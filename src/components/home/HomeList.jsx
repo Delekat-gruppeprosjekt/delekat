@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import HomeCard from './HomeCard.jsx'
 import { API_ALL_POSTS, SANITY_TOKEN } from '../constants.js'
 
-export default function HomeList() {
+export default function HomeList({ searchQuery }) {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -27,9 +27,13 @@ export default function HomeList() {
     return <div className="p-8">Laster...</div>
   }
 
+  const filteredPosts = posts.filter(post =>
+    post.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div>
-      {posts.map((post) => (
+    <div className="mb-20">
+      {filteredPosts.map((post) => (
         <HomeCard key={post._id} post={post} />
       ))}
     </div>
