@@ -25,7 +25,7 @@ export default function PortionControl({ onPortionChange }) {
 
   return (
     <div className="flex flex-col items-center">
-      <p className="text-m font-medium mb-2">Antall Porsjoner</p>
+      <p className="text-m font-medium mb-2">Porsjoner</p>
       <div className="flex items-center justify-center space-x-4">
         <button
           onClick={handleDecrease}
@@ -35,7 +35,7 @@ export default function PortionControl({ onPortionChange }) {
         </button>
         <span
           className={`text-2xl font-regular transition-colors duration-300 ${
-            highlight ? 'text-[var(--color-PMgreen)]' : ''
+            highlight ? 'text-[var(--color-SGgreen)]' : ''
           }`}
         >
           {portions}
