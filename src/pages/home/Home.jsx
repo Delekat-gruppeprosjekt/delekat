@@ -1,5 +1,5 @@
 import React from "react";
-import HomeList from "../src/components/home/HomeList.jsx";
+import HomeList from "../../components/home/HomeList.jsx";
 import { PiMagnifyingGlass } from "react-icons/pi";
 
 
