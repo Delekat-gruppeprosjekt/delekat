@@ -3,7 +3,8 @@ import Layout from "../src/components/Layout";
 import Home from "./Home";
 import ProfilePage from "./pages/profile/ProfilePage";
 import CreatePost from "./pages/create/CreatePost";
-
+import Login from "./pages/login/Login";
+import SignUpPage from "./pages/SignUp/SignUp";
 
 function App() {
   return (
@@ -13,7 +14,8 @@ function App() {
           <Route index element={<Home />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/create" element={<CreatePost />} />
-        
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUpPage />} />
         </Route>
       </Routes>
     </Router>
