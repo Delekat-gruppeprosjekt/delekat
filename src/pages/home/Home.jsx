@@ -35,7 +35,7 @@ export default function Home() {
       {showSearch && (
         <div className="flex justify-center">
           <input 
-            className="bg-navbar w-2/4 p-2 rounded-lg mb-6 outline-0" 
+            className="bg-BGwhite w-2/4 p-2 rounded-lg mb-6 outline-0" 
             type="text"
             value={searchQuery}
             onChange={handleSearch}

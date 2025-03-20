@@ -1,6 +1,7 @@
 import { PiHouseSimple } from "react-icons/pi";
 import { PiPlusCircle } from "react-icons/pi";
 import { PiUserLight } from "react-icons/pi";
+import { PiGearSixLight } from "react-icons/pi";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 
@@ -20,7 +21,7 @@ function Header() {
   }, [location.pathname]);
 
   return (
-    <header className="bg-navbar fixed bottom-0 w-full opacity-90 border-navbar-border border-t-1
+    <header className="bg-BGwhite fixed bottom-0 w-full opacity-90 border-navbar-border border-t-1
                         xl:left-0 xl:h-full xl:w-100 xl:border-r-1 xl:border-t-0 xl:opacity-100">
       <nav className="flex flex-row w-full px-10 h-16 justify-between items-left text-2xl
                         xl:left-0 xl:flex-col xl:h-1/5 xl:justify-evenly xl:text-lg">
@@ -33,6 +34,10 @@ function Header() {
         <Link to="/profile" className={`flex items-center gap-2 hover:scale-110 transition duration-150 w-max ${activePath === "/profile" ? "text-PMgreen" : ""}`}>
           <PiUserLight /> {isLargeScreen ? "Profil" : ""}
         </Link>
+        {isLargeScreen ? <div id="editProfile" className="flex absolute bottom-8 items-center gap-2 hover:scale-110 transition duration-150 w-max cursor-pointer">
+          <PiGearSixLight /> Rediger Profil
+        </div> : ""}
+        
       </nav>
     </header>
   );
