@@ -1,21 +1,35 @@
-import { Link, useLocation } from 'react-router'
 import { PiHouseSimple } from "react-icons/pi";
 import { PiPlusCircle } from "react-icons/pi";
 import { PiUserLight } from "react-icons/pi";
+import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 function Header() {
+  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth > 1280);
+
+  useEffect(() => {
+    const handleResize = () => setIsLargeScreen(window.innerWidth > 1280);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
-    <header className="bg-navbar fixed bottom-0 w-full opacity-90">
-      <nav className="flex flex-row w-full px-10 h-16 justify-between items-center text-2xl">
-        <Link to="/"><PiHouseSimple className="hover:scale-110 transition duration-150" /></Link>
-        <Link to="/create"><PiPlusCircle className="hover:scale-110 transition duration-150" /></Link>
-        <Link to="/profile"><PiUserLight className="hover:scale-110 transition duration-150" /></Link>
+    <header className="bg-navbar fixed bottom-0 w-full opacity-90 border-navbar-border border-t-1
+                        xl:left-0 xl:h-full xl:w-100 xl:border-r-1 xl:border-t-0 xl:opacity-100">
+      <nav className="flex flex-row w-full px-10 h-16 justify-between items-left text-2xl
+                        xl:left-0 xl:flex-col xl:h-1/5 xl:justify-evenly xl:text-lg">
+        <Link to="/" className="flex items-center gap-2 hover:scale-110 transition duration-150 w-max">
+          <PiHouseSimple /> {isLargeScreen ? "Hjem" : ""}
+        </Link>
+        <Link to="/create" className="flex items-center gap-2 hover:scale-110 transition duration-150 w-max">
+          <PiPlusCircle /> {isLargeScreen ? "Post ny oppskrift" : ""}
+        </Link>
+        <Link to="/profile" className="flex items-center gap-2 hover:scale-110 transition duration-150 w-max">
+          <PiUserLight /> {isLargeScreen ? "Profil" : ""}
+        </Link>
       </nav>
     </header>
-  )
+  );
 }
 
-export default Header
-
-//px10 og px 4 er samme verdi og kan ikke burkes sammen.
+export default Header;
