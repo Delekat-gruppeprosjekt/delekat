@@ -82,26 +82,33 @@ export default function HomeCard({ post }) {
       {/* Porsjonskontroll */}
       <PortionControl onPortionChange={handlePortionChange} />
 
+      {/* Divider mellom porsjonskontroll og ingredienser */}
+      <div className="border-t border-gray-200 my-4"></div>
+
       {/* Ingredienser */}
       {post.ingredients && post.ingredients.length > 0 && (
-        <div className="mb-4">
-          <h3 className="font-light text-lg mb-2">Ingredienser</h3>
-          <ul className="list-none text-sm space-y-3 text-gray-600 flex flex-col">
-            {post.ingredients.map((ing, index) => (
-              <li
-                key={`${ing.ingredient}-${index}`}
-                className="flex items-center whitespace-nowrap"
-              >
-                <span className="w-20 text-black font-regular mr-2">
-                  {formatQuantity(ing.value * portions)} {ing.unit}
-                </span>
-                <span className="text-gray-500">
-                  {ing.ingredient.charAt(0).toUpperCase() + ing.ingredient.slice(1)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <>
+          <div className="mb-4">
+            <h3 className="font-light text-lg mb-2">Ingredienser</h3>
+            <ul className="list-none text-sm space-y-3 text-gray-600 flex flex-col">
+              {post.ingredients.map((ing, index) => (
+                <li
+                  key={`${ing.ingredient}-${index}`}
+                  className="flex items-center whitespace-nowrap"
+                >
+                  <span className="w-20 text-black font-regular mr-2">
+                    {formatQuantity(ing.value * portions)} {ing.unit}
+                  </span>
+                  <span className="text-gray-500">
+                    {ing.ingredient.charAt(0).toUpperCase() + ing.ingredient.slice(1)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          {/* Divider mellom ingredienser og "Slik gjør du" */}
+          <div className="border-t border-gray-200 my-4"></div>
+        </>
       )}
 
       {/* Fremgangsmåte */}

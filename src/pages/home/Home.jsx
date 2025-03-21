@@ -23,9 +23,7 @@ export default function Home() {
           className="h-auto w-22"
         />
       </div>
-      <h1 className="text-3xl font-thin mb-6 flex justify-center mt-8">
-        La deg friste
-      </h1>
+     
       <div 
         className="absolute right-0 top-0 m-8 text-2xl hover:scale-110 duration-150 cursor-pointer"
         onClick={() => setShowSearch(!showSearch)}
