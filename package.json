@@ -10,6 +10,7 @@
     "@clerk/clerk-react": "^5.24.2",
     "@tailwindcss/postcss": "^4.0.14",
     "@tailwindcss/vite": "^4.0.14",
+    "firebase": "^11.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",

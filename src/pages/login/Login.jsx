@@ -1,17 +1,10 @@
-import { SignIn } from "@clerk/clerk-react";
+import LoginComponent from "../../components/login/login.jsx"
 
 const Login = () => {
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-      }}
-    >
-      <h1></h1>
-      <SignIn />
+    <div className="min-h-screen p-6 bg-BGcolor">
+      <h1>Login Page</h1>
+      <LoginComponent />
     </div>
   );
 };
