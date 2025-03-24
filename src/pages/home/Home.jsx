@@ -62,7 +62,7 @@ export default function Home() {
               <p>{recipe.description}</p>
               {recipe.imageUrl && (
                 <img
-                  src={recipe.imageUrl}  // Assuming `recipe.image` is the URL
+                  src={recipe.imageUrl} 
                   alt={recipe.title}
                   className="w-40 h-40 object-cover mt-2 rounded-lg"
                 />
