@@ -30,9 +30,10 @@ function Header() {
         <Link to="/" className={`flex items-center gap-2 hover:scale-110 transition duration-150 w-max ${activePath === "/" ? "text-PMgreen" : ""}`}>
           <PiHouseSimple /> {isLargeScreen ? "Hjem" : ""}
         </Link>
+        {userLoggedIn &&
         <Link to="/create" className={`flex items-center gap-2 hover:scale-110 transition duration-150 w-max ${activePath === "/create" ? "text-PMgreen" : ""}`}>
           <PiPlusCircle /> {isLargeScreen ? "Post ny oppskrift" : ""}
-        </Link>
+        </Link>}
 
         {/* Change link based on userLoggedIn status */}
         <Link to={userLoggedIn ? "/profile" : "/login"} className={`flex items-center gap-2 hover:scale-110 transition duration-150 w-max ${activePath === (userLoggedIn ? "/profile" : "/login") ? "text-PMgreen" : ""}`}>

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Import for navigation
 import HomeList from "../../components/home/HomeList.jsx";
 import { PiMagnifyingGlass } from "react-icons/pi";
 import { useAuth } from "../../contexts/authContext/auth.jsx";
@@ -6,20 +7,21 @@ import { firestore } from "../../../firebase";
 import { getDocs, collection } from "@firebase/firestore";
 
 export default function Home() {
-  const { currentUser } = useAuth();  // Change to currentUser, not user
+  const { currentUser } = useAuth();
+  const navigate = useNavigate(); // Initialize navigation
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [oppskrifter, setOppskrifter] = useState([]);
-  
-  // Fetch recipes on component mount
+
+  // Fetch recipes from Firestore
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
         const ref = collection(firestore, "recipes");
         const snapshot = await getDocs(ref);
-        const recipes = snapshot.docs.map(doc => ({
+        const recipes = snapshot.docs.map((doc) => ({
           ...doc.data(),
-          id: doc.id
+          id: doc.id,
         }));
         setOppskrifter(recipes);
       } catch (error) {
@@ -32,6 +34,10 @@ export default function Home() {
 
   const handleSearch = (event) => {
     setSearchQuery(event.target.value.toLowerCase());
+  };
+
+  const handleAuthorClick = (authorId) => {
+    navigate(`/profile/${authorId}`);
   };
 
   return (
@@ -49,7 +55,7 @@ export default function Home() {
         La deg friste
       </h1>
 
-      {/* List of Oppskrifter */}
+      {/* List of Recipes */}
       <ul className="mt-6">
         {oppskrifter
           .filter((recipe) => recipe.title.toLowerCase().includes(searchQuery))
@@ -62,12 +68,20 @@ export default function Home() {
               <p>{recipe.description}</p>
               {recipe.imageUrl && (
                 <img
-                  src={recipe.imageUrl} 
+                  src={recipe.imageUrl}
                   alt={recipe.title}
                   className="w-40 h-40 object-cover mt-2 rounded-lg"
                 />
               )}
-              <p>Created by: {recipe.author}</p>
+              <p>
+                Created by:{" "}
+                <span
+                  className="text-blue-500 hover:underline cursor-pointer"
+                  onClick={() => handleAuthorClick(recipe.userId)}
+                >
+                  {recipe.author}
+                </span>
+              </p>
             </li>
           ))}
       </ul>
