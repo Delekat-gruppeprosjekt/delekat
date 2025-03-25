@@ -13,6 +13,28 @@ const Signup = () => {
     const [isSigningUp, setIsSigningUp] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
 
+    // Passordvalidering
+    const validatePassword = (password) => {
+        const minLength = 8;
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasLowerCase = /[a-z]/.test(password);
+        const hasNumbers = /\d/.test(password);
+
+        if (password.length < minLength) {
+            return "Passordet må være minst 8 tegn langt";
+        }
+        if (!hasUpperCase) {
+            return "Passordet må inneholde minst én stor bokstav";
+        }
+        if (!hasLowerCase) {
+            return "Passordet må inneholde minst én liten bokstav";
+        }
+        if (!hasNumbers) {
+            return "Passordet må inneholde minst ett tall";
+        }
+        return null;
+    };
+
     const onSubmit = async (e) => {
       e.preventDefault();
       setErrorMessage("");
@@ -22,8 +44,14 @@ const Signup = () => {
           return;
       }
   
-      if (username.length > 255) {
-          setErrorMessage("Username cannot exceed 255 characters!");
+      if (username.length > 21) {
+          setErrorMessage("Username cannot exceed 20 characters!");
+          return;
+      }
+
+      const passwordError = validatePassword(password);
+      if (passwordError) {
+          setErrorMessage(passwordError);
           return;
       }
   
@@ -43,7 +71,7 @@ const Signup = () => {
               setIsSigningUp(false);
           }
       }
-  };
+    };
   
 
     const onGoogleSignUp = async (e) => {
@@ -69,14 +97,15 @@ const Signup = () => {
 
     return (
         <div id="signup-container" className="bg-BGcolor min-h-screen p-6">
-            {errorMessage && <p className="error-message">{errorMessage}</p>}
+            {errorMessage && <p className="error-message text-red-500 text-center mb-4">{errorMessage}</p>}
             <form onSubmit={onSubmit} className="flex flex-col text-lg justify-center items-center gap-2">
                 <input
                     type="text"
-                    placeholder="Brukernavn"
+                    placeholder="Brukernavn (maks 20 tegn)"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
+                    maxLength={20}
                     className="bg-BGwhite w-2/4 p-2"
                 />
                 <input
@@ -89,11 +118,12 @@ const Signup = () => {
                 />
                 <input
                     type="password"
-                    placeholder="Passord"
+                    placeholder="Passord (min. 8 tegn, minimum 1 stor og liten bokstav og 1 tall)"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     className="bg-BGwhite w-2/4 p-2"
+                    minLength={8}
                 />
                 <input
                     type="password"
@@ -102,6 +132,7 @@ const Signup = () => {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                     className="bg-BGwhite w-2/4 p-2"
+                    minLength={8}
                 />
                 <button
                   type="submit"
