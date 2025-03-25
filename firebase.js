@@ -1,20 +1,23 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth'
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
-// Firebase Configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCFLvkZAEmCihm-la7fB2iT15x7Xt_x5CU",
-  authDomain: "delekat-d14d8.firebaseapp.com",
-  databaseURL: "https://delekat-d14d8-default-rtdb.firebaseio.com",
-  projectId: "delekat-d14d8",
-  storageBucket: "delekat-d14d8.firebasestorage.app",
-  messagingSenderId: "426686699390",
-  appId: "1:426686699390:web:b74b1c7008cea6ea3dc52f",
-  measurementId: "G-0VTX5CTTV4"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase (only once)
+// Initialiser Firebase
 const app = initializeApp(firebaseConfig);
-export const firestore = getFirestore(app);
-export const auth = getAuth();
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
+const firestore = getFirestore(app);
+
+export { app, analytics, auth, firestore };
