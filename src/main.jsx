@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/clerk-react";
+import { AuthProvider } from "./contexts/authContext/auth";
 
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -15,7 +16,9 @@ if (!clerkPublishableKey) {
 createRoot(document.getElementById("root")).render(
   <ClerkProvider publishableKey={clerkPublishableKey}>
     <React.StrictMode>
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </React.StrictMode>
   </ClerkProvider>
 );

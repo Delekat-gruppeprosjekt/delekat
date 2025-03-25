@@ -2,10 +2,12 @@ import { PiHouseSimple } from "react-icons/pi";
 import { PiPlusCircle } from "react-icons/pi";
 import { PiUserLight } from "react-icons/pi";
 import { PiGearSixLight } from "react-icons/pi";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router";
 import { useState, useEffect } from "react";
+import { useAuth } from "../contexts/authContext/auth";  // Import the useAuth hook
 
 function Header() {
+  const { userLoggedIn } = useAuth();  // Get logged-in user status from auth context
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth > 1280);
   const location = useLocation();
   const [activePath, setActivePath] = useState(location.pathname);
@@ -28,15 +30,21 @@ function Header() {
         <Link to="/" className={`flex items-center gap-2 hover:scale-110 transition duration-150 w-max ${activePath === "/" ? "text-PMgreen" : ""}`}>
           <PiHouseSimple /> {isLargeScreen ? "Hjem" : ""}
         </Link>
+        {userLoggedIn &&
         <Link to="/create" className={`flex items-center gap-2 hover:scale-110 transition duration-150 w-max ${activePath === "/create" ? "text-PMgreen" : ""}`}>
           <PiPlusCircle /> {isLargeScreen ? "Post ny oppskrift" : ""}
+        </Link>}
+
+        {/* Change link based on userLoggedIn status */}
+        <Link to={userLoggedIn ? "/profile" : "/login"} className={`flex items-center gap-2 hover:scale-110 transition duration-150 w-max ${activePath === (userLoggedIn ? "/profile" : "/login") ? "text-PMgreen" : ""}`}>
+          <PiUserLight /> {isLargeScreen ? (userLoggedIn ? "Profil" : "Logg inn") : ""}
         </Link>
-        <Link to="/profile" className={`flex items-center gap-2 hover:scale-110 transition duration-150 w-max ${activePath === "/profile" ? "text-PMgreen" : ""}`}>
-          <PiUserLight /> {isLargeScreen ? "Profil" : ""}
-        </Link>
-        {isLargeScreen ? <div id="editProfile" className="flex absolute bottom-8 items-center gap-2 hover:scale-110 transition duration-150 w-max cursor-pointer">
-          <PiGearSixLight /> Rediger Profil
-        </div> : ""}
+
+        {isLargeScreen ? (
+          <div id="editProfile" className="flex absolute bottom-8 items-center gap-2 hover:scale-110 transition duration-150 w-max cursor-pointer">
+            <PiGearSixLight /> Rediger Profil
+          </div>
+        ) : ""}
         
       </nav>
     </header>
