@@ -1,16 +1,43 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
-import { auth } from "../../../firebase";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { auth, firestore } from "../../../firebase";
 
-function CreateNewRecipe() {
+function EditRecipe() {
+  const { recipeId } = useParams();
+  const navigate = useNavigate();
+
   const [title, setTitle] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [description, setDescription] = useState("");
   const [ingredients, setIngredients] = useState([{ ingredient: "", amount: "", unit: "" }]);
   const [instructions, setInstructions] = useState([""]);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchRecipe = async () => {
+      try {
+        const docRef = doc(firestore, "recipes", recipeId);
+        const docSnap = await getDoc(docRef);
+  
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setTitle(data.title || "");
+          setImageUrl(data.imageUrl || "");
+          setDescription(data.description || "");
+          setIngredients(Array.isArray(data.ingredients) ? data.ingredients : [{ ingredient: "", amount: "", unit: "" }]);
+          setInstructions(Array.isArray(data.instructions) ? data.instructions : [""]);
+        } else {
+          console.error("No such recipe found!");
+        }
+      } catch (error) {
+        console.error("Error fetching recipe:", error);
+      }
+    };
+  
+    fetchRecipe();
+  }, [recipeId]);
+  
 
   const handleInputChange = (e, index, type) => {
     if (type === "ingredient") {
@@ -25,25 +52,15 @@ function CreateNewRecipe() {
     }
   };
 
-  const handleAddIngredient = () => {
-    setIngredients([...ingredients, { ingredient: "", amount: "", unit: "" }]);
-  };
+  const handleAddIngredient = () => setIngredients([...ingredients, { ingredient: "", amount: "", unit: "" }]);
+  const handleRemoveIngredient = (index) => setIngredients(ingredients.filter((_, i) => i !== index));
+  const handleAddInstruction = () => setInstructions([...instructions, ""]);
+  const handleRemoveInstruction = (index) => setInstructions(instructions.filter((_, i) => i !== index));
 
-  const handleRemoveIngredient = (index) => {
-    setIngredients(ingredients.filter((_, i) => i !== index));
-  };
-
-  const handleAddInstruction = () => {
-    setInstructions([...instructions, ""]);
-  };
-
-  const handleRemoveInstruction = (index) => {
-    setInstructions(instructions.filter((_, i) => i !== index));
-  };
-
-  const handleSubmit = async (e) => {
+  const handleUpdateRecipe = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
       const validUrl = imageUrl && /^(ftp|http|https):\/\/[^ "']+$/.test(imageUrl);
       if (!validUrl) {
@@ -52,24 +69,20 @@ function CreateNewRecipe() {
         return;
       }
 
-      const author = auth.currentUser.displayName || "Anonymous";
-      const recipeData = {
+      const recipeRef = doc(firestore, "recipes", recipeId);
+      await updateDoc(recipeRef, {
         title,
         description,
         ingredients,
         instructions,
         imageUrl,
-        author,
-        userId: auth.currentUser.uid,
-        createdAt: new Date(),
-      };
+        updatedAt: new Date(),
+      });
 
-      const db = getFirestore();
-      await addDoc(collection(db, "recipes"), recipeData);
       setLoading(false);
-      navigate("/");
+      navigate("/profile"); // Redirect back to profile page
     } catch (error) {
-      console.error("Error adding recipe: ", error);
+      console.error("Error updating recipe:", error);
       setLoading(false);
     }
   };
@@ -77,8 +90,8 @@ function CreateNewRecipe() {
   return (
     <div className="min-h-screen bg-BGcolor p-6">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Create New Recipe</h1>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <h1 className="text-3xl font-bold mb-6">Edit Recipe</h1>
+        <form onSubmit={handleUpdateRecipe} className="space-y-6">
           <div className="flex flex-col">
             <label className="text-lg font-semibold" htmlFor="title">Title</label>
             <input type="text" id="title" name="title" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full p-2 border rounded-md" placeholder="Recipe title" />
@@ -121,7 +134,7 @@ function CreateNewRecipe() {
 
           <div className="flex justify-center mb-24">
             <button type="submit" className={`bg-blue-500 text-white px-4 py-2 rounded-md ${loading ? "cursor-not-allowed opacity-50" : ""}`} disabled={loading}>
-              {loading ? "Uploading..." : "Create Recipe"}
+              {loading ? "Updating..." : "Save Changes"}
             </button>
           </div>
         </form>
@@ -130,4 +143,4 @@ function CreateNewRecipe() {
   );
 }
 
-export default CreateNewRecipe;
+export default EditRecipe;
