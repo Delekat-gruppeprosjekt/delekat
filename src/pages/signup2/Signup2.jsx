@@ -22,6 +22,11 @@ const Signup = () => {
           return;
       }
   
+      if (username.length > 255) {
+          setErrorMessage("Username cannot exceed 255 characters!");
+          return;
+      }
+  
       if (password !== confirmPassword) {
           setErrorMessage("Passwords do not match!");
           return;
