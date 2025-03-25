@@ -4,7 +4,6 @@ import { IoChatbubbleOutline } from "react-icons/io5";
 import { PiChefHat } from "react-icons/pi";
 import LesMer from "./Homebtn.jsx";
 import PortionControl from "./PortionControl.jsx";
-import Instructions from './Instructions';
 import Comments from './Comments';
 
 export default function HomeCard({ post }) {
@@ -24,6 +23,8 @@ export default function HomeCard({ post }) {
     return result.endsWith('.00') ? parseInt(value) : result;
   };
 
+  const instructionsArray = post.instructions ? post.instructions.split("\\n") : [];
+
   return (
     <div className="max-w-sm mx-auto p-4 bg-white rounded-xl shadow mb-8 flex flex-col">
       {/* Header med brukerinfo og vanskelighetsgrad */}
@@ -32,7 +33,7 @@ export default function HomeCard({ post }) {
           <img
             src={post.user.avatarUrl}
             alt={post.user.username}
-            className="w-8 h-8 mr-2"
+            className="w-8 h-8 mr-2 rounded-full"
           />
         ) : (
           <FaUserCircle className="text-2xl mr-2" />
@@ -52,10 +53,10 @@ export default function HomeCard({ post }) {
           <img
             src={post.imageUrl}
             alt={post.title}
-            className="w-full h-60 object-cover"
+            className="w-full h-60 object-cover rounded-lg"
           />
         ) : (
-          <div className="w-full h-50 bg-gray-300 flex items-center justify-center rounded-lg">
+          <div className="w-full h-60 bg-gray-300 flex items-center justify-center rounded-lg">
             <span className="text-gray-500">Placeholder Image</span>
           </div>
         )}
@@ -82,28 +83,21 @@ export default function HomeCard({ post }) {
       {/* Porsjonskontroll */}
       <PortionControl onPortionChange={handlePortionChange} />
 
-      {/* Ingredienser */}
-      {post.ingredients && post.ingredients.length > 0 && (
-        <div className="mb-4">
-          <h3 className="font-light text-lg mb-2">Ingredienser</h3>
-          <ul className="list-none text-sm space-y-3 text-gray-600 flex flex-col">
-            {post.ingredients.map((ing, index) => (
-              <li
-                key={`${ing.ingredient}-${index}`}
-                className="flex items-center whitespace-nowrap"
-              >
-                <span className="w-20 text-black font-regular mr-2">
-                  {formatQuantity(ing.value * portions)} {ing.unit}
-                </span>
-                <span className="text-gray-500">
-                  {ing.ingredient.charAt(0).toUpperCase() + ing.ingredient.slice(1)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
+{/* Ingredienser */}
+{post.ingredients && post.ingredients.length > 0 && (
+  <div className="mb-4">
+    <h3 className="font-light text-lg mb-2">Ingredienser</h3>
+    <ul className="list-none text-sm space-y-3 text-gray-600 flex flex-col">
+      {post.ingredients.map((ing, index) => (
+        <li key={`${ing.ingredient}-${index}`} className="flex items-center whitespace-nowrap">
+          <span className="text-black font-regular mr-2">
+            {formatQuantity(ing.value * portions)} {ing.unit} {ing.ingredient.charAt(0).toUpperCase() + ing.ingredient.slice(1)}
+          </span>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
       {/* Fremgangsmåte */}
       <div className="mb-4">
         <h3 className="font-light mb-2">Slik gjør du</h3>
@@ -112,9 +106,12 @@ export default function HomeCard({ post }) {
         )}
         {expanded && (
           <>
-            <Instructions instructions={post.instructions} />
+            <ol className="list-decimal ml-5 space-y-2 text-sm text-gray-600">
+              {instructionsArray.map((step, idx) => (
+                <li key={idx}>{step}</li>
+              ))}
+            </ol>
             <Comments comments={post.comments} owner={post.user} />
-
             <LesMer expanded={expanded} onClick={toggleExpanded} />
           </>
         )}

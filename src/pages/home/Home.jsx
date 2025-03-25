@@ -1,43 +1,44 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Import for navigation
-import HomeList from "../../components/home/HomeList.jsx";
 import { PiMagnifyingGlass } from "react-icons/pi";
-import { useAuth } from "../../contexts/authContext/auth.jsx";
+import HomeList from "../../components/home/HomeList.jsx";
 import { firestore } from "../../../firebase";
-import { getDocs, collection } from "@firebase/firestore";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
 export default function Home() {
-  const { currentUser } = useAuth();
-  const navigate = useNavigate(); // Initialize navigation
-  const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [oppskrifter, setOppskrifter] = useState([]);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showSearch, setShowSearch] = useState(false);
 
-  // Fetch recipes from Firestore
   useEffect(() => {
-    const fetchRecipes = async () => {
+    const fetchPosts = async () => {
       try {
-        const ref = collection(firestore, "recipes");
-        const snapshot = await getDocs(ref);
-        const recipes = snapshot.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }));
-        setOppskrifter(recipes);
+        const postsCollection = collection(firestore, "posts");
+        const q = query(postsCollection, orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+
+        const data = snapshot.docs.map((doc) => {
+          const docData = doc.data();
+          return {
+            _id: doc.id,
+            ...docData,
+            createdAt: docData.createdAt?.toDate() || new Date(),
+          };
+        });
+
+        setPosts(data);
       } catch (error) {
-        console.error("Error fetching recipes:", error);
+        console.error("Error fetching posts:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchRecipes();
+    fetchPosts();
   }, []);
 
   const handleSearch = (event) => {
-    setSearchQuery(event.target.value.toLowerCase());
-  };
-
-  const handleAuthorClick = (authorId) => {
-    navigate(`/profile/${authorId}`);
+    setSearchQuery(event.target.value);
   };
 
   return (
@@ -54,37 +55,6 @@ export default function Home() {
       <h1 className="text-3xl font-thin mb-6 flex justify-center mt-8">
         La deg friste
       </h1>
-
-      {/* List of Recipes */}
-      <ul className="mt-6">
-        {oppskrifter
-          .filter((recipe) => recipe.title.toLowerCase().includes(searchQuery))
-          .map((recipe) => (
-            <li
-              key={recipe.id}
-              className="p-2 border-b border-gray-300 flex flex-col items-center mb-4"
-            >
-              <h3 className="text-lg font-semibold">{recipe.title}</h3>
-              <p>{recipe.description}</p>
-              {recipe.imageUrl && (
-                <img
-                  src={recipe.imageUrl}
-                  alt={recipe.title}
-                  className="w-40 h-40 object-cover mt-2 rounded-lg"
-                />
-              )}
-              <p>
-                Created by:{" "}
-                <span
-                  className="text-blue-500 hover:underline cursor-pointer"
-                  onClick={() => handleAuthorClick(recipe.userId)}
-                >
-                  {recipe.author}
-                </span>
-              </p>
-            </li>
-          ))}
-      </ul>
 
       {/* Search Icon */}
       <div
@@ -107,8 +77,19 @@ export default function Home() {
         </div>
       )}
 
-      {/* Pass searchQuery to HomeList */}
-      <HomeList searchQuery={searchQuery} />
+      {/* Content */}
+      {loading ? (
+        <div className="flex justify-center w-full">
+          <div
+            className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"
+            role="status"
+          >
+            <span className="sr-only">Laster...</span>
+          </div>
+        </div>
+      ) : (
+        <HomeList posts={posts} searchQuery={searchQuery} />
+      )}
     </div>
   );
 }
