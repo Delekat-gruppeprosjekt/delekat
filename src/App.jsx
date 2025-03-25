@@ -5,7 +5,6 @@ import ProfilePage from "./pages/profile/ProfilePage";
 import CreatePost from "./pages/create/CreatePost";
 import Login from "./pages/login/Login";
 import SignUpPage2 from "./pages/signup2/Signup2";
-import Home2 from "./pages/home/Home2";
 import CreateNewRecipe from "./pages/create/CreateNewRecipe";
 import Profile from "./pages/profileById/Profile";
 
