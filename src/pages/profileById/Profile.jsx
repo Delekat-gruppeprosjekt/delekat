@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { firestore } from "../../../firebase";
 import { getDocs, collection, query, where } from "@firebase/firestore";
+import RecipeCard from "../../components/profile/RecipeCard";
 
 export default function Profile() {
   const { authorId } = useParams(); // Get the author ID from the URL
   const [authorRecipes, setAuthorRecipes] = useState([]);
   const [authorName, setAuthorName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("/assets/avatar_placeholder.png");
 
   useEffect(() => {
     const fetchAuthorRecipes = async () => {
@@ -33,27 +35,31 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen p-6 bg-[var(--color-BGcolor)]">
-      <h1 className="text-3xl font-bold mb-6">{authorName}'s Profile</h1>
-      
-      <h2 className="text-xl font-semibold mb-4">Recipes by {authorName}:</h2>
-      <ul>
-        {authorRecipes.map((recipe) => (
-          <li
-            key={recipe.id}
-            className="p-2 border-b border-gray-300 flex flex-col items-center mb-4"
-          >
-            <h3 className="text-lg font-semibold">{recipe.title}</h3>
-            <p>{recipe.description}</p>
-            {recipe.imageUrl && (
-              <img
-                src={recipe.imageUrl}
-                alt={recipe.title}
-                className="w-40 h-40 object-cover mt-2 rounded-lg"
-              />
-            )}
-          </li>
-        ))}
-      </ul>
+      <div className="flex flex-col justify-center items-center my-16">
+        <img
+          className="w-48 rounded-full border-BGwhite border-4 mb-4"
+          src={avatarUrl}
+          alt="User Avatar"
+        />
+        <h1 className="text-2xl font-black">{authorName}</h1>
+      </div>
+
+      <div className="max-w-4xl mx-auto">
+        <h2 className="text-2xl font-semibold mb-4 text-center">
+          Oppskrifter av {authorName}
+        </h2>
+        {authorRecipes.length === 0 ? (
+          <p className="text-center text-gray-500">
+            This user has no recipes yet.
+          </p>
+        ) : (
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {authorRecipes.map((recipe) => (
+              <RecipeCard key={recipe.id} recipe={recipe} />
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
