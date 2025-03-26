@@ -24,7 +24,13 @@ export default function Home() {
           id: doc.id,
           authorAvatarUrl: doc.data().authorAvatarUrl || "", // Ensure avatar URL is included
         }));
-        setOppskrifter(recipes);
+        // Sort recipes by createdAt timestamp in descending order (newest first)
+        const sortedRecipes = recipes.sort((a, b) => {
+          const dateA = a.createdAt?.toDate() || new Date(0);
+          const dateB = b.createdAt?.toDate() || new Date(0);
+          return dateB - dateA;
+        });
+        setOppskrifter(sortedRecipes);
       } catch (error) {
         console.error("Error fetching recipes:", error);
       }
