@@ -49,7 +49,7 @@ export default function HomeCard({ post }) {
   };
 
   return (
-    <div className="w-4/5 mx-auto p-4 bg-white rounded-xl shadow mb-8 flex flex-col">
+    <div className="w-4/5 lg:w-128 mx-auto p-4 bg-white rounded-xl shadow mb-8 flex flex-col">
       {/* Header with user info and difficulty level */}
       <div className="flex items-center mb-4">
         {isLoading ? (
@@ -92,7 +92,7 @@ export default function HomeCard({ post }) {
           <img
             src={post.imageUrl}
             alt={post.title}
-            className="w-full h-full object-cover rounded-lg border-gray-300 border-1"
+            className="w-full h-full lg:h-100 object-cover rounded-lg border-gray-300 border-1"
           />
         ) : (
           <div className="w-full h-50 bg-gray-300 flex items-center justify-center rounded-lg">
