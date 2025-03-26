@@ -5,10 +5,19 @@ import { PiChefHat } from "react-icons/pi";
 import LesMer from "./Homebtn.jsx";
 import PortionControl from "./PortionControl.jsx";
 import Comments from './Comments';
+import { getFirestore, doc, updateDoc } from "firebase/firestore";
+
+// Simulert nåværende bruker – erstatt med din autentiseringslogikk
+const currentUser = {
+  _id: "currentUserId",
+  avatarUrl: "/assets/avatar_placeholder.png",
+  username: "MinProfil"
+};
 
 export default function HomeCard({ post }) {
   const [portions, setPortions] = useState(1);
   const [expanded, setExpanded] = useState(false);
+  const db = getFirestore();
 
   const handlePortionChange = (newPortions) => {
     setPortions(newPortions);
@@ -24,6 +33,52 @@ export default function HomeCard({ post }) {
   };
 
   const instructionsArray = post.instructions ? post.instructions.split("\\n") : [];
+
+  // Legg til en ny kommentar (ikke et svar)
+  const handleNewComment = async (text) => {
+    try {
+      const newComm = {
+        _id: Math.random().toString(36).substring(2),
+        author: currentUser,
+        text,
+        createdAt: new Date().toISOString()
+      };
+      const updatedComments = [...post.comments, newComm];
+      const postRef = doc(db, "posts", post._id);
+      await updateDoc(postRef, { comments: updatedComments });
+      console.log("Kommentar lagt til.");
+    } catch (error) {
+      console.error("Feil ved oppdatering av kommentar:", error);
+    }
+  };
+
+  // Legg til et svar på en eksisterende kommentar
+  const handleReply = async (commentId, replyText) => {
+    try {
+      const commentIndex = post.comments.findIndex(c => c._id === commentId);
+      if (commentIndex === -1) return;
+
+      const commentToUpdate = post.comments[commentIndex];
+      const reply = {
+        _id: Math.random().toString(36).substring(2),
+        author: currentUser,
+        text: replyText,
+        createdAt: new Date().toISOString()
+      };
+
+      const updatedReplies = commentToUpdate.replies ? [...commentToUpdate.replies, reply] : [reply];
+      const updatedComment = { ...commentToUpdate, replies: updatedReplies };
+
+      const updatedComments = [...post.comments];
+      updatedComments[commentIndex] = updatedComment;
+
+      const postRef = doc(db, "posts", post._id);
+      await updateDoc(postRef, { comments: updatedComments });
+      console.log("Svar lagt til.");
+    } catch (error) {
+      console.error("Feil ved oppdatering av svar:", error);
+    }
+  };
 
   return (
     <div className="max-w-sm mx-auto p-4 bg-white rounded-xl shadow mb-8 flex flex-col">
@@ -83,21 +138,22 @@ export default function HomeCard({ post }) {
       {/* Porsjonskontroll */}
       <PortionControl onPortionChange={handlePortionChange} />
 
-{/* Ingredienser */}
-{post.ingredients && post.ingredients.length > 0 && (
-  <div className="mb-4">
-    <h3 className="font-light text-lg mb-2">Ingredienser</h3>
-    <ul className="list-none text-sm space-y-3 text-gray-600 flex flex-col">
-      {post.ingredients.map((ing, index) => (
-        <li key={`${ing.ingredient}-${index}`} className="flex items-center whitespace-nowrap">
-          <span className="text-black font-regular mr-2">
-            {formatQuantity(ing.value * portions)} {ing.unit} {ing.ingredient.charAt(0).toUpperCase() + ing.ingredient.slice(1)}
-          </span>
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
+      {/* Ingredienser */}
+      {post.ingredients && post.ingredients.length > 0 && (
+        <div className="mb-4">
+          <h3 className="font-light text-lg mb-2">Ingredienser</h3>
+          <ul className="list-none text-sm space-y-3 text-gray-600 flex flex-col">
+            {post.ingredients.map((ing, index) => (
+              <li key={`${ing.ingredient}-${index}`} className="flex items-center whitespace-nowrap">
+                <span className="text-black font-regular mr-2">
+                  {formatQuantity(ing.value * portions)} {ing.unit} {ing.ingredient.charAt(0).toUpperCase() + ing.ingredient.slice(1)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Fremgangsmåte */}
       <div className="mb-4">
         <h3 className="font-light mb-2">Slik gjør du</h3>
