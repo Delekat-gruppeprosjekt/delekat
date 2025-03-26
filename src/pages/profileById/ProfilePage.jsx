@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useParams } from "react-router-dom";
 
 export default function ProfilePage() {
@@ -10,9 +11,24 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [newAvatar, setNewAvatar] = useState("");
   const [newBio, setNewBio] = useState("");
+  const [currentUserId, setCurrentUserId] = useState(null); // Store the logged-in user's ID
 
-  const { userId } = useParams();
+  const { userId } = useParams(); // Get userId from the URL
   const db = getFirestore();
+  const auth = getAuth();
+
+  // Fetch the logged-in user's ID securely
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUserId(user.uid); // Securely get the logged-in user's UID
+      } else {
+        setCurrentUserId(null);
+      }
+    });
+
+    return () => unsubscribe(); // Clean up the listener
+  }, [auth]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -85,12 +101,16 @@ export default function ProfilePage() {
       <div className="text-center">
         <h1 className="text-3xl font-bold">{userData?.displayName}</h1>
         <p className="text-xl">{userData?.bio || "No bio set."}</p>
-        <button
-          onClick={() => setIsEditing(true)}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600"
-        >
-          Rediger Profil
-        </button>
+
+        {/* Only show "Rediger Profil" if user is logged in and viewing their own profile */}
+        {currentUserId === userId && (
+          <button
+            onClick={() => setIsEditing(true)}
+            className="mt-4 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600"
+          >
+            Rediger Profil
+          </button>
+        )}
       </div>
 
       {/* Modal for Editing Profile */}
