@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { auth } from "../../../firebase";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDoc, doc } from "firebase/firestore";
 
 function CreateNewRecipe() {
   const [title, setTitle] = useState("");
@@ -10,7 +10,40 @@ function CreateNewRecipe() {
   const [ingredients, setIngredients] = useState([{ ingredient: "", amount: "", unit: "" }]);
   const [instructions, setInstructions] = useState([""]);
   const [loading, setLoading] = useState(false);
+  const [authorAvatarUrl, setAuthorAvatarUrl] = useState("/assets/avatar_placeholder.png");
   const navigate = useNavigate();
+
+  // Fetch the user's avatar URL from Firestore
+  useEffect(() => {
+    const fetchUserAvatar = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          const db = getFirestore();
+          const userRef = doc(db, "users", user.uid);  // Assuming there's a 'users' collection
+          const userSnap = await getDoc(userRef);
+          
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            // Log to verify the structure of the document
+            console.log(userData); 
+            
+            // Safely set avatar URL or use the placeholder if not found
+            setAuthorAvatarUrl(userData.avatarUrl || "/assets/avatar_placeholder.png");
+          } else {
+            // If no document exists, use the placeholder
+            console.log("No user data found");
+            setAuthorAvatarUrl("/assets/avatar_placeholder.png");
+          }
+        } catch (error) {
+          console.error("Error fetching user data: ", error);
+          // Handle error gracefully
+        }
+      }
+    };
+
+    fetchUserAvatar();
+  }, []);
 
   const handleInputChange = (e, index, type) => {
     if (type === "ingredient") {
@@ -45,6 +78,7 @@ function CreateNewRecipe() {
     e.preventDefault();
     setLoading(true);
     try {
+      // Validate the image URL
       const validUrl = imageUrl && /^(ftp|http|https):\/\/[^ "']+$/.test(imageUrl);
       if (!validUrl) {
         alert("Please enter a valid image URL.");
@@ -52,7 +86,11 @@ function CreateNewRecipe() {
         return;
       }
 
+      // Get the current user's display name, avatar URL, and ID
       const author = auth.currentUser.displayName || "Anonymous";
+      const authorId = auth.currentUser.uid;  // Author's unique ID from Firebase Auth
+
+      // Prepare recipe data with the new field authorAvatarUrl and authorId
       const recipeData = {
         title,
         description,
@@ -60,14 +98,17 @@ function CreateNewRecipe() {
         instructions,
         imageUrl,
         author,
-        userId: auth.currentUser.uid,
+        authorAvatarUrl,  // Use the dynamic avatar URL here
+        userId: authorId,  // This is the same as authorId, depending on your structure
         createdAt: new Date(),
       };
 
+      // Get Firestore instance and add the new recipe to the "recipes" collection
       const db = getFirestore();
       await addDoc(collection(db, "recipes"), recipeData);
+
       setLoading(false);
-      navigate("/");
+      navigate("/");  // Navigate to the homepage or other appropriate page
     } catch (error) {
       console.error("Error adding recipe: ", error);
       setLoading(false);

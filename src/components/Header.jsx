@@ -30,13 +30,17 @@ function Header() {
         <Link to="/" className={`flex items-center gap-2 hover:scale-110 transition duration-150 w-max ${activePath === "/" ? "text-PMgreen" : ""}`}>
           <PiHouseSimple /> {isLargeScreen ? "Hjem" : ""}
         </Link>
-        {userLoggedIn &&
-        <Link to="/create" className={`flex items-center gap-2 hover:scale-110 transition duration-150 w-max ${activePath === "/create" ? "text-PMgreen" : ""}`}>
-          <PiPlusCircle /> {isLargeScreen ? "Post ny oppskrift" : ""}
-        </Link>}
+        {userLoggedIn && (
+          <Link to="/create" className={`flex items-center gap-2 hover:scale-110 transition duration-150 w-max ${activePath === "/create" ? "text-PMgreen" : ""}`}>
+            <PiPlusCircle /> {isLargeScreen ? "Post ny oppskrift" : ""}
+          </Link>
+        )}
 
         {/* Change link based on userLoggedIn status */}
-        <Link to={userLoggedIn ? "/profile" : "/login"} className={`flex items-center gap-2 hover:scale-110 transition duration-150 w-max ${activePath === (userLoggedIn ? "/profile" : "/login") ? "text-PMgreen" : ""}`}>
+        <Link
+          to={userLoggedIn ? `/profile/${localStorage.getItem("userId")}` : "/login"}
+          className={`flex items-center gap-2 hover:scale-110 transition duration-150 w-max ${activePath === (userLoggedIn ? `/profile/${localStorage.getItem("userId")}` : "/login") ? "text-PMgreen" : ""}`}
+        >
           <PiUserLight /> {isLargeScreen ? (userLoggedIn ? "Profil" : "Logg inn") : ""}
         </Link>
 
