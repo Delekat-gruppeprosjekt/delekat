@@ -11,41 +11,81 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [newAvatar, setNewAvatar] = useState("");
   const [newBio, setNewBio] = useState("");
-  const [currentUserId, setCurrentUserId] = useState(null); // Store the logged-in user's ID
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [avatarError, setAvatarError] = useState(false);
 
-  const { userId } = useParams(); // Get userId from the URL
+  const { userId } = useParams();
   const db = getFirestore();
   const auth = getAuth();
 
-  // Fetch the logged-in user's ID securely
+  // Function to validate if URL is an image
+  const isValidImageUrl = (url) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
+  };
+
+  // Function to handle avatar validation and update
+  const handleAvatarChange = async (url) => {
+    if (!url) {
+      setNewAvatar("");
+      setAvatarError(false);
+      return;
+    }
+
+    try {
+      const isValid = await isValidImageUrl(url);
+      if (isValid) {
+        setNewAvatar(url);
+        setAvatarError(false);
+      } else {
+        setAvatarError(true);
+        setNewAvatar("");
+      }
+    } catch (error) {
+      setAvatarError(true);
+      setNewAvatar("");
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setCurrentUserId(user.uid); // Securely get the logged-in user's UID
+        setCurrentUserId(user.uid);
       } else {
         setCurrentUserId(null);
       }
     });
 
-    return () => unsubscribe(); // Clean up the listener
+    return () => unsubscribe();
   }, [auth]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // Fetch user data
         const userDocRef = doc(db, "users", userId);
         const userDocSnap = await getDoc(userDocRef);
         if (userDocSnap.exists()) {
           const data = userDocSnap.data();
           setUserData(data);
-          setNewAvatar(data.avatarUrl || "");
+          if (data.avatarUrl) {
+            const isValid = await isValidImageUrl(data.avatarUrl);
+            if (isValid) {
+              setNewAvatar(data.avatarUrl);
+              setAvatarError(false);
+            } else {
+              setAvatarError(true);
+              setNewAvatar("");
+            }
+          }
           setNewBio(data.bio || "");
         } else {
           setError("User not found!");
         }
 
-        // Fetch recipes created by the user
         const recipesQuery = query(collection(db, "recipes"), where("userId", "==", userId));
         const recipesSnapshot = await getDocs(recipesQuery);
         const recipes = recipesSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
@@ -61,17 +101,18 @@ export default function ProfilePage() {
   }, [userId]);
 
   const handleSaveChanges = async () => {
-    if (!userData) return;
+    if (!userData || currentUserId !== userId) return;
 
     try {
       const userDocRef = doc(db, "users", userId);
       await updateDoc(userDocRef, {
         avatarUrl: newAvatar,
         bio: newBio,
+        updatedAt: new Date()
       });
 
       setUserData((prev) => ({ ...prev, avatarUrl: newAvatar, bio: newBio }));
-      setIsEditing(false); // Close modal after saving
+      setIsEditing(false);
     } catch (err) {
       console.error("Error updating profile:", err);
       setError("Failed to update profile.");
@@ -89,11 +130,12 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-BGcolor p-6">
       <div className="flex justify-center items-center mb-6">
-        <div className="w-72 rounded-full border-BGwhite border-4 mb-4">
+        <div className="w-72 h-72 rounded-full border-BGwhite border-4 mb-4 overflow-hidden">
           <img
-            className="w-72 rounded-full object-cover"
-            src={userData?.avatarUrl || "/assets/avatar_placeholder.png"}
+            className="w-full h-full rounded-full object-cover"
+            src={!avatarError ? (userData?.avatarUrl || "/assets/avatar_placeholder.png") : "/assets/avatar_placeholder.png"}
             alt="User Avatar"
+            onError={() => setAvatarError(true)}
           />
         </div>
       </div>
@@ -101,8 +143,6 @@ export default function ProfilePage() {
       <div className="text-center">
         <h1 className="text-3xl font-bold">{userData?.displayName}</h1>
         <p className="text-xl">{userData?.bio || "No bio set."}</p>
-
-        {/* Only show "Rediger Profil" if user is logged in and viewing their own profile */}
         {currentUserId === userId && (
           <button
             onClick={() => setIsEditing(true)}
@@ -123,8 +163,12 @@ export default function ProfilePage() {
               type="text"
               className="w-full p-2 border border-gray-300 rounded mt-1"
               value={newAvatar}
-              onChange={(e) => setNewAvatar(e.target.value)}
+              onChange={(e) => handleAvatarChange(e.target.value)}
+              placeholder="Skriv inn URL til bilde"
             />
+            {avatarError && (
+              <p className="text-red-500 text-sm mt-1">Ugyldig bilde-URL. Vennligst prøv igjen.</p>
+            )}
 
             <label className="block text-sm font-medium text-gray-700 mt-4">Ny Bio</label>
             <textarea
@@ -144,6 +188,7 @@ export default function ProfilePage() {
               <button
                 onClick={handleSaveChanges}
                 className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                disabled={avatarError}
               >
                 Lagre Endringer
               </button>
