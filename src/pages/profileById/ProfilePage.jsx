@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs, deleteDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { FaHeart } from 'react-icons/fa';
+import { IoChatbubbleOutline } from "react-icons/io5";
+import { PiChefHat } from "react-icons/pi";
 
 export default function ProfilePage() {
   const [userData, setUserData] = useState(null);
@@ -11,29 +14,28 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [newAvatar, setNewAvatar] = useState("");
   const [newBio, setNewBio] = useState("");
-  const [currentUserId, setCurrentUserId] = useState(null); // Store the logged-in user's ID
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const navigate = useNavigate();
 
-  const { userId } = useParams(); // Get userId from the URL
+  const { userId } = useParams();
   const db = getFirestore();
   const auth = getAuth();
 
-  // Fetch the logged-in user's ID securely
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setCurrentUserId(user.uid); // Securely get the logged-in user's UID
+        setCurrentUserId(user.uid);
       } else {
         setCurrentUserId(null);
       }
     });
 
-    return () => unsubscribe(); // Clean up the listener
+    return () => unsubscribe();
   }, [auth]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // Fetch user data
         const userDocRef = doc(db, "users", userId);
         const userDocSnap = await getDoc(userDocRef);
         if (userDocSnap.exists()) {
@@ -45,7 +47,6 @@ export default function ProfilePage() {
           setError("User not found!");
         }
 
-        // Fetch recipes created by the user
         const recipesQuery = query(collection(db, "recipes"), where("userId", "==", userId));
         const recipesSnapshot = await getDocs(recipesQuery);
         const recipes = recipesSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
@@ -61,21 +62,39 @@ export default function ProfilePage() {
   }, [userId]);
 
   const handleSaveChanges = async () => {
-    if (!userData) return;
+    if (!userData || currentUserId !== userId) return;
 
     try {
       const userDocRef = doc(db, "users", userId);
       await updateDoc(userDocRef, {
         avatarUrl: newAvatar,
         bio: newBio,
+        updatedAt: new Date()
       });
 
       setUserData((prev) => ({ ...prev, avatarUrl: newAvatar, bio: newBio }));
-      setIsEditing(false); // Close modal after saving
+      setIsEditing(false);
     } catch (err) {
       console.error("Error updating profile:", err);
       setError("Failed to update profile.");
     }
+  };
+
+  const handleDeleteRecipe = async (recipeId) => {
+    if (!confirm("Er du sikker på at du vil slette denne oppskriften?")) return;
+
+    try {
+      const recipeRef = doc(db, "recipes", recipeId);
+      await deleteDoc(recipeRef);
+      setUserRecipes(prev => prev.filter(recipe => recipe.id !== recipeId));
+    } catch (err) {
+      console.error("Error deleting recipe:", err);
+      setError("Failed to delete recipe.");
+    }
+  };
+
+  const handleEditRecipe = (recipeId) => {
+    navigate(`/edit/${recipeId}`);
   };
 
   if (loading) {
@@ -101,8 +120,6 @@ export default function ProfilePage() {
       <div className="text-center">
         <h1 className="text-3xl font-bold">{userData?.displayName}</h1>
         <p className="text-xl">{userData?.bio || "No bio set."}</p>
-
-        {/* Only show "Rediger Profil" if user is logged in and viewing their own profile */}
         {currentUserId === userId && (
           <button
             onClick={() => setIsEditing(true)}
@@ -157,16 +174,78 @@ export default function ProfilePage() {
         {userRecipes.length === 0 ? (
           <p className="text-center text-gray-500">Du har ingen oppskrifter enda.</p>
         ) : (
-          <ul className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {userRecipes.map((recipe) => (
-              <li key={recipe.id} className="p-4 border border-gray-300 rounded-lg flex justify-between items-center">
-                <div>
-                  <h3 className="text-lg font-semibold">{recipe.title}</h3>
-                  <p>{recipe.description}</p>
+              <div key={recipe.id} className="max-w-sm mx-auto p-4 bg-white rounded-xl shadow mb-8 flex flex-col">
+                {/* Header with user info and difficulty level */}
+                <div className="flex items-center mb-4">
+                  <img
+                    src={userData?.avatarUrl || "/assets/avatar_placeholder.png"}
+                    alt={userData?.displayName || "Anonym"}
+                    className="w-8 h-8 rounded-full mr-2 object-cover border border-gray-300"
+                  />
+                  <div className="flex items-center justify-between w-full">
+                    <span className="font-regular text-blue-500">{userData?.displayName || 'Anonym'}</span>
+                    <div className="flex items-center">
+                      <PiChefHat className="text-xl mr-2 -mt-2" />
+                      <span>{recipe.difficulty || "Lett"}</span>
+                    </div>
+                  </div>
                 </div>
-              </li>
+                
+                {/* Image or placeholder */}
+                <div className="mb-4">
+                  {recipe.imageUrl ? (
+                    <img
+                      src={recipe.imageUrl}
+                      alt={recipe.title}
+                      className="w-full h-60 object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-50 bg-gray-300 flex items-center justify-center rounded-lg">
+                      <span className="text-gray-500">Placeholder Image</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Post Info with title and icons */}
+                <div className="mb-4">
+                  <div className="flex justify-between items-center mb-1">
+                    <h1 className="text-xl font-light">{recipe.title}</h1>
+                    <div className="flex space-x-4">
+                      <span className="flex items-center space-x-1">
+                        <FaHeart />
+                        <span>{recipe.likes || 0}</span>
+                      </span>
+                      <span className="flex items-center space-x-1">
+                        <IoChatbubbleOutline />
+                        <span>{recipe.comments ? recipe.comments.length : 0}</span>
+                      </span>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-gray-600">{recipe.description}</p>
+                </div>
+
+                {/* Edit and Delete buttons for recipe owner */}
+                {currentUserId === userId && (
+                  <div className="flex justify-end space-x-2 mt-auto">
+                    <button
+                      onClick={() => handleEditRecipe(recipe.id)}
+                      className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Rediger
+                    </button>
+                    <button
+                      onClick={() => handleDeleteRecipe(recipe.id)}
+                      className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                      Slett
+                    </button>
+                  </div>
+                )}
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </div>
     </div>
