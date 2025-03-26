@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FaUserCircle, FaHeart } from 'react-icons/fa';
+import { FaHeart } from 'react-icons/fa';
 import { IoChatbubbleOutline } from "react-icons/io5";
 import { PiChefHat } from "react-icons/pi";
 import { Link } from 'react-router-dom';
 import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { motion, AnimatePresence } from "framer-motion"; // Import Framer Motion
 
 export default function HomeCard({ post }) {
   const [portions, setPortions] = useState(1);
@@ -42,17 +43,13 @@ export default function HomeCard({ post }) {
     setPortions(newPortions);
   };
 
-  const toggleExpanded = () => {
-    setExpanded((prev) => !prev);
-  };
-
   const formatQuantity = (value) => {
     const result = value.toFixed(2);
     return result.endsWith('.00') ? parseInt(value) : result;
   };
 
   return (
-    <div className="max-w-sm mx-auto p-4 bg-white rounded-xl shadow mb-8 flex flex-col">
+    <div className="w-4/5 mx-auto p-4 bg-white rounded-xl shadow mb-8 flex flex-col">
       {/* Header with user info and difficulty level */}
       <div className="flex items-center mb-4">
         {isLoading ? (
@@ -95,7 +92,7 @@ export default function HomeCard({ post }) {
           <img
             src={post.imageUrl}
             alt={post.title}
-            className="w-full h-60 object-cover rounded-lg"
+            className="w-full h-full object-cover rounded-lg border-gray-300 border-1"
           />
         ) : (
           <div className="w-full h-50 bg-gray-300 flex items-center justify-center rounded-lg">
@@ -122,55 +119,67 @@ export default function HomeCard({ post }) {
         <p className="mt-2 text-gray-600">{post.description}</p>
       </div>
       
-      {/* Ingredients */}
-      {post.ingredients && post.ingredients.length > 0 && (
-        <div className="mb-4">
-          <h3 className="font-light text-lg mb-2">Ingredienser</h3>
-          <ul className="list-none text-sm space-y-3 text-gray-600 flex flex-col">
-            {post.ingredients.map((ing, index) => (
-              <li key={`${ing.ingredient}-${index}`} className="flex items-center whitespace-nowrap">
-                <span className="w-20 text-black font-regular mr-2">
-                  {formatQuantity(ing.amount * portions)} {ing.unit}
-                </span>
-                <span>{ing.ingredient}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {/* Show these sections only when expanded with slide animation */}
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            {/* Ingredients */}
+            {post.ingredients && post.ingredients.length > 0 && (
+              <div className="mb-4">
+                <h3 className="font-light text-lg mb-2">Ingredienser</h3>
+                <ul className="list-none text-sm space-y-3 text-gray-600 flex flex-col">
+                  {post.ingredients.map((ing, index) => (
+                    <li key={`${ing.ingredient}-${index}`} className="flex items-center whitespace-nowrap">
+                      <span className="w-20 text-black font-regular mr-2">
+                        {formatQuantity(ing.amount * portions)} {ing.unit}
+                      </span>
+                      <span>{ing.ingredient}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-      {/* Instructions */}
-      {post.instructions && post.instructions.length > 0 && (
-        <div className="mb-4">
-          <h3 className="font-light text-lg mb-2">Instruksjoner</h3>
-          <ol className="list-decimal text-sm space-y-2 text-gray-700 pl-5">
-            {post.instructions.map((step, index) => (
-              <li key={index}>{step}</li>
-            ))}
-          </ol>
-        </div>
-      )}
+            {/* Instructions */}
+            {post.instructions && post.instructions.length > 0 && (
+              <div className="mb-4">
+                <h3 className="font-light text-lg mb-2">Instruksjoner</h3>
+                <ol className="list-decimal text-sm space-y-2 text-gray-700 pl-5">
+                  {post.instructions.map((step, index) => (
+                    <li key={index}>{step}</li>
+                  ))}
+                </ol>
+              </div>
+            )}
 
-      {/* Portion Adjuster */}
-      <div className="flex justify-between items-center mt-4">
-        <span className="text-gray-600">Antall porsjoner:</span>
-        <input
-          type="number"
-          value={portions}
-          min="1"
-          onChange={(e) => handlePortionChange(Number(e.target.value))}
-          className="w-16 p-1 border rounded-md text-center"
-        />
-      </div>
+            {/* Portion Adjuster */}
+            <div className="flex justify-between items-center mt-4">
+              <span className="text-gray-600">Antall porsjoner:</span>
+              <input
+                type="number"
+                value={portions}
+                min="1"
+                onChange={(e) => handlePortionChange(Number(e.target.value))}
+                className="w-16 p-1 border rounded-md text-center"
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Expand Button */}
       <button
         className="mt-4 text-blue-500 hover:underline"
-        onClick={toggleExpanded}
+        onClick={() => setExpanded(!expanded)}
       >
         {expanded ? "Vis mindre" : "Vis mer"}
       </button>
-
     </div>
   );
 }

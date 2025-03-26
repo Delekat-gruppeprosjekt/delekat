@@ -104,7 +104,7 @@ export default function Home() {
       )}
 
       {/* Display Recipes Using HomeCard */}
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-6 mb-24">
         {oppskrifter
           .filter((recipe) => recipe.title.toLowerCase().includes(searchQuery))
           .map((recipe) => (
