@@ -1,15 +1,17 @@
-// ProfilePage.jsx
-import React, { useState, useEffect } from 'react';
-import { getFirestore, doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { useParams } from "react-router-dom";
 
 export default function ProfilePage() {
   const [userData, setUserData] = useState(null);
   const [userRecipes, setUserRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  const { userId } = useParams(); // Get the userId from the URL parameters
+  const [isEditing, setIsEditing] = useState(false);
+  const [newAvatar, setNewAvatar] = useState("");
+  const [newBio, setNewBio] = useState("");
+
+  const { userId } = useParams();
   const db = getFirestore();
 
   useEffect(() => {
@@ -19,7 +21,10 @@ export default function ProfilePage() {
         const userDocRef = doc(db, "users", userId);
         const userDocSnap = await getDoc(userDocRef);
         if (userDocSnap.exists()) {
-          setUserData(userDocSnap.data());
+          const data = userDocSnap.data();
+          setUserData(data);
+          setNewAvatar(data.avatarUrl || "");
+          setNewBio(data.bio || "");
         } else {
           setError("User not found!");
         }
@@ -39,6 +44,24 @@ export default function ProfilePage() {
     fetchUserData();
   }, [userId]);
 
+  const handleSaveChanges = async () => {
+    if (!userData) return;
+
+    try {
+      const userDocRef = doc(db, "users", userId);
+      await updateDoc(userDocRef, {
+        avatarUrl: newAvatar,
+        bio: newBio,
+      });
+
+      setUserData((prev) => ({ ...prev, avatarUrl: newAvatar, bio: newBio }));
+      setIsEditing(false); // Close modal after saving
+    } catch (err) {
+      console.error("Error updating profile:", err);
+      setError("Failed to update profile.");
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -51,14 +74,63 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-BGcolor p-6">
       <div className="flex justify-center items-center mb-6">
         <div className="w-72 rounded-full border-BGwhite border-4 mb-4">
-          <img className="w-72 rounded-full object-cover" src={userData?.avatarUrl || "/assets/avatar_placeholder.png"} alt="User Avatar" />
+          <img
+            className="w-72 rounded-full object-cover"
+            src={userData?.avatarUrl || "/assets/avatar_placeholder.png"}
+            alt="User Avatar"
+          />
         </div>
       </div>
 
       <div className="text-center">
         <h1 className="text-3xl font-bold">{userData?.displayName}</h1>
         <p className="text-xl">{userData?.bio || "No bio set."}</p>
+        <button
+          onClick={() => setIsEditing(true)}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600"
+        >
+          Rediger Profil
+        </button>
       </div>
+
+      {/* Modal for Editing Profile */}
+      {isEditing && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-bold mb-4">Rediger Profil</h2>
+            <label className="block text-sm font-medium text-gray-700">Ny Avatar URL</label>
+            <input
+              type="text"
+              className="w-full p-2 border border-gray-300 rounded mt-1"
+              value={newAvatar}
+              onChange={(e) => setNewAvatar(e.target.value)}
+            />
+
+            <label className="block text-sm font-medium text-gray-700 mt-4">Ny Bio</label>
+            <textarea
+              className="w-full p-2 border border-gray-300 rounded mt-1"
+              rows="3"
+              value={newBio}
+              onChange={(e) => setNewBio(e.target.value)}
+            ></textarea>
+
+            <div className="flex justify-end space-x-2 mt-4">
+              <button
+                onClick={() => setIsEditing(false)}
+                className="px-4 py-2 bg-gray-300 text-black rounded-lg"
+              >
+                Avbryt
+              </button>
+              <button
+                onClick={handleSaveChanges}
+                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+              >
+                Lagre Endringer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mt-8">
         <h2 className="text-2xl font-semibold mb-4 text-center">Dine Oppskrifter</h2>
