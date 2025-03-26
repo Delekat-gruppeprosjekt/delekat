@@ -1,43 +1,40 @@
-// Modify HomeCard.jsx to add a link to the profile page
-
 import React, { useState, useEffect } from 'react';
 import { FaUserCircle, FaHeart } from 'react-icons/fa';
 import { IoChatbubbleOutline } from "react-icons/io5";
 import { PiChefHat } from "react-icons/pi";
-import { Link } from 'react-router-dom';  // Import Link from react-router-dom
-
-import { getFirestore, doc, getDoc } from "firebase/firestore";  // Import Firestore methods
+import { Link } from 'react-router-dom';
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 
 export default function HomeCard({ post }) {
   const [portions, setPortions] = useState(1);
   const [expanded, setExpanded] = useState(false);
-  const [author, setAuthor] = useState(null);  // State to store the author data
-  const [isLoading, setIsLoading] = useState(true);  // State to manage loading state
-  const [error, setError] = useState(null);  // State to handle errors
+  const [author, setAuthor] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const db = getFirestore();  // Initialize Firestore
+  const db = getFirestore();
 
   // Fetch user data from Firestore based on userId in the post
   const fetchUserData = async (userId) => {
     try {
-      const userDocRef = doc(db, "users", userId);  // Get user document reference by userId
+      const userDocRef = doc(db, "users", userId);
       const userDocSnap = await getDoc(userDocRef);
 
       if (userDocSnap.exists()) {
-        setAuthor(userDocSnap.data());  // Set the user data to the state
+        setAuthor(userDocSnap.data());
       } else {
         setError("User not found!");
       }
     } catch (err) {
       setError("Error fetching user data: " + err.message);
     } finally {
-      setIsLoading(false);  // Set loading state to false once data is fetched
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     if (post.userId) {
-      fetchUserData(post.userId);  // Fetch the user data when post.userId is available
+      fetchUserData(post.userId);
     }
   }, [post.userId]);
 
@@ -66,11 +63,11 @@ export default function HomeCard({ post }) {
               src={author.avatarUrl}
               alt={author.displayName || "Anonym"}
               className="w-8 h-8 rounded-full mr-2 object-cover border border-gray-300"
-              onError={(e) => e.target.src = "/assets/avatar_placeholder.png"} // Fallback avatar
+              onError={(e) => e.target.src = "/assets/avatar_placeholder.png"}
             />
           ) : (
             <img
-              src="/assets/avatar_placeholder.png" // Default avatar image
+              src="/assets/avatar_placeholder.png"
               alt="Default Avatar"
               className="w-8 h-8 rounded-full mr-2 object-cover border border-gray-300"
             />
@@ -78,7 +75,6 @@ export default function HomeCard({ post }) {
         )}
 
         <div className="flex items-center justify-between w-full">
-          {/* Make the author's name a clickable link */}
           {isLoading ? (
             <div className="w-1/2 h-4 bg-gray-300 animate-pulse" />
           ) : (
@@ -99,11 +95,11 @@ export default function HomeCard({ post }) {
           <img
             src={post.imageUrl}
             alt={post.title}
-            className="w-full h-60 object-cover"
+            className="w-full h-60 object-cover rounded-lg"
           />
         ) : (
           <div className="w-full h-50 bg-gray-300 flex items-center justify-center rounded-lg">
-            <span className="text-gray-500">Placeholder Image</span>
+            <span className="text-gray-500">No Image Available</span>
           </div>
         )}
       </div>
@@ -115,7 +111,7 @@ export default function HomeCard({ post }) {
           <div className="flex space-x-4">
             <span className="flex items-center space-x-1">
               <FaHeart />
-              <span>{post.likes}</span>
+              <span>{post.likes || 0}</span>
             </span>
             <span className="flex items-center space-x-1">
               <IoChatbubbleOutline />
@@ -134,13 +130,47 @@ export default function HomeCard({ post }) {
             {post.ingredients.map((ing, index) => (
               <li key={`${ing.ingredient}-${index}`} className="flex items-center whitespace-nowrap">
                 <span className="w-20 text-black font-regular mr-2">
-                  {formatQuantity(ing.value * portions)} {ing.unit}
+                  {formatQuantity(ing.amount * portions)} {ing.unit}
                 </span>
+                <span>{ing.ingredient}</span>
               </li>
             ))}
           </ul>
         </div>
       )}
+
+      {/* Instructions */}
+      {post.instructions && post.instructions.length > 0 && (
+        <div className="mb-4">
+          <h3 className="font-light text-lg mb-2">Instruksjoner</h3>
+          <ol className="list-decimal text-sm space-y-2 text-gray-700 pl-5">
+            {post.instructions.map((step, index) => (
+              <li key={index}>{step}</li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {/* Portion Adjuster */}
+      <div className="flex justify-between items-center mt-4">
+        <span className="text-gray-600">Antall porsjoner:</span>
+        <input
+          type="number"
+          value={portions}
+          min="1"
+          onChange={(e) => handlePortionChange(Number(e.target.value))}
+          className="w-16 p-1 border rounded-md text-center"
+        />
+      </div>
+
+      {/* Expand Button */}
+      <button
+        className="mt-4 text-blue-500 hover:underline"
+        onClick={toggleExpanded}
+      >
+        {expanded ? "Vis mindre" : "Vis mer"}
+      </button>
+
     </div>
   );
 }
