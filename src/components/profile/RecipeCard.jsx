@@ -1,5 +1,5 @@
 import React from "react";
-import { FaClock } from "react-icons/fa";
+import { FaClock, FaRegComment, FaHeart } from "react-icons/fa";
 import { GiChefToque } from "react-icons/gi";
 
 export default function RecipeCard({ recipe, onEdit, onDelete }) {
@@ -12,7 +12,17 @@ export default function RecipeCard({ recipe, onEdit, onDelete }) {
           className="absolute top-0 left-0 w-full h-full object-cover"
         />
       </div>
-      <div className="p-4">
+      <div className="p-2">
+        <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+          <div className="flex items-center gap-1">
+            <FaClock />
+            <span>{recipe.time || "30 mins"}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <GiChefToque />
+            <span>{recipe.difficulty || "Easy"}</span>
+          </div>
+        </div>
         <h3 className="text-lg font-semibold mb-2">
           {recipe.title || "Recipe Title"}
         </h3>
@@ -22,12 +32,12 @@ export default function RecipeCard({ recipe, onEdit, onDelete }) {
         </p>
         <div className="flex items-center justify-between text-sm text-gray-500">
           <div className="flex items-center gap-1">
-            <FaClock />
-            <span>{recipe.time || "30 min"}</span>
+            <FaRegComment />
+            <span>{recipe.comments || "0 comments"}</span>
           </div>
           <div className="flex items-center gap-1">
-            <GiChefToque />
-            <span>{recipe.difficulty || "Lett"}</span>
+            <FaHeart />
+            <span>{recipe.favorites || "0 favorites"}</span>
           </div>
         </div>
       </div>
