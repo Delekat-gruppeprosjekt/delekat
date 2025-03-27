@@ -13,6 +13,10 @@ function CreateNewRecipe() {
   const [authorAvatarUrl, setAuthorAvatarUrl] = useState("/assets/avatar_placeholder.png");
   const [imageError, setImageError] = useState(false);
   const [amountErrors, setAmountErrors] = useState({});
+  const [difficulty, setDifficulty] = useState("lett");
+  const [formErrors, setFormErrors] = useState({});
+  const [portions, setPortions] = useState(1);
+  const [cookingTime, setCookingTime] = useState("10 - 15 min");
   const navigate = useNavigate();
 
   // Predefined units for the dropdown
@@ -24,6 +28,22 @@ function CreateNewRecipe() {
     { value: "L", label: "Liter (L)" },
     { value: "gram", label: "Gram" },
     { value: "stk", label: "Stykk (stk)" }
+  ];
+
+  // Predefined cooking times
+  const cookingTimes = [
+    "5 - 10 min",
+    "10 - 15 min",
+    "15 - 20 min",
+    "20 - 25 min",
+    "25 - 30 min",
+    "30 - 35 min",
+    "35 - 40 min",
+    "40 - 45 min",
+    "45 - 50 min",
+    "50 - 55 min",
+    "55 - 60 min",
+    "60+ min"
   ];
 
   // Function to validate if URL is an image
@@ -137,6 +157,10 @@ function CreateNewRecipe() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    
+    console.log('Current portions value before submit:', portions);
+    console.log('Portions type:', typeof portions);
+
     try {
       if (imageError) {
         alert("Vennligst skriv inn en gyldig bilde-URL.");
@@ -175,8 +199,14 @@ function CreateNewRecipe() {
         author,
         authorAvatarUrl,
         userId: authorId,
+        difficulty,
+        portions: Number(portions),
+        cookingTime,
         createdAt: new Date(),
       };
+
+      console.log('Recipe data portions:', recipeData.portions);
+      console.log('Recipe data portions type:', typeof recipeData.portions);
 
       // Save recipe to Firestore
       const db = getFirestore();
@@ -197,7 +227,19 @@ function CreateNewRecipe() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex flex-col">
             <label className="text-lg font-semibold" htmlFor="title">Tittel</label>
-            <input type="text" id="title" name="title" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full p-2 border rounded-md" placeholder="Oppskriftens tittel" />
+            <input 
+              type="text" 
+              id="title" 
+              name="title" 
+              value={title} 
+              onChange={(e) => setTitle(e.target.value)} 
+              required 
+              className={`w-full p-2 border rounded-md ${formErrors.title ? 'border-red-500' : ''}`}
+              placeholder="Oppskriftens tittel" 
+            />
+            {formErrors.title && (
+              <span className="text-red-500 text-sm mt-1">{formErrors.title}</span>
+            )}
           </div>
 
           <div className="flex flex-col">
@@ -219,7 +261,74 @@ function CreateNewRecipe() {
 
           <div className="flex flex-col">
             <label className="text-lg font-semibold" htmlFor="description">Beskrivelse</label>
-            <textarea id="description" name="description" value={description} onChange={(e) => setDescription(e.target.value)} required className="w-full p-2 border rounded-md" placeholder="Skriv en beskrivelse av oppskriften" />
+            <textarea 
+              id="description" 
+              name="description" 
+              value={description} 
+              onChange={(e) => {
+                if (e.target.value.length <= 1000) {
+                  setDescription(e.target.value);
+                }
+              }} 
+              required 
+              className="w-full p-2 border rounded-md" 
+              placeholder="Skriv en beskrivelse av oppskriften"
+              maxLength={1000}
+            />
+            <span className="text-sm text-gray-500 mt-1">{description.length}/1000 tegn</span>
+          </div>
+
+          <div className="flex flex-col">
+            <label className="text-lg font-semibold" htmlFor="difficulty">Vanskelighetsgrad</label>
+            <select
+              id="difficulty"
+              name="difficulty"
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value)}
+              className="w-full p-2 border rounded-md"
+            >
+              <option value="lett">Lett (1 kokkehatt)</option>
+              <option value="medium">Medium (2 kokkehatter)</option>
+              <option value="vanskelig">Vanskelig (3 kokkehatter)</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col">
+            <label className="text-lg font-semibold" htmlFor="portions">Antall porsjoner</label>
+            <input
+              type="number"
+              id="portions"
+              name="portions"
+              value={portions}
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                console.log('Portions input value:', value);
+                if (!isNaN(value) && value >= 1) {
+                  setPortions(value);
+                }
+              }}
+              min="1"
+              className="w-full p-2 border rounded-md"
+              required
+            />
+          </div>
+
+          <div className="flex flex-col">
+            <label className="text-lg font-semibold" htmlFor="cookingTime">Tilberedningstid</label>
+            <select
+              id="cookingTime"
+              name="cookingTime"
+              value={cookingTime}
+              onChange={(e) => setCookingTime(e.target.value)}
+              className="w-full p-2 border rounded-md"
+              required
+            >
+              {cookingTimes.map((time) => (
+                <option key={time} value={time}>
+                  {time}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="flex flex-col">

@@ -2,12 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { FaHeart } from 'react-icons/fa';
 import { IoChatbubbleOutline } from "react-icons/io5";
 import { PiChefHat } from "react-icons/pi";
+import { BiTime } from "react-icons/bi";
 import { Link } from 'react-router-dom';
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion"; // Import Framer Motion
 
 export default function HomeCard({ post }) {
-  const [portions, setPortions] = useState(1);
+  console.log('Post data received:', post);
+  console.log('Initial portions from post:', post.portions);
+  console.log('Post portions type:', typeof post.portions);
+  
+  const [portions, setPortions] = useState(Number(post.portions) || 1);
+  
+  console.log('Portions state after initialization:', portions);
+  console.log('Portions state type:', typeof portions);
   const [expanded, setExpanded] = useState(false);
   const [author, setAuthor] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,7 +48,9 @@ export default function HomeCard({ post }) {
   }, [post.userId]);
 
   const handlePortionChange = (newPortions) => {
-    setPortions(newPortions);
+    if (newPortions >= 1) {
+      setPortions(newPortions);
+    }
   };
 
   const formatQuantity = (value) => {
@@ -48,8 +58,14 @@ export default function HomeCard({ post }) {
     return result.endsWith('.00') ? parseInt(value) : result;
   };
 
+  const truncateDescription = (text, maxLength = 400) => {
+    if (!text) return '';
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + '...';
+  };
+
   return (
-    <div className="w-4/5 lg:w-128 mx-auto p-4 bg-white rounded-xl shadow mb-8 flex flex-col">
+    <div className="w-4/5 mx-auto p-4 bg-white rounded-xl shadow mb-8 flex flex-col relative">
       {/* Header with user info and difficulty level */}
       <div className="flex items-center mb-4">
         {isLoading ? (
@@ -80,8 +96,17 @@ export default function HomeCard({ post }) {
             </Link>
           )}
           <div className="flex items-center">
-            <PiChefHat className="text-xl mr-2 -mt-2" />
-            <span>{post.difficulty || "Lett"}</span>
+            {[...Array(3)].map((_, index) => (
+              <PiChefHat 
+                key={index}
+                className={`text-xl mr-1 -mt-2 ${index < (post.difficulty === "vanskelig" ? 3 : post.difficulty === "medium" ? 2 : 1) ? "text-black" : "text-gray-300"}`}
+              />
+            ))}
+            <span className="ml-2 capitalize">
+              {post.difficulty === "vanskelig" ? "Vanskelig" : 
+               post.difficulty === "medium" ? "Medium" : 
+               "Lett"}
+            </span>
           </div>
         </div>
       </div>
@@ -102,21 +127,34 @@ export default function HomeCard({ post }) {
       </div>
 
       {/* Post Info with title and icons */}
-      <div className="mb-4">
-        <div className="flex justify-between items-center mb-1">
-          <h1 className="text-xl font-light">{post.title}</h1>
-          <div className="flex space-x-4">
-            <span className="flex items-center space-x-1">
-              <FaHeart />
-              <span>{post.likes || 0}</span>
-            </span>
-            <span className="flex items-center space-x-1">
-              <IoChatbubbleOutline />
-              <span>{post.comments ? post.comments.length : 0}</span>
-            </span>
+      <div className="mb-8">
+        <div className="flex justify-between items-start mb-4">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold">{post.title}</h1>
+            <div className="flex items-center text-[#3C5A3C]">
+              <BiTime className="text-xl mr-2" />
+              <span className="text-lg">{post.cookingTime || "10 - 15 min"}</span>
+            </div>
+          </div>
+          <div className="flex items-center space-x-4 text-[#3C5A3C]">
+            <div className="flex items-center">
+              <FaHeart className="text-xl" />
+              <span className="ml-2 text-lg">{post.likes || 0}K</span>
+            </div>
+            <div className="flex items-center">
+              <IoChatbubbleOutline className="text-xl" />
+              <span className="ml-2 text-lg">{post.comments ? post.comments.length : 0}K</span>
+            </div>
           </div>
         </div>
-        <p className="mt-2 text-gray-600">{post.description}</p>
+
+        <div className="w-full h-[1px] bg-gray-200 my-6" />
+        
+        <p className="text-gray-700 text-lg">
+          {expanded ? post.description : truncateDescription(post.description)}
+        </p>
+
+        <div className="w-full h-[1px] bg-gray-200 my-6" />
       </div>
       
       {/* Show these sections only when expanded with slide animation */}
@@ -127,59 +165,72 @@ export default function HomeCard({ post }) {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="overflow-hidden"
+            className="overflow-hidden mb-16"
           >
-            {/* Ingredients */}
-            {post.ingredients && post.ingredients.length > 0 && (
-              <div className="mb-4">
-                <h3 className="font-light text-lg mb-2">Ingredienser</h3>
-                <ul className="list-none text-sm space-y-3 text-gray-600 flex flex-col">
-                  {post.ingredients.map((ing, index) => (
-                    <li key={`${ing.ingredient}-${index}`} className="flex items-center whitespace-nowrap">
-                      <span className="w-20 text-black font-regular mr-2">
-                        {formatQuantity(ing.amount * portions)} {ing.unit}
-                      </span>
-                      <span>{ing.ingredient}</span>
-                    </li>
-                  ))}
-                </ul>
+            <div className="mb-8">
+              <h2 className="text-center text-2xl font-semibold mb-4">Porsjoner</h2>
+              <div className="flex items-center justify-center space-x-6">
+                <button 
+                  type="button"
+                  onClick={() => handlePortionChange(portions - 1)}
+                  className="w-12 h-12 rounded-full border-2 border-[#3C5A3C] flex items-center justify-center text-[#3C5A3C] text-2xl hover:bg-[#3C5A3C] hover:text-white transition-colors"
+                >
+                  -
+                </button>
+                <span className="text-2xl w-8 text-center">{portions}</span>
+                <button 
+                  type="button"
+                  onClick={() => handlePortionChange(portions + 1)}
+                  className="w-12 h-12 rounded-full border-2 border-[#3C5A3C] flex items-center justify-center text-[#3C5A3C] text-2xl hover:bg-[#3C5A3C] hover:text-white transition-colors"
+                >
+                  +
+                </button>
               </div>
-            )}
+            </div>
 
-            {/* Instructions */}
-            {post.instructions && post.instructions.length > 0 && (
-              <div className="mb-4">
-                <h3 className="font-light text-lg mb-2">Instruksjoner</h3>
-                <ol className="list-decimal text-sm space-y-2 text-gray-700 pl-5">
-                  {post.instructions.map((step, index) => (
-                    <li key={index}>{step}</li>
-                  ))}
-                </ol>
-              </div>
-            )}
+            <div className="w-full h-[1px] bg-gray-200 my-6" />
 
-            {/* Portion Adjuster */}
-            <div className="flex justify-between items-center mt-4">
-              <span className="text-gray-600">Antall porsjoner:</span>
-              <input
-                type="number"
-                value={portions}
-                min="1"
-                onChange={(e) => handlePortionChange(Number(e.target.value))}
-                className="w-16 p-1 border rounded-md text-center"
-              />
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">Ingredienser</h2>
+              <ul className="space-y-4">
+                {post.ingredients.map((ing, index) => (
+                  <li key={`${ing.ingredient}-${index}`} className="flex items-center text-lg">
+                    <span className="w-32 text-black font-regular mr-4">
+                      {formatQuantity(ing.amount * (portions / (Number(post.portions) || 1)))} {ing.unit}
+                    </span>
+                    <span>{ing.ingredient}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="w-full h-[1px] bg-gray-200 my-6" />
+
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">Slik gjør du</h2>
+              <ol className="list-decimal list-inside space-y-4">
+                {post.instructions.map((step, index) => (
+                  <li key={index} className="text-lg pl-2">{step}</li>
+                ))}
+              </ol>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Expand Button */}
-      <button
-        className="mt-4 text-blue-500 hover:underline"
-        onClick={() => setExpanded(!expanded)}
-      >
-        {expanded ? "Vis mindre" : "Vis mer"}
-      </button>
+      {/* Footer button - always at the bottom */}
+      <div className="absolute bottom-4 left-4 right-4">
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className={`w-full py-3 rounded-full shadow-md transition-colors duration-200 ${
+            expanded 
+            ? "bg-[#2C432C] text-white" 
+            : "bg-[#3C5A3C] text-white hover:bg-[#2C432C]"
+          }`}
+        >
+          {expanded ? "Skjul Oppskrift" : "Les Oppskrift"}
+        </button>
+      </div>
     </div>
   );
 }
