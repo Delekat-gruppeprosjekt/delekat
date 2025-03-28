@@ -6,9 +6,9 @@ import CreatePost from "./pages/create/CreatePost";
 import Login from "./pages/login/Login";
 import SignUpPage2 from "./pages/signup2/Signup2";
 import CreateNewRecipe from "./pages/create/CreateNewRecipe";
-import Profile from "./pages/profileById/ProfileOLD";
 import EditRecipe from "./pages/edit/Edit";
-import ProfilePage from "./pages/profileById/ProfilePage"
+import ProfilePage from "./pages/profileById/ProfilePage";
+import EditProfilePage from "./pages/edit/EditProfilePage";
 
 function App() {
   return (
@@ -23,6 +23,7 @@ function App() {
           <Route path="/create2" element={<CreatePost />} />
           <Route path="/edit/:recipeId" element={<EditRecipe />} />
           <Route path="/profile/:userId" element={<ProfilePage />} />
+          <Route path="/edit-profile/:userId" element={<EditProfilePage />} />
         </Route>
       </Routes>
     </Router>
