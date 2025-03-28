@@ -1,5 +1,5 @@
 import React from "react";
-import { FaClock, FaRegComment, FaHeart } from "react-icons/fa";
+import { FaRegComment, FaHeart, FaClock } from "react-icons/fa";
 import { PiChefHat } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
 import { getFirestore, doc, deleteDoc } from "firebase/firestore";

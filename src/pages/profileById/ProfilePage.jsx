@@ -9,7 +9,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import RecipeCard from "../../components/Profile/RecipeCardProfile";
 
 export default function ProfilePage() {
@@ -122,20 +122,21 @@ export default function ProfilePage() {
         ) : (
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none">
             {userRecipes.map((recipe) => (
-              <RecipeCard
-                key={recipe.id}
-                recipe={recipe}
-                onEdit={
-                  isOwnProfile
-                    ? () => console.log(`Edit recipe ${recipe.id}`)
-                    : null
-                }
-                onDelete={
-                  isOwnProfile
-                    ? () => console.log(`Delete recipe ${recipe.id}`)
-                    : null
-                }
-              />
+              <Link to={`/recipe/${recipe.id}`} key={recipe.id} replace>
+                <RecipeCard
+                  recipe={recipe}
+                  onEdit={
+                    isOwnProfile
+                      ? () => console.log(`Edit recipe ${recipe.id}`)
+                      : null
+                  }
+                  onDelete={
+                    isOwnProfile
+                      ? () => console.log(`Delete recipe ${recipe.id}`)
+                      : null
+                  }
+                />
+              </Link>
             ))}
           </ul>
         )}
