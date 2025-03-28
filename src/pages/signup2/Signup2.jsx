@@ -164,7 +164,7 @@ const Signup = () => {
     }
 
     return (
-        <div id="signup-container" className="min-h-screen bg-[#FFFBEB] flex flex-col items-center justify-center p-6">
+        <div id="signup-container" className="min-h-screen bg-BGcolor flex flex-col items-center justify-center p-6">
             <h1 className="text-4xl font-semibold mb-12">Registrer deg</h1>
             <div className="w-full max-w-md">
                 {errorMessage && (
