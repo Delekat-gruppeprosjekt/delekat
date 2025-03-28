@@ -5,9 +5,16 @@ import { useAuth } from "../../contexts/authContext/auth";
 import { getFirestore, doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 
+/**
+ * Signup component that handles new user registration
+ * Provides email/password registration with username, form validation,
+ * and creates user documents in Firestore
+ */
 const Signup = () => {
+    // Get authentication state
     const { userLoggedIn } = useAuth();
 
+    // State management for form fields and UI states
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -19,20 +26,44 @@ const Signup = () => {
     const [emailError, setEmailError] = useState("");
     const [usernameError, setUsernameError] = useState("");
 
+    // Initialize Firestore database
     const db = getFirestore();
 
+    /**
+     * Checks if a username already exists in the database (case-insensitive)
+     * @param {string} username - The username to check
+     * @returns {Promise<boolean>} - True if username exists, false otherwise
+     */
     const checkUsernameExists = async (username) => {
-        const usersRef = collection(db, "users");
-        const q = query(usersRef, where("displayName", "==", username));
-        const querySnapshot = await getDocs(q);
-        return !querySnapshot.empty;
+        try {
+            const usersRef = collection(db, "users");
+            const allUsers = await getDocs(usersRef);
+            const lowercaseUsername = username.toLowerCase().trim();
+            
+            return allUsers.docs.some(doc => {
+                const userData = doc.data();
+                return userData.displayName?.toLowerCase() === lowercaseUsername;
+            });
+        } catch (error) {
+            console.error("Error checking username:", error);
+            return false;
+        }
     };
 
+    /**
+     * Validates email format using regex
+     * @param {string} email - The email to validate
+     * @returns {boolean} - True if email is valid, false otherwise
+     */
     const validateEmail = (email) => {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         return emailRegex.test(email);
     };
 
+    /**
+     * Handles email input changes and validates in real-time
+     * @param {Event} e - The input change event
+     */
     const handleEmailChange = (e) => {
         const newEmail = e.target.value;
         setEmail(newEmail);
@@ -43,6 +74,10 @@ const Signup = () => {
         }
     };
 
+    /**
+     * Handles username input changes and checks availability in real-time
+     * @param {Event} e - The input change event
+     */
     const handleUsernameChange = async (e) => {
         const newUsername = e.target.value;
         setUsername(newUsername);
@@ -60,12 +95,15 @@ const Signup = () => {
         }
     };
 
-    // Create user in Firebase Authentication and Firestore
+    /**
+     * Creates a new user document in Firestore with default values
+     * @param {Object} user - The Firebase auth user object
+     */
     const createUserInFirestore = async (user) => {
         try {
             const userRef = doc(db, "users", user.uid);
             await setDoc(userRef, {
-                displayName: user.displayName || username,
+                displayName: username,
                 email: user.email,
                 avatarUrl: "/assets/avatar_placeholder.png",
                 bio: "This is your bio. Edit it in your profile settings.",
@@ -76,17 +114,24 @@ const Signup = () => {
         }
     };
 
+    /**
+     * Handles form submission for registration
+     * Validates all inputs and creates new user account
+     * @param {Event} e - The form submission event
+     */
     const onSubmit = async (e) => {
         e.preventDefault();
         setErrorMessage("");
         setEmailError("");
         setUsernameError("");
 
+        // Validate username
         if (!username.trim()) {
             setErrorMessage("Brukernavn er påkrevd!");
             return;
         }
 
+        // Check username availability
         try {
             const usernameExists = await checkUsernameExists(username);
             if (usernameExists) {
@@ -99,11 +144,13 @@ const Signup = () => {
             return;
         }
 
+        // Validate email
         if (!validateEmail(email)) {
             setEmailError("Vennligst skriv inn en gyldig e-postadresse");
             return;
         }
 
+        // Validate password match
         if (password !== confirmPassword) {
             setErrorMessage("Passordene matcher ikke!");
             return;
@@ -112,11 +159,15 @@ const Signup = () => {
         if (!isSigningUp) {
             setIsSigningUp(true);
             try {
+                // Create new user account
                 const result = await doCreateUserWithEmailAndPassword(email, password, username);
+                // Store user data in localStorage
                 localStorage.setItem("username", username);
                 localStorage.setItem("email", email);
+                // Create user document in Firestore
                 await createUserInFirestore(result.user);
             } catch (error) {
+                // Handle different types of registration errors
                 switch (error.code) {
                     case 'auth/email-already-in-use':
                         setErrorMessage('E-postadressen er allerede i bruk');
@@ -135,14 +186,17 @@ const Signup = () => {
         }
     };
 
+    // Redirect to home if user is already logged in
     if (userLoggedIn) {
         return <Navigate to="/" />;
     }
 
+    // Render registration form with all input fields and error handling
     return (
         <div id="signup-container" className="min-h-screen bg-BGcolor flex flex-col items-center justify-center p-6">
             <h1 className="text-4xl font-semibold mb-12">Registrer deg</h1>
             <div className="w-full max-w-md">
+                {/* Error message display */}
                 {errorMessage && (
                     <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
                         <div className="flex">
@@ -161,6 +215,7 @@ const Signup = () => {
                 )}
 
                 <form onSubmit={onSubmit} className="space-y-6">
+                    {/* Username input field */}
                     <div>
                         <input
                             type="text"
@@ -179,6 +234,7 @@ const Signup = () => {
                         )}
                     </div>
 
+                    {/* Email input field */}
                     <div>
                         <input
                             type="email"
@@ -197,6 +253,7 @@ const Signup = () => {
                         )}
                     </div>
 
+                    {/* Password input field with show/hide toggle */}
                     <div className="relative">
                         <input
                             type={showPassword ? "text" : "password"}
@@ -215,6 +272,7 @@ const Signup = () => {
                         </button>
                     </div>
 
+                    {/* Confirm password input field with show/hide toggle */}
                     <div className="relative">
                         <input
                             type={showConfirmPassword ? "text" : "password"}
@@ -233,6 +291,7 @@ const Signup = () => {
                         </button>
                     </div>
 
+                    {/* Submit button */}
                     <button
                         type="submit"
                         disabled={isSigningUp || emailError}
@@ -246,6 +305,7 @@ const Signup = () => {
                     </button>
                 </form>
 
+                {/* Login link */}
                 <div className="mt-8 text-center">
                     <p className="text-gray-600">Har du allerede en bruker?</p>
                     <Link to="/login" className="block mt-2 text-[#3C5A3C] hover:underline text-lg">
