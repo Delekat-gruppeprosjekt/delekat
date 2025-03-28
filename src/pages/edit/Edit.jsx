@@ -60,7 +60,6 @@ function EditRecipe() {
   const handleUpdateRecipe = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const validUrl = imageUrl && /^(ftp|http|https):\/\/[^ "']+$/.test(imageUrl);
       if (!validUrl) {
@@ -68,7 +67,6 @@ function EditRecipe() {
         setLoading(false);
         return;
       }
-
       const recipeRef = doc(firestore, "recipes", recipeId);
       await updateDoc(recipeRef, {
         title,
@@ -78,9 +76,8 @@ function EditRecipe() {
         imageUrl,
         updatedAt: new Date(),
       });
-
       setLoading(false);
-      navigate("/profile"); // Redirect back to profile page
+      navigate(`/profile/${auth.currentUser.uid}`); // Redirect back to user's profile page with their UID
     } catch (error) {
       console.error("Error updating recipe:", error);
       setLoading(false);
