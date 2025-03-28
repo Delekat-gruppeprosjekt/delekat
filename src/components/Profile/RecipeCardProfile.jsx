@@ -32,20 +32,35 @@ export default function RecipeCard({ recipe, onEdit, onDelete }) {
           className="absolute top-0 left-0 w-full h-full object-cover"
         />
       </div>
-      <div className="p-2">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between text-sm text-gray-500 mb-2">
-          <div className="flex items-center gap-1 text-[#3C5A3C]">
-            <FaClock className="text-xl" />
-            <span className="text-lg">
-              {recipe.cookingTime || "10 - 15 min"}
-            </span>
-          </div>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-[#3C5A3C]">
-            <div className="flex items-center gap-1">
+      
+      <div className="p-3">
+        {/* Recipe title and description */}
+        <h3 className="text-lg font-semibold mb-1">
+          {recipe.title || "Recipe Title"}
+        </h3>
+        <p className="text-sm text-gray-600 mb-3 line-clamp-1">
+          {recipe.description ||
+            "This is a placeholder description for the recipe."}
+        </p>
+        
+        {/* Recipe metadata with time/difficulty on left, comments/favorites on right */}
+        <div className="flex justify-between items-start text-sm text-gray-500">
+          {/* Left side - Time and Difficulty stacked vertically */}
+          <div className="flex flex-col gap-1.5">
+            {/* Time */}
+            <div className="flex items-center gap-1 text-[#3C5A3C]">
+              <FaClock className="text-base flex-shrink-0" />
+              <span className="text-sm whitespace-nowrap">
+                {recipe.cookingTime || "10 - 15 min"}
+              </span>
+            </div>
+            
+            {/* Difficulty */}
+            <div className="flex items-center gap-1 text-[#3C5A3C]">
               {[...Array(3)].map((_, index) => (
                 <PiChefHat
                   key={index}
-                  className={`text-xl ${
+                  className={`text-base flex-shrink-0 ${
                     index <
                     (recipe.difficulty === "vanskelig"
                       ? 3
@@ -57,7 +72,7 @@ export default function RecipeCard({ recipe, onEdit, onDelete }) {
                   }`}
                 />
               ))}
-              <span className="ml-2 capitalize">
+              <span className="ml-1 capitalize text-xs">
                 {recipe.difficulty === "vanskelig"
                   ? "Vanskelig"
                   : recipe.difficulty === "medium"
@@ -65,26 +80,27 @@ export default function RecipeCard({ recipe, onEdit, onDelete }) {
                   : "Lett"}
               </span>
             </div>
-            <div className="flex items-center gap-1">
-              <FaRegComment className="text-xl" />
-              <span>{recipe.comments || 0}</span>
+          </div>
+          
+          {/* Right side - Comments and Favorites stacked vertically */}
+          <div className="flex flex-col items-end gap-1.5">
+            {/* Comments */}
+            <div className="flex items-center gap-1 text-[#3C5A3C]">
+              <span className="text-xs">{recipe.comments || 0}</span>
+              <FaRegComment className="text-base flex-shrink-0" />
             </div>
-            <div className="flex items-center gap-1">
-              <FaHeart className="text-xl" />
-              <span>{recipe.favorites || 0}</span>
+            
+            {/* Favorites */}
+            <div className="flex items-center gap-1 text-[#3C5A3C]">
+              <span className="text-xs">{recipe.favorites || 0}</span>
+              <FaHeart className="text-base flex-shrink-0" />
             </div>
           </div>
         </div>
-        <h3 className="text-lg font-semibold mb-2">
-          {recipe.title || "Recipe Title"}
-        </h3>
-        <p className="text-sm text-gray-600 mb-4 line-clamp-1">
-          {recipe.description ||
-            "This is a placeholder description for the recipe."}
-        </p>
       </div>
+      
       {onEdit && onDelete && (
-        <div className="flex gap-2 mb-2 ml-2 mt-0">
+        <div className="flex gap-2 mb-3 mx-3">
           <button
             className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-700 transition"
             onClick={handleEdit}
