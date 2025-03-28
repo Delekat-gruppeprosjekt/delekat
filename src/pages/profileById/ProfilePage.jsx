@@ -120,24 +120,26 @@ export default function ProfilePage() {
               : "This user has no recipes yet."}
           </p>
         ) : (
-          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none">
-            {userRecipes.map((recipe) => (
-              <RecipeCard
-                key={recipe.id}
-                recipe={recipe}
-                onEdit={
-                  isOwnProfile
-                    ? () => console.log(`Edit recipe ${recipe.id}`)
-                    : null
-                }
-                onDelete={
-                  isOwnProfile
-                    ? () => console.log(`Delete recipe ${recipe.id}`)
-                    : null
-                }
-              />
-            ))}
-          </ul>
+          <div className="max-w-[1400px] mx-auto px-4">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none">
+              {userRecipes.map((recipe) => (
+                <RecipeCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  onEdit={
+                    isOwnProfile
+                      ? () => console.log(`Edit recipe ${recipe.id}`)
+                      : null
+                  }
+                  onDelete={
+                    isOwnProfile
+                      ? () => console.log(`Delete recipe ${recipe.id}`)
+                      : null
+                  }
+                />
+              ))}
+            </ul>
+          </div>
         )}
       </div>
     </div>
