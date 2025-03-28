@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { FaHeart } from "react-icons/fa";
 import { IoChatbubbleOutline } from "react-icons/io5";
@@ -10,6 +10,7 @@ import { PiChefHat } from "react-icons/pi";
 export default function SingleRecipe() {
   const { recipeId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -48,20 +49,30 @@ export default function SingleRecipe() {
     return result.endsWith(".00") ? parseInt(value) : result;
   };
 
+  const handleBack = () => {
+    if (location.state?.from) {
+      navigate(location.state.from);
+    } else {
+      navigate("/"); // Default to home if no previous page
+    }
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="min-h-screen bg-BGcolor p-6">
       <div className="max-w-3xl mx-auto bg-white rounded-xl shadow p-6">
-        <div className="flex justify-center items-center mb-6 relative">
+        <div className="flex flex-col items-center mb-6 relative">
           <button
-            onClick={() => navigate(-1)}
-            className="absolute left-0 px-4 py-2 bg-[#3C5A3C] text-white rounded hover:bg-[#2C432C] transition-colors"
+            onClick={handleBack}
+            className="absolute top-0 left-0 px-4 py-2 bg-[#3C5A3C] text-white rounded hover:bg-[#2C432C] transition-colors"
           >
             Tilbake
           </button>
-          <h1 className="text-4xl font-bold text-center">{recipe.title}</h1>
+          <h1 className="text-3xl font-bold text-center break-words px-4 mt-10">
+            {recipe.title}
+          </h1>
         </div>
 
         <img

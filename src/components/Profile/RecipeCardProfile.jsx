@@ -24,7 +24,7 @@ export default function RecipeCard({ recipe, onEdit, onDelete }) {
   };
 
   return (
-    <li className="relative bg-white shadow-md rounded-lg overflow-hidden">
+    <div className="relative bg-white shadow-md rounded-lg overflow-hidden">
       <div className="relative h-0 pb-[70%]">
         <img
           src={recipe.imageUrl || "/assets/avatar_placeholder.png"}
@@ -115,6 +115,6 @@ export default function RecipeCard({ recipe, onEdit, onDelete }) {
           </button>
         </div>
       )}
-    </li>
+    </div>
   );
 }

@@ -129,8 +129,19 @@ function EditRecipe() {
             <button type="button" onClick={handleAddInstruction} className="text-blue-500 mt-2">Add Step</button>
           </div>
 
-          <div className="flex justify-center mb-24">
-            <button type="submit" className={`bg-blue-500 text-white px-4 py-2 rounded-md ${loading ? "cursor-not-allowed opacity-50" : ""}`} disabled={loading}>
+          <div className="flex justify-between">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition"
+            >
+              Avbryt
+            </button>
+            <button
+              type="submit"
+              className={`bg-blue-500 text-white px-4 py-2 rounded-md ${loading ? "cursor-not-allowed opacity-50" : ""}`}
+              disabled={loading}
+            >
               {loading ? "Updating..." : "Save Changes"}
             </button>
           </div>
