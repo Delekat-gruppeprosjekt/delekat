@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Navigate, Link } from "react-router";
-import { doCreateUserWithEmailAndPassword, doSignInWithGoogle } from "../../../auth";
+import { doCreateUserWithEmailAndPassword } from "../../../auth";
 import { useAuth } from "../../contexts/authContext/auth";
 import { getFirestore, doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
@@ -29,7 +29,7 @@ const Signup = () => {
     };
 
     const validateEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         return emailRegex.test(email);
     };
 
@@ -63,15 +63,12 @@ const Signup = () => {
     // Create user in Firebase Authentication and Firestore
     const createUserInFirestore = async (user) => {
         try {
-            // Create the user document in the Firestore 'users' collection
-            const userRef = doc(db, "users", user.uid);  // Use user's UID as document ID
-
-            // Create user data including default avatar URL and bio
+            const userRef = doc(db, "users", user.uid);
             await setDoc(userRef, {
-                displayName: user.displayName || username,  // Use displayName from Auth or username provided during sign up
+                displayName: user.displayName || username,
                 email: user.email,
-                avatarUrl: "/assets/avatar_placeholder.png",  // Set default avatar image
-                bio: "This is your bio. Edit it in your profile settings.",  // Default bio
+                avatarUrl: "/assets/avatar_placeholder.png",
+                bio: "This is your bio. Edit it in your profile settings.",
                 createdAt: new Date(),
             });
         } catch (error) {
@@ -133,27 +130,6 @@ const Signup = () => {
                     default:
                         setErrorMessage('Det oppstod en feil ved registrering');
                 }
-                setIsSigningUp(false);
-            }
-        }
-    };
-
-    const onGoogleSignUp = async (e) => {
-        e.preventDefault();
-        if (!isSigningUp) {
-            setIsSigningUp(true);
-            try {
-                const result = await doSignInWithGoogle();
-                if (result?.user?.email) {
-                    // Store username and email in localStorage
-                    localStorage.setItem("username", result.user.displayName || "User");
-                    localStorage.setItem("email", result.user.email);
-
-                    // Add the Google user to Firestore
-                    await createUserInFirestore(result.user);  // Pass the Google user to Firestore
-                }
-            } catch (error) {
-                setErrorMessage(error.message);
                 setIsSigningUp(false);
             }
         }

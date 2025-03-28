@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Navigate, Link, useNavigate } from "react-router";
-import { doSignInWithEmailAndPassword, doSignInWithGoogle, doSignOut } from "../../../auth";
+import { doSignInWithEmailAndPassword } from "../../../auth";
 import { useAuth } from "../../contexts/authContext/auth";
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 
 const LoginComponent = () => {
-    const { userLoggedIn, user } = useAuth();
+    const { userLoggedIn } = useAuth();
     const navigate = useNavigate();
 
     const [email, setEmail] = useState(localStorage.getItem("email") || "");
@@ -23,9 +23,10 @@ const LoginComponent = () => {
     }, []);
 
     const validateEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         return emailRegex.test(email);
     };
+
 
     const handleEmailChange = (e) => {
         const newEmail = e.target.value;
@@ -76,33 +77,6 @@ const LoginComponent = () => {
                 setIsSigningIn(false);
             }
         }
-    };
-
-    const onGoogleSignIn = async (e) => {
-        e.preventDefault();
-        if (!isSigningIn) {
-            setIsSigningIn(true);
-            try {
-                const result = await doSignInWithGoogle();
-                if (result?.user?.email) {
-                    // Store the user email and UID in localStorage on successful Google login
-                    localStorage.setItem("email", result.user.email);
-                    localStorage.setItem("userId", result.user.uid); // Save user ID in localStorage
-                    setEmail(result.user.email);
-                }
-                navigate("/home"); // Navigate to home page after Google login
-            } catch (error) {
-                setErrorMessage(error.message);
-                setIsSigningIn(false);
-            }
-        }
-    };
-
-    const onLogout = async () => {
-        await doSignOut();
-        localStorage.removeItem("email"); // Clear email from localStorage on logout
-        localStorage.removeItem("userId"); // Clear userId from localStorage on logout
-        setEmail("");
     };
 
     if (userLoggedIn) {
