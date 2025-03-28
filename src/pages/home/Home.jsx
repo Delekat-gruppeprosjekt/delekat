@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Import for navigation
-import HomeList from "../../components/home/HomeList.jsx";
+import { useNavigate } from "react-router-dom";
+import HomeCard from "../../components/home/HomeCard2.jsx"; // Import HomeCard
 import { PiMagnifyingGlass } from "react-icons/pi";
 import { useAuth } from "../../contexts/authContext/auth.jsx";
 import { firestore } from "../../../firebase";
 import { getDocs, collection } from "@firebase/firestore";
+import { getAuth, signOut } from "firebase/auth"; // Import signOut from Firebase Auth
 
 export default function Home() {
-  const { currentUser } = useAuth();
-  const navigate = useNavigate(); // Initialize navigation
+  const { currentUser } = useAuth(); // Get currentUser from context
+  const navigate = useNavigate();
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [oppskrifter, setOppskrifter] = useState([]);
 
-  // Fetch recipes from Firestore
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
@@ -22,8 +22,15 @@ export default function Home() {
         const recipes = snapshot.docs.map((doc) => ({
           ...doc.data(),
           id: doc.id,
+          authorAvatarUrl: doc.data().authorAvatarUrl || "", // Ensure avatar URL is included
         }));
-        setOppskrifter(recipes);
+        // Sort recipes by createdAt timestamp in descending order (newest first)
+        const sortedRecipes = recipes.sort((a, b) => {
+          const dateA = a.createdAt?.toDate() || new Date(0);
+          const dateB = b.createdAt?.toDate() || new Date(0);
+          return dateB - dateA;
+        });
+        setOppskrifter(sortedRecipes);
       } catch (error) {
         console.error("Error fetching recipes:", error);
       }
@@ -36,8 +43,15 @@ export default function Home() {
     setSearchQuery(event.target.value.toLowerCase());
   };
 
-  const handleAuthorClick = (authorId) => {
-    navigate(`/profile/${authorId}`);
+  const handleLogout = async () => {
+    const auth = getAuth(); // Get Firebase Auth instance
+    try {
+      await signOut(auth); // Sign the user out
+      localStorage.clear(); // Clear localStorage
+      navigate("/"); // Navigate to home page after logout
+    } catch (err) {
+      console.error("Error during logout:", err);
+    }
   };
 
   return (
@@ -55,43 +69,25 @@ export default function Home() {
         La deg friste
       </h1>
 
-      {/* List of Recipes */}
-      <ul className="mt-6">
-        {oppskrifter
-          .filter((recipe) => recipe.title.toLowerCase().includes(searchQuery))
-          .map((recipe) => (
-            <li
-              key={recipe.id}
-              className="p-2 border-b border-gray-300 flex flex-col items-center mb-4"
-            >
-              <h3 className="text-lg font-semibold">{recipe.title}</h3>
-              <p>{recipe.description}</p>
-              {recipe.imageUrl && (
-                <img
-                  src={recipe.imageUrl}
-                  alt={recipe.title}
-                  className="w-40 h-40 object-cover mt-2 rounded-lg"
-                />
-              )}
-              <p>
-                Created by:{" "}
-                <span
-                  className="text-blue-500 hover:underline cursor-pointer"
-                  onClick={() => handleAuthorClick(recipe.userId)}
-                >
-                  {recipe.author}
-                </span>
-              </p>
-            </li>
-          ))}
-      </ul>
+      {/* Search and Logout Buttons */}
+      <div className="absolute right-0 top-0 m-8 flex space-x-4">
+        {/* Magnifying Glass Search Icon */}
+        <div
+          className="text-2xl hover:scale-110 duration-150 cursor-pointer"
+          onClick={() => setShowSearch(!showSearch)}
+        >
+          <PiMagnifyingGlass />
+        </div>
 
-      {/* Search Icon */}
-      <div
-        className="absolute right-0 top-0 m-8 text-2xl hover:scale-110 duration-150 cursor-pointer"
-        onClick={() => setShowSearch(!showSearch)}
-      >
-        <PiMagnifyingGlass />
+        {/* Logg ut button only shows if user is logged in */}
+        {currentUser && (
+          <button
+            onClick={handleLogout}
+            className="text-lg font-semibold text-red-500 hover:text-red-600"
+          >
+            Logg ut
+          </button>
+        )}
       </div>
 
       {/* Search Input */}
@@ -107,8 +103,14 @@ export default function Home() {
         </div>
       )}
 
-      {/* Pass searchQuery to HomeList */}
-      <HomeList searchQuery={searchQuery} />
+      {/* Display Recipes Using HomeCard */}
+      <div className="grid grid-cols-1 gap-6 mb-24">
+        {oppskrifter
+          .filter((recipe) => recipe.title.toLowerCase().includes(searchQuery))
+          .map((recipe) => (
+            <HomeCard key={recipe.id} post={recipe} />
+          ))}
+      </div>
     </div>
   );
 }

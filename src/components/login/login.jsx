@@ -24,8 +24,10 @@ const LoginComponent = () => {
         if (!isSigningIn) {
             setIsSigningIn(true);
             try {
-                await doSignInWithEmailAndPassword(email, password);
-                localStorage.setItem("email", email); // Store email in localStorage on successful login
+                const result = await doSignInWithEmailAndPassword(email, password);
+                // Store the user email and UID in localStorage on successful login
+                localStorage.setItem("email", email);
+                localStorage.setItem("userId", result.user.uid); // Save user ID in localStorage
                 navigate("/"); // Navigate to home page after successful login
             } catch (error) {
                 setErrorMessage(error.message);
@@ -41,7 +43,9 @@ const LoginComponent = () => {
             try {
                 const result = await doSignInWithGoogle();
                 if (result?.user?.email) {
+                    // Store the user email and UID in localStorage on successful Google login
                     localStorage.setItem("email", result.user.email);
+                    localStorage.setItem("userId", result.user.uid); // Save user ID in localStorage
                     setEmail(result.user.email);
                 }
                 navigate("/home"); // Navigate to home page after Google login
@@ -55,6 +59,7 @@ const LoginComponent = () => {
     const onLogout = async () => {
         await doSignOut();
         localStorage.removeItem("email"); // Clear email from localStorage on logout
+        localStorage.removeItem("userId"); // Clear userId from localStorage on logout
         setEmail("");
     };
 
@@ -91,18 +96,17 @@ const LoginComponent = () => {
                 <button type="submit"
                         disabled={isSigningIn}
                         className="bg-PMgreen text-BGwhite w-2/4 p-2 hover:bg-SGgreen duration-150"
-                        >
+                >
                     {isSigningIn ? "Signing In..." : "Logg inn"}
                 </button>
             </form>
             <div className="flex flex-col justify-center items-center text-center gap-2 mt-16">
-            <p>
-                Har du ikke en bruker? 
-            </p>
+                <p>Har du ikke en bruker? </p>
                 <Link to="/signup"
                     className="bg-blue-500 text-BGwhite px-8 py-2 text-lg hover:bg-blue-700 duration-150"
-                >Registrer ny bruker</Link>
-
+                >
+                    Registrer ny bruker
+                </Link>
             </div>
         </div>
     );

@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { auth } from "../../../firebase";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDoc, doc } from "firebase/firestore";
 
 function CreateNewRecipe() {
   const [title, setTitle] = useState("");
@@ -10,13 +10,120 @@ function CreateNewRecipe() {
   const [ingredients, setIngredients] = useState([{ ingredient: "", amount: "", unit: "" }]);
   const [instructions, setInstructions] = useState([""]);
   const [loading, setLoading] = useState(false);
+  const [authorAvatarUrl, setAuthorAvatarUrl] = useState("/assets/avatar_placeholder.png");
+  const [imageError, setImageError] = useState(false);
+  const [amountErrors, setAmountErrors] = useState({});
+  const [difficulty, setDifficulty] = useState("lett");
+  const [formErrors, setFormErrors] = useState({});
+  const [portions, setPortions] = useState(1);
+  const [cookingTime, setCookingTime] = useState("10 - 15 min");
   const navigate = useNavigate();
+
+  // Predefined units for the dropdown
+  const units = [
+    { value: "ss", label: "Spiseskje (ss)" },
+    { value: "ts", label: "Teskje (ts)" },
+    { value: "ml", label: "Milliliter (ml)" },
+    { value: "dl", label: "Desiliter (dl)" },
+    { value: "L", label: "Liter (L)" },
+    { value: "gram", label: "Gram" },
+    { value: "stk", label: "Stykk (stk)" }
+  ];
+
+  // Predefined cooking times
+  const cookingTimes = [
+    "5 - 10 min",
+    "10 - 15 min",
+    "15 - 20 min",
+    "20 - 25 min",
+    "25 - 30 min",
+    "30 - 35 min",
+    "35 - 40 min",
+    "40 - 45 min",
+    "45 - 50 min",
+    "50 - 55 min",
+    "55 - 60 min",
+    "60+ min"
+  ];
+
+  // Function to validate if URL is an image
+  const isValidImageUrl = (url) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
+  };
+
+  // Function to handle image URL validation
+  const handleImageUrlChange = async (url) => {
+    if (!url) {
+      setImageUrl('');
+      setImageError(false);
+      return;
+    }
+
+    try {
+      const isValid = await isValidImageUrl(url);
+      if (isValid) {
+        setImageUrl(url);
+        setImageError(false);
+      } else {
+        setImageError(true);
+        setImageUrl('');
+      }
+    } catch (error) {
+      setImageError(true);
+      setImageUrl('');
+    }
+  };
+
+  // Fetch the user's avatar URL from Firestore
+  useEffect(() => {
+    const fetchUserAvatar = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          const db = getFirestore();
+          const userRef = doc(db, "users", user.uid);
+          const userSnap = await getDoc(userRef);
+          
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            setAuthorAvatarUrl(userData.avatarUrl || "/assets/avatar_placeholder.png");
+          } else {
+            console.log("Ingen brukerdata funnet");
+            setAuthorAvatarUrl("/assets/avatar_placeholder.png");
+          }
+        } catch (error) {
+          console.error("Feil ved henting av brukerdata: ", error);
+        }
+      }
+    };
+
+    fetchUserAvatar();
+  }, []);
 
   const handleInputChange = (e, index, type) => {
     if (type === "ingredient") {
       const { name, value } = e.target;
       const newIngredients = [...ingredients];
-      newIngredients[index][name] = value;
+      
+      if (name === "amount") {
+        // Only allow numbers and decimal point
+        if (value === "" || /^\d*\.?\d*$/.test(value)) {
+          newIngredients[index][name] = value;
+          // Update amount errors
+          setAmountErrors(prev => ({
+            ...prev,
+            [index]: value === "" ? "Mengde er påkrevd" : null
+          }));
+        }
+      } else {
+        newIngredients[index][name] = value;
+      }
+      
       setIngredients(newIngredients);
     } else if (type === "instruction") {
       const newInstructions = [...instructions];
@@ -31,6 +138,12 @@ function CreateNewRecipe() {
 
   const handleRemoveIngredient = (index) => {
     setIngredients(ingredients.filter((_, i) => i !== index));
+    // Remove error for deleted ingredient
+    setAmountErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[index];
+      return newErrors;
+    });
   };
 
   const handleAddInstruction = () => {
@@ -44,32 +157,65 @@ function CreateNewRecipe() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    
+    console.log('Current portions value before submit:', portions);
+    console.log('Portions type:', typeof portions);
+
     try {
-      const validUrl = imageUrl && /^(ftp|http|https):\/\/[^ "']+$/.test(imageUrl);
-      if (!validUrl) {
-        alert("Please enter a valid image URL.");
+      if (imageError) {
+        alert("Vennligst skriv inn en gyldig bilde-URL.");
         setLoading(false);
         return;
       }
 
-      const author = auth.currentUser.displayName || "Anonymous";
+      // Validate all amounts before submission
+      const newAmountErrors = {};
+      ingredients.forEach((item, index) => {
+        if (!item.amount || isNaN(item.amount) || parseFloat(item.amount) <= 0) {
+          newAmountErrors[index] = "Mengde er påkrevd";
+        }
+      });
+
+      if (Object.keys(newAmountErrors).length > 0) {
+        setAmountErrors(newAmountErrors);
+        setLoading(false);
+        return;
+      }
+
+      // Get the current user's display name and ID
+      const author = auth.currentUser.displayName || "Anonym";
+      const authorId = auth.currentUser.uid;
+
+      // Prepare recipe data
       const recipeData = {
         title,
         description,
-        ingredients,
+        ingredients: ingredients.map(item => ({
+          ...item,
+          amount: parseFloat(item.amount)
+        })),
         instructions,
         imageUrl,
         author,
-        userId: auth.currentUser.uid,
+        authorAvatarUrl,
+        userId: authorId,
+        difficulty,
+        portions: Number(portions),
+        cookingTime,
         createdAt: new Date(),
       };
 
+      console.log('Recipe data portions:', recipeData.portions);
+      console.log('Recipe data portions type:', typeof recipeData.portions);
+
+      // Save recipe to Firestore
       const db = getFirestore();
       await addDoc(collection(db, "recipes"), recipeData);
+
       setLoading(false);
       navigate("/");
     } catch (error) {
-      console.error("Error adding recipe: ", error);
+      console.error("Feil ved lagring av oppskrift: ", error);
       setLoading(false);
     }
   };
@@ -77,51 +223,166 @@ function CreateNewRecipe() {
   return (
     <div className="min-h-screen bg-BGcolor p-6">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Create New Recipe</h1>
+        <h1 className="text-3xl font-bold mb-6">Opprett ny oppskrift</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex flex-col">
-            <label className="text-lg font-semibold" htmlFor="title">Title</label>
-            <input type="text" id="title" name="title" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full p-2 border rounded-md" placeholder="Recipe title" />
+            <label className="text-lg font-semibold" htmlFor="title">Tittel</label>
+            <input 
+              type="text" 
+              id="title" 
+              name="title" 
+              value={title} 
+              onChange={(e) => setTitle(e.target.value)} 
+              required 
+              className={`w-full p-2 border rounded-md ${formErrors.title ? 'border-red-500' : ''}`}
+              placeholder="Oppskriftens tittel" 
+            />
+            {formErrors.title && (
+              <span className="text-red-500 text-sm mt-1">{formErrors.title}</span>
+            )}
           </div>
 
           <div className="flex flex-col">
-            <label className="text-lg font-semibold" htmlFor="imageUrl">Recipe Image URL</label>
-            <input type="text" id="imageUrl" name="imageUrl" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} required className="w-full p-2 border rounded-md" placeholder="Enter the image URL" />
+            <label className="text-lg font-semibold" htmlFor="imageUrl">Bilde-URL</label>
+            <input 
+              type="text" 
+              id="imageUrl" 
+              name="imageUrl" 
+              value={imageUrl} 
+              onChange={(e) => handleImageUrlChange(e.target.value)} 
+              required 
+              className={`w-full p-2 border rounded-md ${imageError ? 'border-red-500' : ''}`} 
+              placeholder="Skriv inn bilde-URL" 
+            />
+            {imageError && (
+              <span className="text-red-500 text-sm mt-1">Ugyldig bilde-URL. Vennligst sjekk at URL-en er korrekt og at den peker til et bilde.</span>
+            )}
           </div>
 
           <div className="flex flex-col">
-            <label className="text-lg font-semibold" htmlFor="description">Description</label>
-            <textarea id="description" name="description" value={description} onChange={(e) => setDescription(e.target.value)} required className="w-full p-2 border rounded-md" placeholder="Write a description of the recipe" />
+            <label className="text-lg font-semibold" htmlFor="description">Beskrivelse</label>
+            <textarea 
+              id="description" 
+              name="description" 
+              value={description} 
+              onChange={(e) => {
+                if (e.target.value.length <= 1000) {
+                  setDescription(e.target.value);
+                }
+              }} 
+              required 
+              className="w-full p-2 border rounded-md" 
+              placeholder="Skriv en beskrivelse av oppskriften"
+              maxLength={1000}
+            />
+            <span className="text-sm text-gray-500 mt-1">{description.length}/1000 tegn</span>
           </div>
 
           <div className="flex flex-col">
-            <label className="text-lg font-semibold">Ingredients</label>
+            <label className="text-lg font-semibold" htmlFor="difficulty">Vanskelighetsgrad</label>
+            <select
+              id="difficulty"
+              name="difficulty"
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value)}
+              className="w-full p-2 border rounded-md"
+            >
+              <option value="lett">Lett (1 kokkehatt)</option>
+              <option value="medium">Medium (2 kokkehatter)</option>
+              <option value="vanskelig">Vanskelig (3 kokkehatter)</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col">
+            <label className="text-lg font-semibold" htmlFor="portions">Antall porsjoner</label>
+            <input
+              type="number"
+              id="portions"
+              name="portions"
+              value={portions}
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                console.log('Portions input value:', value);
+                if (!isNaN(value) && value >= 1) {
+                  setPortions(value);
+                }
+              }}
+              min="1"
+              className="w-full p-2 border rounded-md"
+              required
+            />
+          </div>
+
+          <div className="flex flex-col">
+            <label className="text-lg font-semibold" htmlFor="cookingTime">Tilberedningstid</label>
+            <select
+              id="cookingTime"
+              name="cookingTime"
+              value={cookingTime}
+              onChange={(e) => setCookingTime(e.target.value)}
+              className="w-full p-2 border rounded-md"
+              required
+            >
+              {cookingTimes.map((time) => (
+                <option key={time} value={time}>
+                  {time}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col">
+            <label className="text-lg font-semibold">Ingredienser</label>
             {ingredients.map((item, index) => (
               <div key={index} className="flex gap-2 items-center">
-                <input type="text" name="ingredient" value={item.ingredient} onChange={(e) => handleInputChange(e, index, "ingredient")} className="w-1/3 p-2 border rounded-md" placeholder="Ingredient" />
-                <input type="text" name="amount" value={item.amount} onChange={(e) => handleInputChange(e, index, "ingredient")} className="w-1/4 p-2 border rounded-md" placeholder="Amount" />
-                <input type="text" name="unit" value={item.unit} onChange={(e) => handleInputChange(e, index, "ingredient")} className="w-1/4 p-2 border rounded-md" placeholder="Unit" />
-                <button type="button" onClick={() => handleRemoveIngredient(index)} className="text-red-500">Remove</button>
+                <input type="text" name="ingredient" value={item.ingredient} onChange={(e) => handleInputChange(e, index, "ingredient")} className="w-1/3 p-2 border rounded-md" placeholder="Ingrediens" />
+                <div className="w-1/4 flex flex-col">
+                  <input 
+                    type="text" 
+                    name="amount" 
+                    value={item.amount} 
+                    onChange={(e) => handleInputChange(e, index, "ingredient")} 
+                    className={`p-2 border rounded-md ${amountErrors[index] ? 'border-red-500' : ''}`} 
+                    placeholder="Mengde" 
+                  />
+                  {amountErrors[index] && (
+                    <span className="text-red-500 text-xs mt-1">{amountErrors[index]}</span>
+                  )}
+                </div>
+                <select 
+                  name="unit" 
+                  value={item.unit} 
+                  onChange={(e) => handleInputChange(e, index, "ingredient")} 
+                  className="w-1/4 p-2 border rounded-md"
+                >
+                  <option value="">Velg enhet</option>
+                  {units.map((unit) => (
+                    <option key={unit.value} value={unit.value}>
+                      {unit.label}
+                    </option>
+                  ))}
+                </select>
+                <button type="button" onClick={() => handleRemoveIngredient(index)} className="text-red-500">Fjern</button>
               </div>
             ))}
-            <button type="button" onClick={handleAddIngredient} className="text-blue-500 mt-2">Add Ingredient</button>
+            <button type="button" onClick={handleAddIngredient} className="text-blue-500 mt-2">+ Legg til ingrediens</button>
           </div>
 
           <div className="flex flex-col">
-            <label className="text-lg font-semibold">Instructions</label>
+            <label className="text-lg font-semibold">Fremgangsmåte</label>
             {instructions.map((step, index) => (
               <div key={index} className="flex gap-2 items-center">
                 <span className="font-bold">{index + 1}.</span>
-                <input type="text" value={step} onChange={(e) => handleInputChange(e, index, "instruction")} className="w-full p-2 border rounded-md" placeholder={`Step ${index + 1}`} />
-                <button type="button" onClick={() => handleRemoveInstruction(index)} className="text-red-500">Remove</button>
+                <input type="text" value={step} onChange={(e) => handleInputChange(e, index, "instruction")} className="w-full p-2 border rounded-md" placeholder={`Trinn ${index + 1}`} />
+                <button type="button" onClick={() => handleRemoveInstruction(index)} className="text-red-500">Fjern</button>
               </div>
             ))}
-            <button type="button" onClick={handleAddInstruction} className="text-blue-500 mt-2">Add Step</button>
+            <button type="button" onClick={handleAddInstruction} className="text-blue-500 mt-2">+ Legg til trinn</button>
           </div>
 
           <div className="flex justify-center mb-24">
             <button type="submit" className={`bg-blue-500 text-white px-4 py-2 rounded-md ${loading ? "cursor-not-allowed opacity-50" : ""}`} disabled={loading}>
-              {loading ? "Uploading..." : "Create Recipe"}
+              {loading ? "Lagrer..." : "Lagre oppskrift"}
             </button>
           </div>
         </form>
