@@ -2,6 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./globals.css";
+
 import { AuthProvider } from "./contexts/authContext/auth";
 
 createRoot(document.getElementById("root")).render(
@@ -10,4 +11,17 @@ createRoot(document.getElementById("root")).render(
         <App />
       </AuthProvider>
     </React.StrictMode>
+);
+=======
+import { AuthProvider } from "./contexts/authContext/auth"; 
+import "../firebase";
+
+
+
+createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </React.StrictMode>
 );
