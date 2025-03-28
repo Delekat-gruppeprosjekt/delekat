@@ -65,7 +65,8 @@ export default function HomeCard({ post }) {
   };
 
   return (
-    <div className="w-4/5 mx-auto p-4 bg-white rounded-xl shadow mb-8 flex flex-col relative">
+<div className="w-full max-w-xs mx-auto p-4 bg-white rounded-xl shadow mb-8 flex flex-col relative">
+ 
       {/* Header with user info and difficulty level */}
       <div className="flex items-center mb-4">
         {isLoading ? (
