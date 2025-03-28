@@ -2,8 +2,8 @@ import LoginComponent from "../../components/login/login.jsx"
 
 const Login = () => {
   return (
-    <div className="min-h-screen p-6 bg-BGcolor">
-      <h1>Login Page</h1>
+    <div className="min-h-screen bg-[#FFFBEB] flex flex-col items-center justify-center p-6">
+      <h1 className="text-4xl font-semibold mb-12">Logg inn</h1>
       <LoginComponent />
     </div>
   );
