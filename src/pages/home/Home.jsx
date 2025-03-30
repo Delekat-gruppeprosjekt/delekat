@@ -13,6 +13,7 @@ export default function Home() {
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [oppskrifter, setOppskrifter] = useState([]);
+  const [expandedCardId, setExpandedCardId] = useState(null);
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -51,6 +52,14 @@ export default function Home() {
       navigate("/"); // Navigate to home page after logout
     } catch (err) {
       console.error("Error during logout:", err);
+    }
+  };
+
+  const handleCardExpand = (cardId) => {
+    if (expandedCardId === cardId) {
+      setExpandedCardId(null);
+    } else {
+      setExpandedCardId(cardId);
     }
   };
 
@@ -109,7 +118,12 @@ export default function Home() {
     {oppskrifter
       .filter((recipe) => recipe.title.toLowerCase().includes(searchQuery))
       .map((recipe) => (
-        <HomeCard key={recipe.id} post={recipe} />
+        <HomeCard 
+          key={recipe.id} 
+          post={recipe} 
+          isExpanded={expandedCardId === recipe.id}
+          onExpand={() => handleCardExpand(recipe.id)}
+        />
       ))}
   </div>
 </div>
