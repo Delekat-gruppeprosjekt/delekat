@@ -191,6 +191,7 @@ export default function ProfilePage() {
                     onDelete={isAdmin || isOwnProfile ? () => handleDeleteRecipe(recipe.id) : null}
                     isAdmin={isAdmin}
                     isOwnProfile={isOwnProfile}
+                    onClick={() => navigate(`/recipe/${recipe.id}`)}
                   />
                 ))}
               </ul>
