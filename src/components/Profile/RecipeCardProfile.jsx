@@ -29,7 +29,9 @@ export default function RecipeCardProfile({ recipe, onEdit, onDelete, isAdmin, i
   };
 
   return (
-    <div className="relative bg-white shadow-md rounded-lg overflow-hidden">
+    <div
+    onClick={() => navigate(`/recipe/${recipe.id}`)}
+    className="relative bg-white shadow-md rounded-lg overflow-hidden">
       <div className="relative h-0 pb-[70%]">
         <img
           src={recipe.imageUrl || "/assets/avatar_placeholder.png"}
@@ -82,21 +84,29 @@ export default function RecipeCardProfile({ recipe, onEdit, onDelete, isAdmin, i
       {(isAdmin || isOwnProfile) && (
         <div className="flex gap-2 mb-3 mx-3">
           {onEdit && (
-            <button
-              className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-700 transition"
-              onClick={handleEdit}
-            >
-              Edit
-            </button>
-          )}
-          {onDelete && (
-            <button
-              className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-700 transition"
-              onClick={handleDelete}
-            >
-              Delete
-            </button>
-          )}
+  <button
+    className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-700 transition"
+    onClick={(e) => {
+      e.stopPropagation(); // Prevent click event from propagating to the parent element
+      handleEdit();
+    }}
+  >
+    Edit
+  </button>
+)}
+
+{onDelete && (
+  <button
+    className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-700 transition"
+    onClick={(e) => {
+      e.stopPropagation(); // Prevent click event from propagating to the parent element
+      handleDelete();
+    }}
+  >
+    Delete
+  </button>
+)}
+
         </div>
       )}
     </div>

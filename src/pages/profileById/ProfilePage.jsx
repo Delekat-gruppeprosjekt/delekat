@@ -184,7 +184,6 @@ export default function ProfilePage() {
             <div className="max-w-[1400px] mx-auto px-4">
               <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none">
                 {userRecipes.map((recipe) => (
-                  <Link to={`/recipe/${recipe.id}`} state={{ from: location.pathname }} replace>
                   <RecipeCard
                     key={recipe.id}
                     recipe={recipe}
@@ -192,8 +191,8 @@ export default function ProfilePage() {
                     onDelete={isAdmin || isOwnProfile ? () => handleDeleteRecipe(recipe.id) : null}
                     isAdmin={isAdmin}
                     isOwnProfile={isOwnProfile}
+                    onClick={() => navigate(`/recipe/${recipe.id}`)}
                   />
-                  </Link>
                 ))}
               </ul>
             </div>
