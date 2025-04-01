@@ -117,9 +117,12 @@ function EditRecipe() {
         if (value === "" || /^\d*\.?\d*$/.test(value)) {
           newIngredients[index][name] = value;
           // Update amount errors
+          const numValue = parseFloat(value);
           setAmountErrors(prev => ({
             ...prev,
-            [index]: value === "" ? "Mengde er påkrevd" : null
+            [index]: value === "" ? "Mengde er påkrevd" : 
+                     isNaN(numValue) ? "Ugyldig nummer" :
+                     numValue > 9999 ? "Mengde kan ikke være større enn 9999" : null
           }));
         }
       } else {
@@ -167,16 +170,46 @@ function EditRecipe() {
         return;
       }
 
-      // Validate all amounts before submission
+      // Validate title
+      if (!title.trim()) {
+        setFormErrors(prev => ({ ...prev, title: "Tittel er påkrevd" }));
+        setLoading(false);
+        return;
+      }
+
+      // Validate description
+      if (!description.trim()) {
+        setFormErrors(prev => ({ ...prev, description: "Beskrivelse er påkrevd" }));
+        setLoading(false);
+        return;
+      }
+
+      // Validate ingredients
       const newAmountErrors = {};
+      let hasIngredientErrors = false;
       ingredients.forEach((item, index) => {
+        if (!item.ingredient.trim()) {
+          hasIngredientErrors = true;
+        }
         if (!item.amount || isNaN(item.amount) || parseFloat(item.amount) <= 0) {
           newAmountErrors[index] = "Mengde er påkrevd";
+          hasIngredientErrors = true;
+        }
+        if (!item.unit) {
+          hasIngredientErrors = true;
         }
       });
 
-      if (Object.keys(newAmountErrors).length > 0) {
+      if (hasIngredientErrors) {
         setAmountErrors(newAmountErrors);
+        alert("Vennligst fyll ut alle ingrediensfeltene");
+        setLoading(false);
+        return;
+      }
+
+      // Validate instructions
+      if (instructions.some(step => !step.trim())) {
+        alert("Vennligst fyll ut alle trinnene i fremgangsmåten");
         setLoading(false);
         return;
       }
@@ -281,19 +314,32 @@ function EditRecipe() {
           <div className="flex flex-col">
             <label className="text-lg font-semibold" htmlFor="portions">Antall porsjoner</label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               id="portions"
               name="portions"
               value={portions}
               onChange={(e) => {
-                const value = parseInt(e.target.value);
-                if (!isNaN(value) && value >= 1) {
+                const value = e.target.value;
+                // Only allow numeric values
+                if (value === "" || /^\d+$/.test(value)) {
                   setPortions(value);
+                  const numValue = parseInt(value);
+                  if (!isNaN(numValue) && numValue > 999) {
+                    setPortions("999");
+                  }
                 }
               }}
-              min="1"
+              onBlur={() => {
+                const numValue = parseInt(portions);
+                if (portions === "" || isNaN(numValue) || numValue < 1) {
+                  setPortions("1");
+                }
+              }}
               className="w-full p-2 border rounded-md"
               required
+              title="Maksimalt antall porsjoner er 999"
             />
           </div>
 
@@ -325,7 +371,8 @@ function EditRecipe() {
                   value={item.ingredient} 
                   onChange={(e) => handleInputChange(e, index, "ingredient")} 
                   className="w-1/3 p-2 border rounded-md" 
-                  placeholder="Ingrediens" 
+                  placeholder="Ingrediens"
+                  required
                 />
                 <div className="w-1/4 flex flex-col">
                   <input 
@@ -334,7 +381,9 @@ function EditRecipe() {
                     value={item.amount} 
                     onChange={(e) => handleInputChange(e, index, "ingredient")} 
                     className={`p-2 border rounded-md ${amountErrors[index] ? 'border-red-500' : ''}`} 
-                    placeholder="Mengde" 
+                    placeholder="Mengde"
+                    required
+                    title="Maksimal mengde er 9999"
                   />
                   {amountErrors[index] && (
                     <span className="text-red-500 text-xs mt-1">{amountErrors[index]}</span>
@@ -345,6 +394,7 @@ function EditRecipe() {
                   value={item.unit} 
                   onChange={(e) => handleInputChange(e, index, "ingredient")} 
                   className="w-1/4 p-2 border rounded-md"
+                  required
                 >
                   <option value="">Velg enhet</option>
                   {units.map((unit) => (
