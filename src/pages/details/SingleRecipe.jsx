@@ -39,7 +39,7 @@ export default function SingleRecipe() {
   }, [recipeId]);
 
   const handlePortionChange = (newPortions) => {
-    if (newPortions >= 1) {
+    if (newPortions >= 1 && newPortions <= 999) {
       setPortions(newPortions);
     }
   };
@@ -129,7 +129,10 @@ export default function SingleRecipe() {
             <span className="text-xl font-semibold">{portions}</span>
             <button
               onClick={() => handlePortionChange(portions + 1)}
-              className="px-4 py-2 bg-gray-200 rounded hover:bg-[#3C5A3C] hover:text-white transition-colors"
+              disabled={portions >= 999}
+              className={`px-4 py-2 bg-gray-200 rounded hover:bg-[#3C5A3C] hover:text-white transition-colors ${
+                portions >= 999 ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
               +
             </button>
