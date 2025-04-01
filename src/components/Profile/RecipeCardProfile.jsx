@@ -31,7 +31,7 @@ export default function RecipeCardProfile({ recipe, onEdit, onDelete, isAdmin, i
   return (
     <div
     onClick={() => navigate(`/recipe/${recipe.id}`)}
-    className="relative bg-white shadow-md rounded-lg overflow-hidden">
+    className="relative bg-white shadow-md rounded-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow duration-300">
       <div className="relative h-0 pb-[70%]">
         <img
           src={recipe.imageUrl || "/assets/avatar_placeholder.png"}

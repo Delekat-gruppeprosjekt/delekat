@@ -1,25 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { FaHeart } from 'react-icons/fa';
-import { IoChatbubbleOutline } from "react-icons/io5";
+import { FaHeart, FaRegComment, FaClock } from 'react-icons/fa';
 import { PiChefHat } from "react-icons/pi";
-import { BiTime } from "react-icons/bi";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { motion, AnimatePresence } from "framer-motion"; // Import Framer Motion
 
 export default function HomeCard({ post }) {
-  const [portions, setPortions] = useState(parseInt(post.portions) || 1);
-  const [showFullDescription, setShowFullDescription] = useState(false);
-  const [showFullIngredients, setShowFullIngredients] = useState(false);
-  const [showFullInstructions, setShowFullInstructions] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const [author, setAuthor] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const db = getFirestore();
 
-  // Fetch user data from Firestore based on userId in the post
   const fetchUserData = async (userId) => {
     try {
       const userDocRef = doc(db, "users", userId);
@@ -43,28 +35,13 @@ export default function HomeCard({ post }) {
     }
   }, [post.userId]);
 
-  const handlePortionChange = (newPortions) => {
-    if (newPortions >= 1) {
-      setPortions(newPortions);
-    }
-  };
-
-  const formatQuantity = (value) => {
-    const result = value.toFixed(2);
-    return result.endsWith('.00') ? parseInt(value) : result;
-  };
-
-  const truncateDescription = (text, maxLength = 400) => {
-    if (!text) return '';
-    if (text.length <= maxLength) return text;
-    return text.slice(0, maxLength) + '...';
-  };
-
   return (
-<div className="w-full max-w-xs mx-auto p-4 bg-white rounded-xl shadow mb-8 flex flex-col relative">
- 
-      {/* Header with user info and difficulty level */}
-      <div className="flex items-center mb-4">
+    <div
+      onClick={() => navigate(`/recipe/${post.id}`)}
+      className="relative bg-white shadow-md rounded-lg overflow-hidden cursor-pointer hover:shadow-xl transition-shadow duration-300"
+    >
+      {/* User Info at top */}
+      <div className="flex items-center p-3">
         {isLoading ? (
           <div className="w-8 h-8 rounded-full bg-gray-300 animate-pulse mr-2" />
         ) : (
@@ -84,149 +61,77 @@ export default function HomeCard({ post }) {
           )
         )}
 
-        <div className="flex items-center justify-between w-full">
+        <div className="flex-grow">
           {isLoading ? (
             <div className="w-1/2 h-4 bg-gray-300 animate-pulse" />
           ) : (
-            <Link to={`/profile/${post.userId}`} className="font-regular text-blue-500 hover:underline">
+            <Link 
+              to={`/profile/${post.userId}`} 
+              className="font-medium text-blue-600 hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
               {author?.displayName || 'Anonym'}
             </Link>
           )}
-          <div className="flex items-center">
-            {[...Array(3)].map((_, index) => (
-              <PiChefHat 
-                key={index}
-                className={`text-xl mr-1 -mt-2 ${index < (post.difficulty === "vanskelig" ? 3 : post.difficulty === "medium" ? 2 : 1) ? "text-black" : "text-gray-300"}`}
-              />
-            ))}
-            <span className="ml-2 capitalize">
-              {post.difficulty === "vanskelig" ? "Vanskelig" : 
-               post.difficulty === "medium" ? "Medium" : 
-               "Lett"}
-            </span>
-          </div>
         </div>
       </div>
-      
-      {/* Image or placeholder */}
-      <div className="mb-4">
+
+      {/* Image with aspect ratio like profile card */}
+      <div className="relative h-0 pb-[70%]">
         {post.imageUrl ? (
           <img
             src={post.imageUrl}
             alt={post.title}
-            className="w-full h-full lg:h-100 object-cover rounded-lg border-gray-300 border-1"
+            className="absolute top-0 left-0 w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-50 bg-gray-300 flex items-center justify-center rounded-lg">
+          <div className="absolute top-0 left-0 w-full h-full bg-gray-200 flex items-center justify-center">
             <span className="text-gray-500">No Image Available</span>
           </div>
         )}
       </div>
-
-      {/* Post Info with title and icons */}
-      <div className="mb-8">
-        <div className="flex justify-between items-start mb-4">
-          <div className="space-y-2">
-            <h1 className="text-2xl font-semibold">{post.title}</h1>
-            <div className="flex items-center text-[#3C5A3C]">
-              <BiTime className="text-xl mr-2" />
-              <span className="text-lg">{post.cookingTime || "10 - 15 min"}</span>
+      
+      {/* Content section */}
+      <div className="p-3">
+        <h3 className="text-lg font-semibold mb-1">{post.title}</h3>
+        <p className="text-sm text-gray-600 mb-3 line-clamp-1">
+          {post.description || "This is a placeholder description for the recipe."}
+        </p>
+        
+        {/* Stats section - similar to profile card */}
+        <div className="flex justify-between items-start text-sm text-gray-500">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-1 text-[#3C5A3C]">
+              <FaClock className="text-base flex-shrink-0" />
+              <span className="text-sm whitespace-nowrap">{post.cookingTime || "10 - 15 min"}</span>
+            </div>
+            <div className="flex items-center gap-1 text-[#3C5A3C]">
+              {[...Array(3)].map((_, index) => (
+                <PiChefHat
+                  key={index}
+                  className={`text-base flex-shrink-0 ${
+                    index < (post.difficulty === "vanskelig" ? 3 : post.difficulty === "medium" ? 2 : 1)
+                      ? "text-black"
+                      : "text-gray-300"
+                  }`}
+                />
+              ))}
+              <span className="ml-1 capitalize text-xs">
+                {post.difficulty === "vanskelig" ? "Vanskelig" : post.difficulty === "medium" ? "Medium" : "Lett"}
+              </span>
             </div>
           </div>
-          <div className="flex items-center space-x-4 text-[#3C5A3C]">
-            <div className="flex items-center">
-              <FaHeart className="text-xl" />
-              <span className="ml-2 text-lg">{post.likes || 0}K</span>
+          <div className="flex flex-col items-end gap-1.5">
+            <div className="flex items-center gap-1 text-[#3C5A3C]">
+              <span className="text-xs">{post.comments ? post.comments.length : 0}</span>
+              <FaRegComment className="text-base flex-shrink-0" />
             </div>
-            <div className="flex items-center">
-              <IoChatbubbleOutline className="text-xl" />
-              <span className="ml-2 text-lg">{post.comments ? post.comments.length : 0}K</span>
+            <div className="flex items-center gap-1 text-[#3C5A3C]">
+              <span className="text-xs">{post.likes || 0}</span>
+              <FaHeart className="text-base flex-shrink-0" />
             </div>
           </div>
         </div>
-
-        <div className="w-full h-[1px] bg-gray-200 my-6" />
-        
-        <p className="text-gray-700 text-lg">
-          {expanded ? post.description : truncateDescription(post.description)}
-        </p>
-
-        <div className="w-full h-[1px] bg-gray-200 my-6" />
-      </div>
-      
-      {/* Show these sections only when expanded with slide animation */}
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="overflow-hidden mb-16"
-          >
-            <div className="mb-8">
-              <h2 className="text-center text-2xl font-semibold mb-4">Porsjoner</h2>
-              <div className="flex items-center justify-center space-x-6">
-                <button 
-                  type="button"
-                  onClick={() => handlePortionChange(portions - 1)}
-                  className="w-12 h-12 rounded-full border-2 border-[#3C5A3C] flex items-center justify-center text-[#3C5A3C] text-2xl hover:bg-[#3C5A3C] hover:text-white transition-colors"
-                >
-                  -
-                </button>
-                <span className="text-2xl w-8 text-center">{portions}</span>
-                <button 
-                  type="button"
-                  onClick={() => handlePortionChange(portions + 1)}
-                  className="w-12 h-12 rounded-full border-2 border-[#3C5A3C] flex items-center justify-center text-[#3C5A3C] text-2xl hover:bg-[#3C5A3C] hover:text-white transition-colors"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            <div className="w-full h-[1px] bg-gray-200 my-6" />
-
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">Ingredienser</h2>
-              <ul className="space-y-4">
-                {post.ingredients.map((ing, index) => (
-                  <li key={`${ing.ingredient}-${index}`} className="flex items-center text-lg">
-                    <span className="w-32 text-black font-regular mr-4">
-                      {formatQuantity(ing.amount * (portions / (Number(post.portions) || 1)))} {ing.unit}
-                    </span>
-                    <span>{ing.ingredient}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="w-full h-[1px] bg-gray-200 my-6" />
-
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">Slik gjør du</h2>
-              <ol className="list-decimal list-inside space-y-4">
-                {post.instructions.map((step, index) => (
-                  <li key={index} className="text-lg pl-2">{step}</li>
-                ))}
-              </ol>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Footer button - always at the bottom */}
-      <div className="absolute bottom-4 left-4 right-4">
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className={`w-full py-3 rounded-full shadow-md transition-colors duration-200 ${
-            expanded 
-            ? "bg-[#2C432C] text-white" 
-            : "bg-[#3C5A3C] text-white hover:bg-[#2C432C]"
-          }`}
-        >
-          {expanded ? "Skjul Oppskrift" : "Les Oppskrift"}
-        </button>
       </div>
     </div>
   );
