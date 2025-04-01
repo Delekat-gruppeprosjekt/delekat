@@ -7,9 +7,10 @@ import {
   query,
   where,
   getDocs,
+  deleteDoc,
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import RecipeCard from "../../components/Profile/RecipeCardProfile";
 
 export default function ProfilePage() {
@@ -26,6 +27,7 @@ export default function ProfilePage() {
   const db = getFirestore();
   const auth = getAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -84,6 +86,18 @@ export default function ProfilePage() {
     navigate(`/edit-profile/${userId}`);
   };
 
+  const handleDelete = async (recipeId) => {
+    if (window.confirm("Are you sure you want to delete this recipe?")) {
+      try {
+        const db = getFirestore();
+        await deleteDoc(doc(db, "recipes", recipeId));
+        setUserRecipes((prevRecipes) => prevRecipes.filter((r) => r.id !== recipeId));
+      } catch (error) {
+        console.error("Error deleting recipe:", error);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-BGcolor p-6">
       <div className="flex justify-center items-center mb-6">
@@ -120,26 +134,31 @@ export default function ProfilePage() {
               : "This user has no recipes yet."}
           </p>
         ) : (
-          <div className="max-w-[1400px] mx-auto px-4">
-            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none">
-              {userRecipes.map((recipe) => (
-                <RecipeCard
-                  key={recipe.id}
-                  recipe={recipe}
-                  onEdit={
-                    isOwnProfile
-                      ? () => console.log(`Edit recipe ${recipe.id}`)
-                      : null
-                  }
-                  onDelete={
-                    isOwnProfile
-                      ? () => console.log(`Delete recipe ${recipe.id}`)
-                      : null
-                  }
-                />
-              ))}
-            </ul>
-          </div>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none">
+            {userRecipes.map((recipe) => (
+              <li key={recipe.id} className="relative">
+                <Link to={`/recipe/${recipe.id}`} state={{ from: location.pathname }} replace>
+                  <RecipeCard recipe={recipe} />
+                </Link>
+                {isOwnProfile && (
+                  <div className="absolute top-2 right-2 flex gap-2">
+                    <button
+                      className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-700 transition"
+                      onClick={() => navigate(`/edit/${recipe.id}`)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-700 transition"
+                      onClick={() => handleDelete(recipe.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </div>

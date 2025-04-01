@@ -9,6 +9,7 @@ import CreateNewRecipe from "./pages/create/CreateNewRecipe";
 import EditRecipe from "./pages/edit/Edit";
 import ProfilePage from "./pages/profileById/ProfilePage";
 import EditProfilePage from "./pages/edit/EditProfilePage";
+import SingleRecipe from "./pages/details/SingleRecipe";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/edit/:recipeId" element={<EditRecipe />} />
           <Route path="/profile/:userId" element={<ProfilePage />} />
           <Route path="/edit-profile/:userId" element={<EditProfilePage />} />
+          <Route path="/recipe/:recipeId" element={<SingleRecipe />} />
         </Route>
       </Routes>
     </Router>
