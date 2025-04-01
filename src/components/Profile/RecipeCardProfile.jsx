@@ -28,10 +28,6 @@ export default function RecipeCardProfile({ recipe, onEdit, onDelete, isAdmin, i
     }
   };
 
-  // Log whether the user is admin or owns the profile
-  console.log("isAdmin:", isAdmin); 
-  console.log("isOwnProfile:", isOwnProfile);
-
   return (
     <li className="relative bg-white shadow-md rounded-lg overflow-hidden">
       <div className="relative h-0 pb-[70%]">

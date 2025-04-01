@@ -20,6 +20,8 @@ export default function ProfilePage() {
   const [error, setError] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userList, setUserList] = useState([]);
+  const [isRecipesView, setIsRecipesView] = useState(true);
 
   const { userId } = useParams();
   const db = getFirestore();
@@ -92,6 +94,31 @@ export default function ProfilePage() {
     }
   };
 
+  const fetchUsers = async () => {
+    try {
+      const usersQuery = query(collection(db, "users"));
+      const usersSnapshot = await getDocs(usersQuery);
+      console.log(usersSnapshot);
+      const users = usersSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        email: doc.data().email,
+        avatarUrl: doc.data().avatarUrl,
+        displayName: doc.data().displayName,
+      }));
+      setUserList(users);
+      console.log(users)
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    }
+  };
+
+  const toggleView = (view) => {
+    setIsRecipesView(view === "recipes");
+    if (view === "users" && isAdmin) {
+      fetchUsers();
+    }
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
@@ -121,37 +148,82 @@ export default function ProfilePage() {
             Edit Profile
           </button>
         )}
+
+        {/* Toggle between Recipes and Users View */}
+        <div className="mt-6">
+          <button
+            onClick={() => toggleView("recipes")}
+            className={`px-4 py-2 ${isRecipesView ? "bg-blue-500" : "bg-gray-300"} text-white font-semibold rounded-lg hover:bg-blue-600`}
+          >
+            Recipes
+          </button>
+          {isAdmin && (
+            <button
+              onClick={() => toggleView("users")}
+              className={`ml-4 px-4 py-2 ${!isRecipesView ? "bg-blue-500" : "bg-gray-300"} text-white font-semibold rounded-lg hover:bg-blue-600`}
+            >
+              Users
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="mt-8">
-        <h2 className="text-2xl font-semibold mb-4 text-center">
-          {isOwnProfile ? "Your Recipes" : `${userData?.displayName}'s Recipes`}
-        </h2>
-        {userRecipes.length === 0 ? (
-          <p className="text-center text-gray-500">
-            {isOwnProfile ? "You have no recipes yet." : "This user has no recipes yet."}
-          </p>
-        ) : (
-          <div className="max-w-[1400px] mx-auto px-4">
-            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none">
-            {userRecipes.map((recipe) => {
-  console.log("Recipe:", recipe.id, "isAdmin:", isAdmin, "isOwnProfile:", isOwnProfile);
-  return (
-    <RecipeCard
-      key={recipe.id}
-      recipe={recipe}
-      onEdit={isOwnProfile ? () => console.log(`Edit recipe ${recipe.id}`) : null}
-      onDelete={isAdmin || isOwnProfile ? () => handleDeleteRecipe(recipe.id) : null}
-      isAdmin={isAdmin} // Pass isAdmin to the RecipeCardProfile
-      isOwnProfile={isOwnProfile} // Pass isOwnProfile to the RecipeCardProfile
-    />
-  );
-})}
-
-            </ul>
+      {/* Display the active view (Recipes or Users) */}
+      {isRecipesView ? (
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold mb-4 text-center">
+            {isOwnProfile ? "Your Recipes" : `${userData?.displayName}'s Recipes`}
+          </h2>
+          {userRecipes.length === 0 ? (
+            <p className="text-center text-gray-500">
+              {isOwnProfile ? "You have no recipes yet." : "This user has no recipes yet."}
+            </p>
+          ) : (
+            <div className="max-w-[1400px] mx-auto px-4">
+              <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none">
+                {userRecipes.map((recipe) => (
+                  <RecipeCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    onEdit={isOwnProfile ? () => console.log(`Edit recipe ${recipe.id}`) : null}
+                    onDelete={isAdmin || isOwnProfile ? () => handleDeleteRecipe(recipe.id) : null}
+                    isAdmin={isAdmin}
+                    isOwnProfile={isOwnProfile}
+                  />
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      ) : (
+        isAdmin && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-semibold mb-4 text-center">All Users</h2>
+            {userList.length === 0 ? (
+              <p className="text-center text-gray-500">No users found.</p>
+            ) : (
+              <ul className="px-16 grid grid-cols-3 gap-8">
+                {userList.map((user) => (
+                  <li
+                    key={user.id}
+                    className="mb-2 p-2 text-center cursor-pointer hover:bg-Secondary flex flex-row items-center justify-center border-1 border-Secondary"
+                    onClick={() => navigate(`/profile/${user.id}`)}
+                  >
+                    <p
+                    className="w-2/3"
+                    >{user.displayName}</p>
+                    <img
+                    src={user.avatarUrl}
+                    className="ml-4 w-16 h-16 object-cover rounded-full border-1 border-white"
+                    ></img>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-        )}
-      </div>
+        )
+      )}
     </div>
+    
   );
 }
