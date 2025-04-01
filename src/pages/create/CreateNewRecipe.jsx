@@ -294,7 +294,7 @@ function CreateNewRecipe() {
                 }}
                 required
                 maxLength={100}
-                className={`w-full p-2 border rounded-md ${
+                className={`w-full p-2 border border-[#438407] rounded-md ${
                   formErrors.title ? "border-red-500" : ""
                 }`}
                 placeholder="Oppskriftens tittel"
@@ -320,7 +320,7 @@ function CreateNewRecipe() {
                 value={imageUrl}
                 onChange={(e) => handleImageUrlChange(e.target.value)}
                 required
-                className={`w-full p-2 border rounded-md ${
+                className={`w-full p-2 border border-[#438407] rounded-md ${
                   imageError ? "border-red-500" : ""
                 }`}
                 placeholder="Skriv inn bilde-URL"
@@ -347,7 +347,7 @@ function CreateNewRecipe() {
                   }
                 }}
                 required
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border border-[#438407] rounded-md"
                 placeholder="Skriv en beskrivelse av oppskriften"
                 maxLength={1000}
               />
@@ -365,7 +365,7 @@ function CreateNewRecipe() {
                 name="difficulty"
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value)}
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border border-[#438407] rounded-md"
                 required
               >
                 <option value="lett">Lett (1 kokkehatt)</option>
@@ -402,7 +402,7 @@ function CreateNewRecipe() {
                     setPortions("1");
                   }
                 }}
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border border-[#438407] rounded-md"
                 required
                 title="Maksimalt antall porsjoner er 999"
               />
@@ -417,7 +417,7 @@ function CreateNewRecipe() {
                 name="cookingTime"
                 value={cookingTime}
                 onChange={(e) => setCookingTime(e.target.value)}
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border border-[#438407] rounded-md"
                 required
               >
                 {cookingTimes.map((time) => (
@@ -443,7 +443,7 @@ function CreateNewRecipe() {
                           }
                         }}
                         placeholder="Ingrediens"
-                        className="w-full p-2 border rounded-md resize-none min-h-[38px] max-h-[100px]"
+                        className="w-full p-2 border border-[#438407] rounded-md resize-none min-h-[38px] max-h-[100px]"
                         required
                         maxLength={100}
                         rows={1}
@@ -481,7 +481,7 @@ function CreateNewRecipe() {
                         }
                       }}
                       placeholder="Mengde"
-                      className="w-full p-2 border rounded-md"
+                      className="w-full p-2 border border-[#438407] rounded-md"
                       required
                       title="Maksimal mengde er 9999"
                     />
@@ -490,7 +490,7 @@ function CreateNewRecipe() {
                     name="unit"
                     value={ingredient.unit}
                     onChange={(e) => handleInputChange(e, index, "ingredient")}
-                    className="w-1/4 p-2 border rounded-md"
+                    className="w-1/4 p-2 border border-[#438407] rounded-md"
                     required
                   >
                     <option value="">Velg enhet</option>
@@ -532,7 +532,7 @@ function CreateNewRecipe() {
                             handleInputChange(e, index, "instruction");
                           }
                         }}
-                        className="w-full p-2 border rounded-md resize-none min-h-[38px] max-h-[150px]"
+                        className="w-full p-2 border border-[#438407] rounded-md resize-none min-h-[38px] max-h-[150px]"
                         placeholder={`Trinn ${index + 1}`}
                         required
                         maxLength={300}
