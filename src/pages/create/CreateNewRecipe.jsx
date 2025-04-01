@@ -552,10 +552,17 @@ function CreateNewRecipe() {
             </button>
           </div>
 
-          <div className="flex justify-center mb-24">
+          <div className="flex justify-center gap-4 mb-24">
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+            >
+              Avbryt
+            </button>
             <button
               type="submit"
-              className={`bg-blue-500 text-white px-4 py-2 rounded-md ${
+              className={`bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 ${
                 loading ? "cursor-not-allowed opacity-50" : ""
               }`}
               disabled={loading}

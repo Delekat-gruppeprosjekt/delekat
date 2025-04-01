@@ -470,10 +470,17 @@ function EditRecipe() {
             <button type="button" onClick={handleAddInstruction} className="text-blue-500 mt-2">+ Legg til trinn</button>
           </div>
 
-          <div className="flex justify-center mb-24">
+          <div className="flex justify-center gap-4 mb-24">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+            >
+              Avbryt
+            </button>
             <button 
               type="submit" 
-              className={`bg-blue-500 text-white px-4 py-2 rounded-md ${loading ? "cursor-not-allowed opacity-50" : ""}`} 
+              className={`bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 ${loading ? "cursor-not-allowed opacity-50" : ""}`} 
               disabled={loading}
             >
               {loading ? "Lagrer..." : "Lagre endringer"}
