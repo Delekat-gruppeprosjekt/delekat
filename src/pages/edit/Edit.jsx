@@ -251,11 +251,19 @@ function EditRecipe() {
                 id="title" 
                 name="title" 
                 value={title} 
-                onChange={(e) => setTitle(e.target.value)} 
+                onChange={(e) => {
+                  if (e.target.value.length <= 100) {
+                    setTitle(e.target.value);
+                  }
+                }}
                 required 
+                maxLength={100}
                 className={`w-full p-2 border rounded-md ${formErrors.title ? 'border-red-500' : ''}`}
                 placeholder="Oppskriftens tittel" 
               />
+              <span className="text-sm text-gray-500 mt-1">
+                {title.length}/100 tegn
+              </span>
               {formErrors.title && (
                 <span className="text-red-500 text-sm mt-1">{formErrors.title}</span>
               )}
