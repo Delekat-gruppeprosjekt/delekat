@@ -19,9 +19,9 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [newAvatar, setNewAvatar] = useState("");
-  const [newBio, setNewBio] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [userList, setUserList] = useState([]);
+  const [isRecipesView, setIsRecipesView] = useState(true);
 
   const { userId } = useParams();
   const db = getFirestore();
@@ -30,11 +30,17 @@ export default function ProfilePage() {
   const location = useLocation();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUserId(user.uid);
+        const userDocRef = doc(db, "users", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          setIsAdmin(userDocSnap.data().isAdmin || false);
+        }
       } else {
         setCurrentUserId(null);
+        setIsAdmin(false);
       }
     });
 
@@ -72,31 +78,54 @@ export default function ProfilePage() {
     fetchUserData();
   }, [userId]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  const handleDeleteRecipe = async (recipeId) => {
+    const isOwnProfile = currentUserId === userId;
+    if (!isAdmin && !isOwnProfile) {
+      alert("You do not have permission to delete this recipe.");
+      return;
+    }
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  const isOwnProfile = currentUserId === userId;
-
-  const handleEditProfile = () => {
-    navigate(`/edit-profile/${userId}`);
-  };
-
-  const handleDelete = async (recipeId) => {
-    if (window.confirm("Are you sure you want to delete this recipe?")) {
-      try {
-        const db = getFirestore();
-        await deleteDoc(doc(db, "recipes", recipeId));
-        setUserRecipes((prevRecipes) => prevRecipes.filter((r) => r.id !== recipeId));
-      } catch (error) {
-        console.error("Error deleting recipe:", error);
-      }
+    try {
+      await deleteDoc(doc(db, "recipes", recipeId));
+      setUserRecipes((prevRecipes) => prevRecipes.filter((recipe) => recipe.id !== recipeId));
+      alert("Recipe deleted successfully.");
+    } catch (error) {
+      console.error("Error deleting recipe:", error);
+      alert("Failed to delete recipe.");
     }
   };
+
+  const fetchUsers = async () => {
+    try {
+      const usersQuery = query(collection(db, "users"));
+      const usersSnapshot = await getDocs(usersQuery);
+      console.log(usersSnapshot);
+      const users = usersSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        email: doc.data().email,
+        avatarUrl: doc.data().avatarUrl,
+        displayName: doc.data().displayName,
+      }));
+      setUserList(users);
+      console.log(users)
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    }
+  };
+
+  const toggleView = (view) => {
+    setIsRecipesView(view === "recipes");
+    if (view === "users" && isAdmin) {
+      fetchUsers();
+    }
+  };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  const isOwnProfile = currentUserId === userId;
+  const handleEditProfile = () => navigate(`/edit-profile/${userId}`);
+
 
   return (
     <div className="min-h-screen bg-BGcolor p-6">
@@ -121,46 +150,82 @@ export default function ProfilePage() {
             Edit Profile
           </button>
         )}
+
+        {/* Toggle between Recipes and Users View */}
+        <div className="mt-6">
+          <button
+            onClick={() => toggleView("recipes")}
+            className={`px-4 py-2 ${isRecipesView ? "bg-blue-500" : "bg-gray-300"} text-white font-semibold rounded-lg hover:bg-blue-600`}
+          >
+            Recipes
+          </button>
+          {isAdmin && (
+            <button
+              onClick={() => toggleView("users")}
+              className={`ml-4 px-4 py-2 ${!isRecipesView ? "bg-blue-500" : "bg-gray-300"} text-white font-semibold rounded-lg hover:bg-blue-600`}
+            >
+              Users
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="mt-8">
-        <h2 className="text-2xl font-semibold mb-4 text-center">
-          {isOwnProfile ? "Your Recipes" : `${userData?.displayName}'s Recipes`}
-        </h2>
-        {userRecipes.length === 0 ? (
-          <p className="text-center text-gray-500">
-            {isOwnProfile
-              ? "You have no recipes yet."
-              : "This user has no recipes yet."}
-          </p>
-        ) : (
-          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none">
-            {userRecipes.map((recipe) => (
-              <li key={recipe.id} className="relative">
-                <Link to={`/recipe/${recipe.id}`} state={{ from: location.pathname }} replace>
-                  <RecipeCard recipe={recipe} />
-                </Link>
-                {isOwnProfile && (
-                  <div className="absolute top-2 right-2 flex gap-2">
-                    <button
-                      className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-700 transition"
-                      onClick={() => navigate(`/edit/${recipe.id}`)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-700 transition"
-                      onClick={() => handleDelete(recipe.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {/* Display the active view (Recipes or Users) */}
+      {isRecipesView ? (
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold mb-4 text-center">
+            {isOwnProfile ? "Your Recipes" : `${userData?.displayName}'s Recipes`}
+          </h2>
+          {userRecipes.length === 0 ? (
+            <p className="text-center text-gray-500">
+              {isOwnProfile ? "You have no recipes yet." : "This user has no recipes yet."}
+            </p>
+          ) : (
+            <div className="max-w-[1400px] mx-auto px-4">
+              <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none">
+                {userRecipes.map((recipe) => (
+                  <RecipeCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    onEdit={isOwnProfile ? () => console.log(`Edit recipe ${recipe.id}`) : null}
+                    onDelete={isAdmin || isOwnProfile ? () => handleDeleteRecipe(recipe.id) : null}
+                    isAdmin={isAdmin}
+                    isOwnProfile={isOwnProfile}
+                  />
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      ) : (
+        isAdmin && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-semibold mb-4 text-center">All Users</h2>
+            {userList.length === 0 ? (
+              <p className="text-center text-gray-500">No users found.</p>
+            ) : (
+              <ul className="px-16 grid grid-cols-3 gap-8">
+                {userList.map((user) => (
+                  <li
+                    key={user.id}
+                    className="mb-2 p-2 text-center cursor-pointer hover:bg-Secondary flex flex-row items-center justify-center border-1 border-Secondary"
+                    onClick={() => navigate(`/profile/${user.id}`)}
+                  >
+                    <p
+                    className="w-2/3"
+                    >{user.displayName}</p>
+                    <img
+                    src={user.avatarUrl}
+                    className="ml-4 w-16 h-16 object-cover rounded-full border-1 border-white"
+                    ></img>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )
+      )}
     </div>
+    
   );
 }
