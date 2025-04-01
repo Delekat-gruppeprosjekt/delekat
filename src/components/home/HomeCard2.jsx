@@ -8,14 +8,10 @@ import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion"; // Import Framer Motion
 
 export default function HomeCard({ post }) {
-  console.log('Post data received:', post);
-  console.log('Initial portions from post:', post.portions);
-  console.log('Post portions type:', typeof post.portions);
-  
-  const [portions, setPortions] = useState(Number(post.portions) || 1);
-  
-  console.log('Portions state after initialization:', portions);
-  console.log('Portions state type:', typeof portions);
+  const [portions, setPortions] = useState(parseInt(post.portions) || 1);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const [showFullIngredients, setShowFullIngredients] = useState(false);
+  const [showFullInstructions, setShowFullInstructions] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [author, setAuthor] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -65,7 +61,8 @@ export default function HomeCard({ post }) {
   };
 
   return (
-    <div className="w-4/5 mx-auto p-4 bg-white rounded-xl shadow mb-8 flex flex-col relative">
+<div className="w-full max-w-xs mx-auto p-4 bg-white rounded-xl shadow mb-8 flex flex-col relative">
+ 
       {/* Header with user info and difficulty level */}
       <div className="flex items-center mb-4">
         {isLoading ? (
