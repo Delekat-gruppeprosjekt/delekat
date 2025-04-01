@@ -130,7 +130,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-BGcolor p-6">
       <div className="flex justify-center items-center mb-6">
-        <div className="w-36 h-36 rounded-full border-BGwhite border-4 mb-4 overflow-hidden">
+        <div className="w-36 h-36 rounded-full border-BGwhite border-4 overflow-hidden">
           <img
             className="w-full h-full rounded-full object-cover"
             src={userData?.avatarUrl || "/assets/avatar_placeholder.png"}

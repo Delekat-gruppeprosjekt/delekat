@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import HomeCard from "../../components/home/HomeCard2.jsx"; // Import HomeCard
 import { PiMagnifyingGlass } from "react-icons/pi";
+import { PiSignOutLight } from "react-icons/pi";
 import { useAuth } from "../../contexts/authContext/auth.jsx";
 import { firestore } from "../../../firebase";
 import { getDocs, collection } from "@firebase/firestore";
@@ -13,6 +14,7 @@ export default function Home() {
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [oppskrifter, setOppskrifter] = useState([]);
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1280);
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -43,6 +45,12 @@ export default function Home() {
     setSearchQuery(event.target.value.toLowerCase());
   };
 
+  useEffect(() => {
+    const handleResize = () => setIsSmallScreen(window.innerWidth < 1280);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const handleLogout = async () => {
     const auth = getAuth(); // Get Firebase Auth instance
     try {
@@ -70,23 +78,22 @@ export default function Home() {
       </h1>
 
       {/* Search and Logout Buttons */}
-      <div className="absolute right-0 top-0 m-8 flex space-x-4">
+      <div className="absolute right-0 top-0 m-8 flex items-center space-x-8">
         {/* Magnifying Glass Search Icon */}
         <div
-          className="text-2xl hover:scale-110 duration-150 cursor-pointer"
+          className="flex gap-2 items-center text-xl hover:scale-110 duration-150 cursor-pointer"
           onClick={() => setShowSearch(!showSearch)}
         >
-          <PiMagnifyingGlass />
+        <PiMagnifyingGlass /> Søk 
         </div>
 
         {/* Logg ut button only shows if user is logged in */}
-        {currentUser && (
-          <button
-            onClick={handleLogout}
-            className="text-lg font-semibold text-red-500 hover:text-red-600"
-          >
-            Logg ut
-          </button>
+        {currentUser && isSmallScreen &&(
+          <button 
+          onClick={handleLogout} 
+          className=" text-xl flex gap-2 items-center hover:scale-110 hover:text-[#BD081C] duration-150 cursor-pointer" >
+           <PiSignOutLight /> Logg ut
+            </button>
         )}
       </div>
 
