@@ -6,6 +6,8 @@ import { useAuth } from "../../contexts/authContext/auth.jsx";
 import { firestore } from "../../../firebase";
 import { getDocs, collection } from "@firebase/firestore";
 import { getAuth, signOut } from "firebase/auth"; // Import signOut from Firebase Auth
+import BurgerGame from "../../components/spinner/PacManGame.jsx";
+
 
 export default function Home() {
   const { currentUser } = useAuth(); // Get currentUser from context
@@ -68,6 +70,10 @@ export default function Home() {
       <h1 className="text-3xl font-thin mb-6 flex justify-center mt-8">
         La deg friste
       </h1>
+      {/* Plasser PacManGame her for en synlig effekt */}
+    <div className="flex justify-center mb-6">
+      <BurgerGame />
+    </div>
 
       {/* Search and Logout Buttons */}
       <div className="absolute right-0 top-0 m-8 flex space-x-4">
@@ -89,6 +95,7 @@ export default function Home() {
           </button>
         )}
       </div>
+
 
       {/* Search Input */}
       {showSearch && (
