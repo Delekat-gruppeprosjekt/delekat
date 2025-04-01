@@ -1,5 +1,5 @@
 import React from "react";
-import { FaClock, FaRegComment, FaHeart } from "react-icons/fa";
+import { FaRegComment, FaHeart, FaClock } from "react-icons/fa";
 import { PiChefHat } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
 import { getFirestore, doc, deleteDoc } from "firebase/firestore";
@@ -29,7 +29,7 @@ export default function RecipeCardProfile({ recipe, onEdit, onDelete, isAdmin, i
   };
 
   return (
-    <li className="relative bg-white shadow-md rounded-lg overflow-hidden">
+    <div className="relative bg-white shadow-md rounded-lg overflow-hidden">
       <div className="relative h-0 pb-[70%]">
         <img
           src={recipe.imageUrl || "/assets/avatar_placeholder.png"}
@@ -99,6 +99,6 @@ export default function RecipeCardProfile({ recipe, onEdit, onDelete, isAdmin, i
           )}
         </div>
       )}
-    </li>
+    </div>
   );
 }

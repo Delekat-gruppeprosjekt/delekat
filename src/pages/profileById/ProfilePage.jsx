@@ -10,7 +10,7 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import RecipeCard from "../../components/Profile/RecipeCardProfile";
 
 export default function ProfilePage() {
@@ -27,6 +27,7 @@ export default function ProfilePage() {
   const db = getFirestore();
   const auth = getAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -124,6 +125,7 @@ export default function ProfilePage() {
 
   const isOwnProfile = currentUserId === userId;
   const handleEditProfile = () => navigate(`/edit-profile/${userId}`);
+
 
   return (
     <div className="min-h-screen bg-BGcolor p-6">
