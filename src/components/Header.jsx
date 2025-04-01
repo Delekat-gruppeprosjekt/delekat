@@ -2,7 +2,8 @@ import { PiHouseSimple } from "react-icons/pi";
 import { PiPlusCircle } from "react-icons/pi";
 import { PiUserLight } from "react-icons/pi";
 import { PiGearSixLight } from "react-icons/pi";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+
 import { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
@@ -11,6 +12,7 @@ function Header() {
   const [userId, setUserId] = useState(null);
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth > 1280);
   const location = useLocation();
+  const navigate = useNavigate();
   const [activePath, setActivePath] = useState(location.pathname);
   
   const auth = getAuth(); // Get Firebase auth instance
@@ -40,6 +42,19 @@ function Header() {
     setActivePath(location.pathname);
   }, [location.pathname]);
 
+    const [userIden, setUserIden] = useState(null);
+  
+    useEffect(() => {
+      const id = localStorage.getItem("userId");
+      setUserIden(id);
+    }, []);
+
+   
+
+  const handleEditProfile = () => {
+    navigate(`/edit-profile/${userIden}`);
+  };
+
   return (
     <header className="bg-BGwhite fixed bottom-0 w-full opacity-90 border-navbar-border border-t-1
                         xl:left-0 xl:h-full xl:w-100 xl:border-r-1 xl:border-t-0 xl:opacity-100">
@@ -66,9 +81,14 @@ function Header() {
         </Link>
 
         {isLargeScreen && userLoggedIn && (
-          <div id="editProfile" className="flex absolute bottom-8 items-center gap-2 hover:scale-110 transition duration-150 w-max cursor-pointer">
-            <PiGearSixLight /> Rediger Profil
-          </div>
+          <button
+          id="editProfile"
+          className="flex absolute bottom-8 items-center gap-2 hover:scale-110 transition duration-150 w-max cursor-pointer"
+          onClick={handleEditProfile}
+        >
+          <PiGearSixLight /> Rediger Profil
+        </button>
+        
         )}
       </nav>
     </header>
