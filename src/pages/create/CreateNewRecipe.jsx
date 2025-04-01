@@ -447,12 +447,12 @@ function CreateNewRecipe() {
                 <div className="w-24">
                   <input
                     type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
+                    inputMode="decimal"
                     name="amount"
                     value={ingredient.amount}
                     onChange={(e) => {
                       const value = e.target.value;
+                      // Allow numbers and single decimal point
                       if (value === "" || /^\d*\.?\d*$/.test(value)) {
                         handleInputChange(e, index, "ingredient");
                         const numValue = parseFloat(value);
