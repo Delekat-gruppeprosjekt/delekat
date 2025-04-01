@@ -422,36 +422,60 @@ function CreateNewRecipe() {
           <div className="flex flex-col">
             <label className="text-lg font-semibold">Ingredienser</label>
             {ingredients.map((ingredient, index) => (
-              <div key={index} className="flex items-center gap-4 mb-4">
+              <div key={index} className="flex items-start gap-4 mb-4">
                 <div className="flex-1">
-                  <input
-                    type="text"
-                    name="ingredient"
-                    value={ingredient.ingredient}
-                    onChange={(e) => handleInputChange(e, index, "ingredient")}
-                    placeholder="Ingrediens"
-                    className="w-full p-2 border rounded-md"
-                    required
-                  />
+                  <div className="flex flex-col">
+                    <textarea
+                      name="ingredient"
+                      value={ingredient.ingredient}
+                      onChange={(e) => {
+                        if (e.target.value.length <= 100) {
+                          handleInputChange(e, index, "ingredient");
+                        }
+                      }}
+                      placeholder="Ingrediens"
+                      className="w-full p-2 border rounded-md resize-none min-h-[38px] max-h-[100px]"
+                      required
+                      maxLength={100}
+                      rows={1}
+                    />
+                    <span className="text-sm text-gray-500 mt-1">
+                      {ingredient.ingredient.length}/100 tegn
+                    </span>
+                  </div>
                 </div>
                 <div className="w-24">
                   <input
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     name="amount"
                     value={ingredient.amount}
-                    onChange={(e) => handleInputChange(e, index, "ingredient")}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                        handleInputChange(e, index, "ingredient");
+                        const numValue = parseFloat(value);
+                        if (!isNaN(numValue) && numValue > 9999) {
+                          const newIngredients = [...ingredients];
+                          newIngredients[index].amount = "9999";
+                          setIngredients(newIngredients);
+                        }
+                      }
+                    }}
+                    onBlur={() => {
+                      const numValue = parseFloat(ingredient.amount);
+                      if (ingredient.amount === "" || isNaN(numValue) || numValue <= 0) {
+                        const newIngredients = [...ingredients];
+                        newIngredients[index].amount = "1";
+                        setIngredients(newIngredients);
+                      }
+                    }}
                     placeholder="Mengde"
-                    className={`w-full p-2 border rounded-md ${
-                      amountErrors[index] ? "border-red-500" : ""
-                    }`}
+                    className="w-full p-2 border rounded-md"
                     required
                     title="Maksimal mengde er 9999"
                   />
-                  {amountErrors[index] && (
-                    <span className="text-red-500 text-xs">
-                      {amountErrors[index]}
-                    </span>
-                  )}
                 </div>
                 <select
                   name="unit"
@@ -470,7 +494,7 @@ function CreateNewRecipe() {
                 <button
                   type="button"
                   onClick={() => handleRemoveIngredient(index)}
-                  className="text-red-500"
+                  className="text-red-500 mt-1"
                 >
                   Fjern
                 </button>
@@ -488,16 +512,28 @@ function CreateNewRecipe() {
           <div className="flex flex-col">
             <label className="text-lg font-semibold">Fremgangsmåte</label>
             {instructions.map((step, index) => (
-              <div key={index} className="flex gap-2 items-center mb-4">
+              <div key={index} className="flex gap-2 items-start mb-4">
                 <span className="font-bold">{index + 1}.</span>
-                <input
-                  type="text"
-                  value={step}
-                  onChange={(e) => handleInputChange(e, index, "instruction")}
-                  className="w-full p-2 border rounded-md"
-                  placeholder={`Trinn ${index + 1}`}
-                  required
-                />
+                <div className="flex-1">
+                  <div className="flex flex-col">
+                    <textarea
+                      value={step}
+                      onChange={(e) => {
+                        if (e.target.value.length <= 300) {
+                          handleInputChange(e, index, "instruction");
+                        }
+                      }}
+                      className="w-full p-2 border rounded-md resize-none min-h-[38px] max-h-[150px]"
+                      placeholder={`Trinn ${index + 1}`}
+                      required
+                      maxLength={300}
+                      rows={1}
+                    />
+                    <span className="text-sm text-gray-500 mt-1">
+                      {step.length}/300 tegn
+                    </span>
+                  </div>
+                </div>
                 <button
                   type="button"
                   onClick={() => handleRemoveInstruction(index)}
