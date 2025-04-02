@@ -129,17 +129,18 @@ export default function SingleRecipe() {
           </div>
         </div>
 
+        <img
+          src={recipe.imageUrl || "/assets/avatar_placeholder.png"}
+          alt={recipe.title}
+          className="w-full h-64 object-cover rounded-lg mb-6"
+        />
+
         <div className="flex flex-col items-center mb-6">
-          <h1 className="text-3xl font-bold text-center break-words px-4 w-full">
+          <h1 className="text-3xl font-thin text-center break-words px-4 w-full">
             {recipe.title}
           </h1>
         </div>
 
-        <img
-          src={recipe.imageUrl || "/assets/avatar_placeholder.png"}
-          alt={recipe.title}
-          className="w-full h-[400px] object-cover rounded-lg mb-6"
-        />
         <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
           <div className="flex flex-wrap items-center text-[#3C5A3C] gap-2">
             <BiTime className="text-xl flex-shrink-0" />
@@ -170,7 +171,7 @@ export default function SingleRecipe() {
             </div>
           </div>
         </div>
-        
+
         <div className="w-full h-[1px] bg-gray-200 my-6" />
 
         <p className="text-gray-700 text-lg mb-6 break-words whitespace-pre-wrap">{recipe.description}</p>
