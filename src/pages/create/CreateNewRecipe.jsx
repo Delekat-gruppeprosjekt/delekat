@@ -289,19 +289,19 @@ function CreateNewRecipe() {
                 name="title"
                 value={title}
                 onChange={(e) => {
-                  if (e.target.value.length <= 100) {
+                  if (e.target.value.length <= 60) {
                     setTitle(e.target.value);
                   }
                 }}
                 required
-                maxLength={100}
+                maxLength={60}
                 className={`w-full p-2 border border-[#438407] rounded-md ${
                   formErrors.title ? "border-red-500" : ""
                 }`}
                 placeholder="Oppskriftens tittel"
               />
               <span className="text-sm text-gray-500 mt-1">
-                {title.length}/100 tegn
+                {title.length}/60 tegn
               </span>
               {formErrors.title && (
                 <span className="text-red-500 text-sm mt-1">
