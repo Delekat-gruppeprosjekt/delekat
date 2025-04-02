@@ -67,7 +67,13 @@ export default function ProfilePage() {
           ...doc.data(),
           id: doc.id,
         }));
-        setUserRecipes(recipes);
+        // Sort recipes by createdAt timestamp in descending order (newest first)
+        const sortedRecipes = recipes.sort((a, b) => {
+          const dateA = a.createdAt?.toDate() || new Date(0);
+          const dateB = b.createdAt?.toDate() || new Date(0);
+          return dateB - dateA;
+        });
+        setUserRecipes(sortedRecipes);
       } catch (err) {
         setError("Error fetching data: " + err.message);
       } finally {

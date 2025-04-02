@@ -28,7 +28,8 @@ function EditRecipe() {
     { value: "dl", label: "Desiliter (dl)" },
     { value: "L", label: "Liter (L)" },
     { value: "gram", label: "Gram" },
-    { value: "stk", label: "Stykk (stk)" }
+    { value: "stk", label: "Stykk (stk)" },
+    { value: "boks", label: "Boks(er)" }
   ];
 
   // Predefined cooking times
