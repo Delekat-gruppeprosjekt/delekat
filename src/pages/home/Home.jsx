@@ -106,7 +106,7 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen p-6 bg-[var(--color-BGcolor)]">
+    <div className="min-h-screen p-6 bg-BGcolor">
       <div className="flex items-center justify-start ml-1">
         <img
           src="/assets/DelekatLogo.svg"
@@ -132,7 +132,7 @@ export default function Home() {
           >
             <input
               type="text"
-              className={`bg-BGwhite border border-gray-200 rounded-full py-2 px-3 pl-9 outline-none transition-all duration-300 ${
+              className={`bg-BGwhite border border-PMgreen rounded-full py-2 px-3 pl-9 outline-none transition-all duration-300 ${
                 isSearchExpanded ? "w-full opacity-100" : "w-0 opacity-0"
               }`}
               placeholder="Søk"
@@ -162,7 +162,7 @@ export default function Home() {
         {currentUser && isSmallScreen &&(
           <button 
           onClick={handleLogout} 
-          className=" text-xl flex gap-2 items-center hover:scale-110 hover:text-[#BD081C] duration-150 cursor-pointer" >
+          className=" text-xl flex gap-2 items-center hover:scale-110 hover:text-red-btn-hover duration-150 cursor-pointer" >
            <PiSignOutLight /> Logg ut
             </button>
         )}

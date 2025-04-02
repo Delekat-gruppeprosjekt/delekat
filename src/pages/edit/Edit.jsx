@@ -277,7 +277,7 @@ function EditRecipe() {
   return (
     <div className="min-h-screen bg-BGcolor p-6">
       <div className="max-w-3xl mx-auto">
-        <div className="bg-[#FDFDFD] rounded-lg p-6 shadow-sm">
+        <div className="bg-BGwhite rounded-lg p-6 shadow-sm">
           <h1 className="text-3xl font-bold mb-6">Rediger oppskrift</h1>
           <form onSubmit={handleUpdateRecipe} className="space-y-6">
             <div className="flex flex-col">
@@ -294,14 +294,14 @@ function EditRecipe() {
                 }}
                 required 
                 maxLength={60}
-                className={`w-full p-2 border border-[#438407] rounded-md ${formErrors.title ? 'border-red-500' : ''}`}
+                className={`w-full p-2 border border-PMgreen rounded-md ${formErrors.title ? 'border-red-btn' : ''}`}
                 placeholder="Oppskriftens tittel" 
               />
               <span className="text-sm text-gray-500 mt-1">
                 {title.length}/60 tegn
               </span>
               {formErrors.title && (
-                <span className="text-red-500 text-sm mt-1">{formErrors.title}</span>
+                <span className="text-red-btn text-sm mt-1">{formErrors.title}</span>
               )}
             </div>
 
@@ -314,11 +314,11 @@ function EditRecipe() {
                 value={imageUrl} 
                 onChange={(e) => handleImageUrlChange(e.target.value)} 
                 required 
-                className={`w-full p-2 border border-[#438407] rounded-md ${imageError ? 'border-red-500' : ''}`} 
+                className={`w-full p-2 border border-PMgreen rounded-md ${imageError ? 'border-red-btn' : ''}`} 
                 placeholder="Skriv inn bilde-URL" 
               />
               {imageError && (
-                <span className="text-red-500 text-sm mt-1">Ugyldig bilde-URL. Vennligst sjekk at URL-en er korrekt og at den peker til et bilde.</span>
+                <span className="text-red-btn text-sm mt-1">Ugyldig bilde-URL. Vennligst sjekk at URL-en er korrekt og at den peker til et bilde.</span>
               )}
             </div>
 
@@ -334,7 +334,7 @@ function EditRecipe() {
                   }
                 }} 
                 required 
-                className="w-full p-2 border border-[#438407] rounded-md" 
+                className="w-full p-2 border border-PMgreen rounded-md" 
                 placeholder="Skriv en beskrivelse av oppskriften"
                 maxLength={1000}
               />
@@ -348,7 +348,7 @@ function EditRecipe() {
                 name="difficulty"
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value)}
-                className="w-full p-2 border border-[#438407] rounded-md"
+                className="w-full p-2 border border-PMgreen rounded-md"
               >
                 <option value="lett">Lett (1 kokkehatt)</option>
                 <option value="medium">Medium (2 kokkehatter)</option>
@@ -382,7 +382,7 @@ function EditRecipe() {
                     setPortions("1");
                   }
                 }}
-                className="w-full p-2 border border-[#438407] rounded-md"
+                className="w-full p-2 border border-PMgreen rounded-md"
                 required
                 title="Maksimalt antall porsjoner er 999"
               />
@@ -395,7 +395,7 @@ function EditRecipe() {
                 name="cookingTime"
                 value={cookingTime}
                 onChange={(e) => setCookingTime(e.target.value)}
-                className="w-full p-2 border border-[#438407] rounded-md"
+                className="w-full p-2 border border-PMgreen rounded-md"
                 required
               >
                 {cookingTimes.map((time) => (
@@ -420,7 +420,7 @@ function EditRecipe() {
                             handleInputChange(e, index, "ingredient");
                           }
                         }}
-                        className="w-full p-2 border border-[#438407] rounded-md resize-none min-h-[38px] max-h-[100px]" 
+                        className="w-full p-2 border border-PMgreen rounded-md resize-none min-h-[38px] max-h-[100px]" 
                         placeholder="Ingrediens"
                         required
                         maxLength={100}
@@ -458,7 +458,7 @@ function EditRecipe() {
                           setIngredients(newIngredients);
                         }
                       }}
-                      className="w-full p-2 border border-[#438407] rounded-md" 
+                      className="w-full p-2 border border-PMgreen rounded-md" 
                       placeholder="Mengde"
                       required
                       title="Maksimal mengde er 9999"
@@ -468,7 +468,7 @@ function EditRecipe() {
                     name="unit" 
                     value={item.unit} 
                     onChange={(e) => handleInputChange(e, index, "ingredient")} 
-                    className="w-1/4 p-2 border border-[#438407] rounded-md"
+                    className="w-1/4 p-2 border border-[PMgreen rounded-md"
                     required
                   >
                     <option value="">Velg enhet</option>
@@ -478,10 +478,10 @@ function EditRecipe() {
                       </option>
                     ))}
                   </select>
-                  <button type="button" onClick={() => handleRemoveIngredient(index)} className="text-red-500 mt-1">Fjern</button>
+                  <button type="button" onClick={() => handleRemoveIngredient(index)} className="text-red-btn hover:text-red-btn-hover cursor-pointer mt-1">Fjern</button>
                 </div>
               ))}
-              <button type="button" onClick={handleAddIngredient} className="text-blue-500 mt-2">+ Legg til ingrediens</button>
+              <button type="button" onClick={handleAddIngredient} className="text-blue-btn hover:text-blue-btn-hover cursor-pointer mt-2">+ Legg til ingrediens</button>
             </div>
 
             <div className="flex flex-col">
@@ -509,23 +509,23 @@ function EditRecipe() {
                       </span>
                     </div>
                   </div>
-                  <button type="button" onClick={() => handleRemoveInstruction(index)} className="text-red-500">Fjern</button>
+                  <button type="button" onClick={() => handleRemoveInstruction(index)} className="text-red-btn hover:text-red-btn-hover cursor-pointer">Fjern</button>
                 </div>
               ))}
-              <button type="button" onClick={handleAddInstruction} className="text-blue-500 mt-2">+ Legg til trinn</button>
+              <button type="button" onClick={handleAddInstruction} className="text-blue-btn hover:text-blue-btn-hover cursor-pointer mt-2">+ Legg til trinn</button>
             </div>
 
             <div className="flex justify-end space-x-4 mb-24">
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                className="bg-gray-500 text-BGwhite px-4 py-2 rounded-md hover:bg-gray-600"
               >
                 Avbryt
               </button>
               <button 
                 type="submit" 
-                className={`bg-[#719F46] text-white px-4 py-2 rounded-md hover:bg-[#5c8138] ${loading ? "cursor-not-allowed opacity-50" : ""}`} 
+                className={`bg-green-btn text-BGwhite px-4 py-2 rounded-md hover:bg-green-btn-hover ${loading ? "cursor-not-allowed opacity-50" : ""}`} 
                 disabled={loading}
               >
                 {loading ? "Lagrer..." : "Lagre endringer"}
