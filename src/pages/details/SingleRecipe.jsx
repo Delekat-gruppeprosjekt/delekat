@@ -83,7 +83,7 @@ export default function SingleRecipe() {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="min-h-screen bg-BGcolor p-6">
+    <div className="min-h-screen bg-BGcolor p-6 pb-20">
       <div className="max-w-3xl mx-auto bg-white rounded-xl shadow p-6">
         {/* Back button */}
         <div className="mb-6">
