@@ -178,22 +178,21 @@ export default function SingleRecipe() {
         
         <div className="w-full h-[1px] bg-gray-200 my-6" />
 
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Porsjoner</h2>
-          <div className="flex items-center space-x-4">
+        <div className="mb-8 flex flex-col items-center">
+          <h2 className="text-2xl font-thin mb-4">Porsjoner</h2>
+          <div className="flex items-center gap-4">
             <button
               onClick={() => handlePortionChange(portions - 1)}
-              className="px-4 py-2 bg-gray-200 rounded hover:bg-[#3C5A3C] hover:text-white transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#3C5A3C] text-[#3C5A3C] hover:bg-[#3C5A3C] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[#3C5A3C]"
+              disabled={portions <= 1}
             >
               -
             </button>
-            <span className="text-xl font-semibold">{portions}</span>
+            <span className="text-xl">{portions}</span>
             <button
               onClick={() => handlePortionChange(portions + 1)}
+              className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#3C5A3C] text-[#3C5A3C] hover:bg-[#3C5A3C] hover:text-white transition-colors ${portions >= 999 ? "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-[#3C5A3C]" : ""}`}
               disabled={portions >= 999}
-              className={`px-4 py-2 bg-gray-200 rounded hover:bg-[#3C5A3C] hover:text-white transition-colors ${
-                portions >= 999 ? "opacity-50 cursor-not-allowed" : ""
-              }`}
             >
               +
             </button>
