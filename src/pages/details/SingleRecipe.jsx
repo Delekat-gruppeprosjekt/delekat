@@ -39,7 +39,7 @@ export default function SingleRecipe() {
   }, [recipeId]);
 
   const handlePortionChange = (newPortions) => {
-    if (newPortions >= 1) {
+    if (newPortions >= 1 && newPortions <= 999) {
       setPortions(newPortions);
     }
   };
@@ -70,7 +70,7 @@ export default function SingleRecipe() {
           >
             Tilbake
           </button>
-          <h1 className="text-3xl font-bold text-center break-words px-4 mt-10">
+          <h1 className="text-3xl font-bold text-center break-words px-4 mt-10 w-full">
             {recipe.title}
           </h1>
         </div>
@@ -80,10 +80,10 @@ export default function SingleRecipe() {
           alt={recipe.title}
           className="w-full h-64 object-cover rounded-lg mb-6"
         />
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center text-[#3C5A3C]">
-            <BiTime className="text-xl mr-2" />
-            <span className="text-lg mr-4">{recipe.cookingTime || "10 - 15 min"}</span>
+        <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
+          <div className="flex flex-wrap items-center text-[#3C5A3C] gap-2">
+            <BiTime className="text-xl flex-shrink-0" />
+            <span className="text-lg">{recipe.cookingTime || "10 - 15 min"}</span>
             <div className="flex items-center">
               {[...Array(3)].map((_, index) => (
                 <PiChefHat
@@ -98,7 +98,8 @@ export default function SingleRecipe() {
               </span>
             </div>
           </div>
-          <div className="flex items-center space-x-4 text-[#3C5A3C]">
+          
+          <div className="flex items-center gap-4">
             <div className="flex items-center">
               <FaHeart className="text-xl" />
               <span className="ml-2 text-lg">{recipe.likes || 0}</span>
@@ -112,7 +113,7 @@ export default function SingleRecipe() {
         
         <div className="w-full h-[1px] bg-gray-200 my-6" />
 
-        <p className="text-gray-700 text-lg mb-6">{recipe.description}</p>
+        <p className="text-gray-700 text-lg mb-6 break-words whitespace-pre-wrap">{recipe.description}</p>
         
         <div className="w-full h-[1px] bg-gray-200 my-6" />
 
@@ -128,7 +129,10 @@ export default function SingleRecipe() {
             <span className="text-xl font-semibold">{portions}</span>
             <button
               onClick={() => handlePortionChange(portions + 1)}
-              className="px-4 py-2 bg-gray-200 rounded hover:bg-[#3C5A3C] hover:text-white transition-colors"
+              disabled={portions >= 999}
+              className={`px-4 py-2 bg-gray-200 rounded hover:bg-[#3C5A3C] hover:text-white transition-colors ${
+                portions >= 999 ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
               +
             </button>
@@ -140,7 +144,7 @@ export default function SingleRecipe() {
           <h2 className="text-2xl font-semibold mb-4">Ingredienser</h2>
           <ul className="list-disc list-inside mb-4">
             {recipe.ingredients.map((ing, index) => (
-              <li key={index}>
+              <li key={index} className="break-words">
                 {formatQuantity(ing.amount * (portions / recipe.portions))} {ing.unit} {ing.ingredient}
               </li>
             ))}
@@ -153,7 +157,7 @@ export default function SingleRecipe() {
           <h2 className="text-2xl font-semibold mb-4">Instruksjoner</h2>
           <ol className="list-decimal list-inside">
             {recipe.instructions.map((step, index) => (
-              <li key={index} className="mb-2">{step}</li>
+              <li key={index} className="mb-2 break-words whitespace-pre-wrap">{step}</li>
             ))}
           </ol>
         </div>

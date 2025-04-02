@@ -251,11 +251,19 @@ function EditRecipe() {
                 id="title" 
                 name="title" 
                 value={title} 
-                onChange={(e) => setTitle(e.target.value)} 
+                onChange={(e) => {
+                  if (e.target.value.length <= 100) {
+                    setTitle(e.target.value);
+                  }
+                }}
                 required 
-                className={`w-full p-2 border rounded-md ${formErrors.title ? 'border-red-500' : ''}`}
+                maxLength={100}
+                className={`w-full p-2 border border-[#438407] rounded-md ${formErrors.title ? 'border-red-500' : ''}`}
                 placeholder="Oppskriftens tittel" 
               />
+              <span className="text-sm text-gray-500 mt-1">
+                {title.length}/100 tegn
+              </span>
               {formErrors.title && (
                 <span className="text-red-500 text-sm mt-1">{formErrors.title}</span>
               )}
@@ -270,7 +278,7 @@ function EditRecipe() {
                 value={imageUrl} 
                 onChange={(e) => handleImageUrlChange(e.target.value)} 
                 required 
-                className={`w-full p-2 border rounded-md ${imageError ? 'border-red-500' : ''}`} 
+                className={`w-full p-2 border border-[#438407] rounded-md ${imageError ? 'border-red-500' : ''}`} 
                 placeholder="Skriv inn bilde-URL" 
               />
               {imageError && (
@@ -290,7 +298,7 @@ function EditRecipe() {
                   }
                 }} 
                 required 
-                className="w-full p-2 border rounded-md" 
+                className="w-full p-2 border border-[#438407] rounded-md" 
                 placeholder="Skriv en beskrivelse av oppskriften"
                 maxLength={1000}
               />
@@ -304,7 +312,7 @@ function EditRecipe() {
                 name="difficulty"
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value)}
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border border-[#438407] rounded-md"
               >
                 <option value="lett">Lett (1 kokkehatt)</option>
                 <option value="medium">Medium (2 kokkehatter)</option>
@@ -338,7 +346,7 @@ function EditRecipe() {
                     setPortions("1");
                   }
                 }}
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border border-[#438407] rounded-md"
                 required
                 title="Maksimalt antall porsjoner er 999"
               />
@@ -351,7 +359,7 @@ function EditRecipe() {
                 name="cookingTime"
                 value={cookingTime}
                 onChange={(e) => setCookingTime(e.target.value)}
-                className="w-full p-2 border rounded-md"
+                className="w-full p-2 border border-[#438407] rounded-md"
                 required
               >
                 {cookingTimes.map((time) => (
@@ -376,7 +384,7 @@ function EditRecipe() {
                             handleInputChange(e, index, "ingredient");
                           }
                         }}
-                        className="w-full p-2 border rounded-md resize-none min-h-[38px] max-h-[100px]" 
+                        className="w-full p-2 border border-[#438407] rounded-md resize-none min-h-[38px] max-h-[100px]" 
                         placeholder="Ingrediens"
                         required
                         maxLength={100}
@@ -414,7 +422,7 @@ function EditRecipe() {
                           setIngredients(newIngredients);
                         }
                       }}
-                      className="w-full p-2 border rounded-md" 
+                      className="w-full p-2 border border-[#438407] rounded-md" 
                       placeholder="Mengde"
                       required
                       title="Maksimal mengde er 9999"
@@ -424,7 +432,7 @@ function EditRecipe() {
                     name="unit" 
                     value={item.unit} 
                     onChange={(e) => handleInputChange(e, index, "ingredient")} 
-                    className="w-1/4 p-2 border rounded-md"
+                    className="w-1/4 p-2 border border-[#438407] rounded-md"
                     required
                   >
                     <option value="">Velg enhet</option>
@@ -454,7 +462,7 @@ function EditRecipe() {
                             handleInputChange(e, index, "instruction");
                           }
                         }}
-                        className="w-full p-2 border rounded-md resize-none min-h-[38px] max-h-[150px]" 
+                        className="w-full p-2 border border-[#438407] rounded-md resize-none min-h-[38px] max-h-[150px]" 
                         placeholder={`Trinn ${index + 1}`} 
                         required
                         maxLength={300}

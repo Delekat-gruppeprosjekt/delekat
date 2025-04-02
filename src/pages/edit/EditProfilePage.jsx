@@ -88,7 +88,7 @@ export default function EditProfilePage() {
               setAvatarUrl(e.target.value);
               setAvatarError(null); // Clear previous error
             }}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border border-[#438407] rounded-md"
             placeholder="Fyll inn avatar URL"
           />
           {avatarError && <p className="text-red-500">{avatarError}</p>}
@@ -105,7 +105,7 @@ export default function EditProfilePage() {
                 setBio(e.target.value);
               }
             }}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border border-[#438407] rounded-md"
             rows="4"
             placeholder="Skriv en Bio (max 150 tegn)"
           ></textarea>
