@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 export default function EditProfilePage() {
   const { userId } = useParams();
   const navigate = useNavigate();
   const db = getFirestore();
+  const auth = getAuth();
 
   const [avatarUrl, setAvatarUrl] = useState("");
   const [bio, setBio] = useState("");
@@ -14,6 +16,12 @@ export default function EditProfilePage() {
   const [avatarError, setAvatarError] = useState(null);
 
   useEffect(() => {
+    // Redirect if logged-in user is not the same as userId in URL
+    if (auth.currentUser?.uid !== userId) {
+      navigate("/");
+      return;
+    }
+
     const fetchUserData = async () => {
       try {
         const userDocRef = doc(db, "users", userId);
@@ -33,7 +41,7 @@ export default function EditProfilePage() {
     };
 
     fetchUserData();
-  }, [userId, db]);
+  }, [userId, db, auth, navigate]);
 
   const validateImageUrl = (url) => {
     return new Promise((resolve) => {

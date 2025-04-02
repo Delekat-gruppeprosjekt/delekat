@@ -57,6 +57,41 @@ function EditRecipe() {
     });
   };
 
+  useEffect(() => {
+    const fetchRecipe = async () => {
+      try {
+        const docRef = doc(firestore, "recipes", recipeId);
+        const docSnap = await getDoc(docRef);
+  
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+  
+          // Check if the logged-in user is the owner
+          if (data.userId !== auth.currentUser?.uid) {
+            navigate("/"); // Navigate back to the previous page
+            return;
+          }
+  
+          setTitle(data.title || "");
+          setImageUrl(data.imageUrl || "");
+          setDescription(data.description || "");
+          setIngredients(Array.isArray(data.ingredients) ? data.ingredients : [{ ingredient: "", amount: "", unit: "" }]);
+          setInstructions(Array.isArray(data.instructions) ? data.instructions : [""]);
+          setDifficulty(data.difficulty || "lett");
+          setPortions(data.portions || 1);
+          setCookingTime(data.cookingTime || "10 - 15 min");
+        } else {
+          console.error("No such recipe found!");
+        }
+      } catch (error) {
+        console.error("Error fetching recipe:", error);
+      }
+    };
+  
+    fetchRecipe();
+  }, [recipeId, navigate]);
+  
+
   // Function to handle image URL validation
   const handleImageUrlChange = async (url) => {
     if (!url) {
