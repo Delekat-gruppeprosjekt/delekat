@@ -82,7 +82,7 @@ export default function EditProfilePage() {
 
   return (
     <div className="min-h-screen bg-BGcolor p-6">
-      <div className="max-w-3xl mx-auto bg-[#fdfdfd] rounded-lg shadow-sm p-6">
+      <div className="max-w-3xl mx-auto bg-BGwhite rounded-lg shadow-sm p-6">
         <h1 className="text-3xl font-bold mb-6">Rediger Profil</h1>
         <div className="flex flex-col mb-4">
           <label className="text-lg font-semibold" htmlFor="avatarUrl">
@@ -96,10 +96,10 @@ export default function EditProfilePage() {
               setAvatarUrl(e.target.value);
               setAvatarError(null); // Clear previous error
             }}
-            className="w-full p-2 border border-[#438407] rounded-md"
+            className="w-full p-2 border border-PMgreen rounded-md"
             placeholder="Fyll inn avatar URL"
           />
-          {avatarError && <p className="text-red-500">{avatarError}</p>}
+          {avatarError && <p className="text-red-btn">{avatarError}</p>}
         </div>
         <div className="flex flex-col mb-4">
           <label className="text-lg font-semibold" htmlFor="bio">
@@ -113,7 +113,7 @@ export default function EditProfilePage() {
                 setBio(e.target.value);
               }
             }}
-            className="w-full p-2 border border-[#438407] rounded-md"
+            className="w-full p-2 border border-PMgreen rounded-md"
             rows="4"
             placeholder="Skriv en Bio (max 150 tegn)"
           ></textarea>
@@ -124,13 +124,13 @@ export default function EditProfilePage() {
         <div className="flex justify-end space-x-4">
           <button
             onClick={() => navigate(`/profile/${userId}`)}
-            className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+            className="px-4 py-2 bg-gray-500 text-BGwhite rounded-lg hover:bg-gray-600"
           >
             Avbryt
           </button>
           <button
             onClick={handleSaveChanges}
-            className="px-4 py-2 bg-[#719F46] text-white rounded-lg hover:bg-[#4C6B2F]"
+            className="px-4 py-2 bg-green-btn text-BGwhite rounded-lg hover:bg-green-btn-hover"
           >
             Oppdater profil
           </button>

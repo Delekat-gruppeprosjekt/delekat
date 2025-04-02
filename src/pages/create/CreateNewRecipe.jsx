@@ -295,8 +295,8 @@ function CreateNewRecipe() {
                 }}
                 required
                 maxLength={60}
-                className={`w-full p-2 border border-[#438407] rounded-md ${
-                  formErrors.title ? "border-red-500" : ""
+                className={`w-full p-2 border border-PMgreen rounded-md ${
+                  formErrors.title ? "border-red-btn" : ""
                 }`}
                 placeholder="Oppskriftens tittel"
               />
@@ -304,7 +304,7 @@ function CreateNewRecipe() {
                 {title.length}/60 tegn
               </span>
               {formErrors.title && (
-                <span className="text-red-500 text-sm mt-1">
+                <span className="text-red-btn text-sm mt-1">
                   {formErrors.title}
                 </span>
               )}
@@ -321,13 +321,13 @@ function CreateNewRecipe() {
                 value={imageUrl}
                 onChange={(e) => handleImageUrlChange(e.target.value)}
                 required
-                className={`w-full p-2 border border-[#438407] rounded-md ${
-                  imageError ? "border-red-500" : ""
+                className={`w-full p-2 border border-PMgreen rounded-md ${
+                  imageError ? "border-red-btn" : ""
                 }`}
                 placeholder="Skriv inn bilde-URL"
               />
               {imageError && (
-                <span className="text-red-500 text-sm mt-1">
+                <span className="text-red-btn text-sm mt-1">
                   Ugyldig bilde-URL. Vennligst sjekk at URL-en er korrekt og at
                   den peker til et bilde.
                 </span>
@@ -348,7 +348,7 @@ function CreateNewRecipe() {
                   }
                 }}
                 required
-                className="w-full p-2 border border-[#438407] rounded-md"
+                className="w-full p-2 border border-PMgreen rounded-md"
                 placeholder="Skriv en beskrivelse av oppskriften"
                 maxLength={1000}
               />
@@ -366,7 +366,7 @@ function CreateNewRecipe() {
                 name="difficulty"
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value)}
-                className="w-full p-2 border border-[#438407] rounded-md"
+                className="w-full p-2 border border-PMgreen rounded-md"
                 required
               >
                 <option value="lett">Lett (1 kokkehatt)</option>
@@ -403,7 +403,7 @@ function CreateNewRecipe() {
                     setPortions("1");
                   }
                 }}
-                className="w-full p-2 border border-[#438407] rounded-md"
+                className="w-full p-2 border border-PMgreen rounded-md"
                 required
                 title="Maksimalt antall porsjoner er 999"
               />
@@ -418,7 +418,7 @@ function CreateNewRecipe() {
                 name="cookingTime"
                 value={cookingTime}
                 onChange={(e) => setCookingTime(e.target.value)}
-                className="w-full p-2 border border-[#438407] rounded-md"
+                className="w-full p-2 border border-PMgreen rounded-md"
                 required
               >
                 {cookingTimes.map((time) => (
@@ -444,7 +444,7 @@ function CreateNewRecipe() {
                           }
                         }}
                         placeholder="Ingrediens"
-                        className="w-full p-2 border border-[#438407] rounded-md resize-none min-h-[38px] max-h-[100px]"
+                        className="w-full p-2 border border-PMgreen rounded-md resize-none min-h-[38px] max-h-[100px]"
                         required
                         maxLength={100}
                         rows={1}
@@ -482,7 +482,7 @@ function CreateNewRecipe() {
                         }
                       }}
                       placeholder="Mengde"
-                      className="w-full p-2 border border-[#438407] rounded-md"
+                      className="w-full p-2 border border-PMgreen rounded-md"
                       required
                       title="Maksimal mengde er 9999"
                     />
@@ -491,7 +491,7 @@ function CreateNewRecipe() {
                     name="unit"
                     value={ingredient.unit}
                     onChange={(e) => handleInputChange(e, index, "ingredient")}
-                    className="w-1/4 p-2 border border-[#438407] rounded-md"
+                    className="w-1/4 p-2 border border-PMgreen rounded-md"
                     required
                   >
                     <option value="">Velg enhet</option>
@@ -504,7 +504,7 @@ function CreateNewRecipe() {
                   <button
                     type="button"
                     onClick={() => handleRemoveIngredient(index)}
-                    className="text-red-500 mt-1"
+                    className="text-red-btn mt-1 hover:text-red-btn-hover cursor-pointer"
                   >
                     Fjern
                   </button>
@@ -513,7 +513,7 @@ function CreateNewRecipe() {
               <button
                 type="button"
                 onClick={handleAddIngredient}
-                className="text-blue-500 mt-2"
+                className="text-blue-btn mt-2 hover:text-blue-btn-hover cursor-pointer"
               >
                 + Legg til ingrediens
               </button>
@@ -533,7 +533,7 @@ function CreateNewRecipe() {
                             handleInputChange(e, index, "instruction");
                           }
                         }}
-                        className="w-full p-2 border border-[#438407] rounded-md resize-none min-h-[38px] max-h-[150px]"
+                        className="w-full p-2 border border-PMgreen rounded-md resize-none min-h-[38px] max-h-[150px]"
                         placeholder={`Trinn ${index + 1}`}
                         required
                         maxLength={300}
@@ -547,7 +547,7 @@ function CreateNewRecipe() {
                   <button
                     type="button"
                     onClick={() => handleRemoveInstruction(index)}
-                    className="text-red-500"
+                    className="text-red-btn hover:text-red-btn-hover cursor-pointer"
                   >
                     Fjern
                   </button>
@@ -556,7 +556,7 @@ function CreateNewRecipe() {
               <button
                 type="button"
                 onClick={handleAddInstruction}
-                className="text-blue-500 mt-2"
+                className="text-blue-btn mt-2 hover:text-blue-btn-hover cursor-pointer"
               >
                 + Legg til trinn
               </button>
@@ -566,13 +566,13 @@ function CreateNewRecipe() {
               <button
                 type="button"
                 onClick={() => navigate("/")}
-                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                className="bg-gray-500 text-BGwhite px-4 py-2 rounded-md hover:bg-gray-600"
               >
                 Avbryt
               </button>
               <button
                 type="submit"
-                className={`bg-[#719F46] text-white px-4 py-2 rounded-md hover:bg-[#5c8138] ${
+                className={`bg-green-btn text-BGwhite px-4 py-2 rounded-md hover:bg-green-btn-hover ${
                   loading ? "cursor-not-allowed opacity-50" : ""
                 }`}
                 disabled={loading}

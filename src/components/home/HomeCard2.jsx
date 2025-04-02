@@ -67,7 +67,7 @@ export default function HomeCard({ post }) {
           ) : (
             <Link 
               to={`/profile/${post.userId}`} 
-              className="font-medium text-blue-600 hover:underline"
+              className="font-medium text-blue-btn hover:underline"
               onClick={(e) => e.stopPropagation()}
             >
               {author?.displayName || 'Anonym'}
@@ -86,7 +86,7 @@ export default function HomeCard({ post }) {
           />
         ) : (
           <div className="absolute top-0 left-0 w-full h-full bg-gray-200 flex items-center justify-center">
-            <span className="text-gray-500">No Image Available</span>
+            <span className="text-gray-500">Ingen bilde tilgjengelig</span>
           </div>
         )}
       </div>
@@ -95,17 +95,17 @@ export default function HomeCard({ post }) {
       <div className="p-3">
         <h3 className="text-lg font-semibold mb-1">{post.title}</h3>
         <p className="text-sm text-gray-600 mb-3 line-clamp-1">
-          {post.description || "This is a placeholder description for the recipe."}
+          {post.description || "Dette er en plassholderbeskrivelse for oppskriften."}
         </p>
         
         {/* Stats section - similar to profile card */}
         <div className="flex justify-between items-start text-sm text-gray-500">
           <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-1 text-[#3C5A3C]">
+            <div className="flex items-center gap-1 text-PMgreen">
               <FaClock className="text-base flex-shrink-0" />
               <span className="text-sm whitespace-nowrap">{post.cookingTime || "10 - 15 min"}</span>
             </div>
-            <div className="flex items-center gap-1 text-[#3C5A3C]">
+            <div className="flex items-center gap-1 text-PMgreen">
               {[...Array(3)].map((_, index) => (
                 <PiChefHat
                   key={index}
@@ -122,11 +122,11 @@ export default function HomeCard({ post }) {
             </div>
           </div>
           <div className="flex flex-col items-end gap-1.5">
-            <div className="flex items-center gap-1 text-[#3C5A3C]">
+            <div className="flex items-center gap-1 text-PMgreen">
               <span className="text-xs">{post.comments ? post.comments.length : 0}</span>
               <FaRegComment className="text-base flex-shrink-0" />
             </div>
-            <div className="flex items-center gap-1 text-[#3C5A3C]">
+            <div className="flex items-center gap-1 text-PMgreen">
               <span className="text-xs">{post.likes || 0}</span>
               <FaHeart className="text-base flex-shrink-0" />
             </div>

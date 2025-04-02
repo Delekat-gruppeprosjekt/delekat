@@ -115,7 +115,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-BGcolor p-6">
       <div className="flex justify-center items-center mb-6">
-        <div className="w-36 h-36 rounded-full border-BGwhite border-4 overflow-hidden">
+        <div className="w-36 h-36 rounded-full overflow-hidden">
           <img
             className="w-full h-full rounded-full object-cover"
             src={userData?.avatarUrl || "/assets/avatar_placeholder.png"}
@@ -126,30 +126,30 @@ export default function ProfilePage() {
 
       <div className="text-center max-w-lg mx-auto">
         <h1 className="text-3xl font-bold">{userData?.displayName}</h1>
-        <p className="text-xl break-words">{userData?.bio || "No bio set."}</p>
+        <p className="text-xl break-words">{userData?.bio || "Ingen bio enda"}</p>
         {isOwnProfile && (
           <button
-            className="mt-4 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600"
+            className="mt-4 px-4 py-2 bg-blue-btn text-BGwhite font-semibold rounded-lg hover:bg-blue-btn-hover"
             onClick={handleEditProfile}
           >
-            Edit Profile
+            Rediger profil
           </button>
         )}
 
-        {/* Only show the toggle buttons if the user is an admin */}
-        {isAdmin && (
-          <div className="mt-6">
-            <button
-              onClick={() => toggleView("recipes")}
-              className={`px-4 py-2 mr-4 ${isRecipesView ? "font-black" : "font-normal"} text-2xl border-b-1 border-BGcolor text-black hover:border-b-1 hover:border-black`}
-            >
-              Recipes
-            </button>
+        {/* Toggle between Recipes and Users View */}
+        <div className="mt-6">
+          <button
+            onClick={() => toggleView("recipes")}
+            className={`px-4 py-2 ${isRecipesView ? "bg-blue-btn" : "bg-gray-300"} text-BGwhite font-semibold rounded-lg hover:bg-blue-btn-hover`}
+          >
+            Oppskrifter
+          </button>
+          {isAdmin && (
             <button
               onClick={() => toggleView("users")}
-              className={`ml-4 px-4 py-2 ${!isRecipesView ? "font-black" : "font-normal"} text-2xl text-black hover:border-b-1`}
+              className={`ml-4 px-4 py-2 ${!isRecipesView ? "bg-blue-btn" : "bg-gray-300"} text-BGwhite font-semibold rounded-lg hover:bg-blue-btn-hover`}
             >
-              Users
+              Brukere
             </button>
           </div>
         )}
@@ -159,11 +159,11 @@ export default function ProfilePage() {
       {isRecipesView && (
         <div className="mt-8">
           <h2 className="text-2xl font-semibold mb-4 text-center">
-            {isOwnProfile ? "Your Recipes" : `${userData?.displayName}'s Recipes`}
+            {isOwnProfile ? "Dine oppskrifter" : `${userData?.displayName}'s oppskrifter`}
           </h2>
           {userRecipes.length === 0 ? (
             <p className="text-center text-gray-500">
-              {isOwnProfile ? "You have no recipes yet." : "This user has no recipes yet."}
+              {isOwnProfile ? "Du har ingen oppskrifter enda" : "Denne brukeren har ingen oppskrifter enda"}
             </p>
           ) : (
             <div className="max-w-[1400px] mx-auto px-4">
@@ -179,32 +179,34 @@ export default function ProfilePage() {
             </div>
           )}
         </div>
-      )}
 
-      {/* Only show the Users section if the user is an admin */}
-      {!isRecipesView && isAdmin && (
-        <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4 text-center">All Users</h2>
-          {userList.length === 0 ? (
-            <p className="text-center text-gray-500">No users found.</p>
-          ) : (
-            <ul className="px-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {userList.map((user) => (
-                <li
-                  key={user.id}
-                  className="mb-2 px-4 py-1 text-center cursor-pointer hover:bg-Secondary flex flex-row items-center justify-center border-1 border-Secondary"
-                  onClick={() => navigate(`/profile/${user.id}`)}
-                >
-                  <p className="w-full">{user.displayName}</p>
-                  <img
+      ) : (
+        isAdmin && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-semibold mb-4 text-center">Alle brukere</h2>
+            {userList.length === 0 ? (
+              <p className="text-center text-gray-500">Ingen brukere funnet</p>
+            ) : (
+              <ul className="px-16 grid grid-cols-3 gap-8">
+                {userList.map((user) => (
+                  <li
+                    key={user.id}
+                    className="mb-2 p-2 text-center cursor-pointer hover:bg-Secondary flex flex-row items-center justify-center border-1 border-Secondary"
+                    onClick={() => navigate(`/profile/${user.id}`)}
+                  >
+                    <p
+                    className="w-2/3"
+                    >{user.displayName}</p>
+                    <img
                     src={user.avatarUrl}
-                    className="ml-4 min-w-16 min-h-16 max-h-16 max-w-16 object-cover rounded-full border-1 border-white"
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                    className="ml-4 w-16 h-16 object-cover rounded-full border-1 border-BGwhite"
+                    ></img>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )
       )}
     </div>
   );
