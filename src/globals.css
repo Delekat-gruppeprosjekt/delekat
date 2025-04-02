@@ -13,6 +13,14 @@
 /* Development help tool -Frankie*/
 body {
     font-family: "DM Sans", sans-serif;
+    background-color: var(--color-BGcolor);
+}
+
+@media screen and (max-width: 1280px) {
+    main {
+        padding-bottom: 64px;
+    }
+    
 }
 
 /* Animation utilities */
