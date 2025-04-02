@@ -183,13 +183,6 @@ const LoginComponent = () => {
                 </button>
             </form>
 
-            {/* Reset password link */}
-            <div className="mt-6 text-center">
-                <Link to="/reset-password" className="text-[#3C5A3C] hover:underline">
-                    Glemt passord?
-                </Link>
-            </div>
-
             {/* Sign up link */}
             <div className="mt-8 text-center">
                 <p className="text-gray-600">Har du ikke en konto?</p>
