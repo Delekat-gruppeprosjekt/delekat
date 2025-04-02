@@ -8,11 +8,19 @@
     --color-SGgreen: #93C572;
     --color-BGwhite: #FDFDFD;
     --color-navbar-border: #438407;
-  }  
+}  
 
 /* Development help tool -Frankie*/
 body {
-    
     font-family: "DM Sans", sans-serif;
-   
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-in-out forwards;
 }

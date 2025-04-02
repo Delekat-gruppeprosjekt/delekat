@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import HomeCard from "../../components/home/HomeCard2.jsx"; // Import HomeCard
 import { PiMagnifyingGlass } from "react-icons/pi";
@@ -6,15 +6,16 @@ import { PiSignOutLight } from "react-icons/pi";
 import { useAuth } from "../../contexts/authContext/auth.jsx";
 import { firestore } from "../../../firebase";
 import { getDocs, collection } from "@firebase/firestore";
-import { getAuth, signOut } from "firebase/auth"; // Import signOut from Firebase Auth
+import { getAuth, signOut } from "firebase/auth";
 
 export default function Home() {
   const { currentUser } = useAuth(); // Get currentUser from context
   const navigate = useNavigate();
-  const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [oppskrifter, setOppskrifter] = useState([]);
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1280);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const searchInputRef = useRef(null);
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -41,15 +42,52 @@ export default function Home() {
     fetchRecipes();
   }, []);
 
+  // Handle clicks outside of the search input to collapse it
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        isSearchExpanded &&
+        searchInputRef.current && 
+        !searchInputRef.current.contains(event.target)
+      ) {
+        // Only collapse if there's no text in the search
+        if (!searchQuery) {
+          setIsSearchExpanded(false);
+        }
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isSearchExpanded, searchQuery]);
+
+  // Focus the input when expanded
+  useEffect(() => {
+    if (isSearchExpanded && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isSearchExpanded]);
+
   const handleSearch = (event) => {
     setSearchQuery(event.target.value.toLowerCase());
   };
+
 
   useEffect(() => {
     const handleResize = () => setIsSmallScreen(window.innerWidth < 1280);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+  
+  const clearSearch = () => {
+    setSearchQuery("");
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  };
+
 
   const handleLogout = async () => {
     const auth = getAuth(); // Get Firebase Auth instance
@@ -61,6 +99,11 @@ export default function Home() {
       console.error("Error during logout:", err);
     }
   };
+
+  // Filter recipes by title 
+  const filteredRecipes = oppskrifter.filter((recipe) => 
+    recipe.title.toLowerCase().includes(searchQuery)
+  );
 
   return (
     <div className="min-h-screen p-6 bg-[var(--color-BGcolor)]">
@@ -78,13 +121,41 @@ export default function Home() {
       </h1>
 
       {/* Search and Logout Buttons */}
-      <div className="absolute right-0 top-0 m-8 flex items-center space-x-8">
-        {/* Magnifying Glass Search Icon */}
-        <div
-          className="flex gap-2 items-center text-xl hover:scale-110 duration-150 cursor-pointer"
-          onClick={() => setShowSearch(!showSearch)}
-        >
-        <PiMagnifyingGlass /> Søk 
+
+      <div className="absolute right-0 top-0 m-8 flex items-center space-x-4">
+        {/* Expandable Search Bar */}
+        <div className="relative flex items-center" ref={searchInputRef}>
+          <div
+            className={`flex items-center transition-all duration-300 ease-in-out ${
+              isSearchExpanded ? "w-56" : "w-8"
+            } overflow-hidden`}
+          >
+            <input
+              type="text"
+              className={`bg-BGwhite border border-gray-200 rounded-full py-2 px-3 pl-9 outline-none transition-all duration-300 ${
+                isSearchExpanded ? "w-full opacity-100" : "w-0 opacity-0"
+              }`}
+              placeholder="Søk"
+              value={searchQuery}
+              onChange={handleSearch}
+            />
+            <div 
+              className={`absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 z-10 ${
+                isSearchExpanded ? "text-xl" : "text-2xl hover:scale-110"
+              }`}
+              onClick={() => setIsSearchExpanded(true)}
+            >
+              <PiMagnifyingGlass />
+            </div>
+            {searchQuery && isSearchExpanded && (
+              <div 
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700"
+                onClick={clearSearch}
+              >
+                <PiX size={18} />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Logg ut button only shows if user is logged in */}
@@ -97,31 +168,30 @@ export default function Home() {
         )}
       </div>
 
-      {/* Search Input */}
-      {showSearch && (
-        <div className="flex justify-center">
-          <input
-            className="bg-BGwhite w-2/4 p-2 rounded-lg mb-6 outline-0"
-            type="text"
-            value={searchQuery}
-            onChange={handleSearch}
-            placeholder="Søk"
-          />
+      {/* Search results count - only shown when there's a search query */}
+      {searchQuery && (
+        <div className="w-full text-center text-sm text-gray-600 mt-2 mb-4">
+          {filteredRecipes.length === 0 
+            ? "Ingen oppskrifter funnet" 
+            : `${filteredRecipes.length} oppskrift${filteredRecipes.length !== 1 ? 'er' : ''} funnet`
+          }
         </div>
       )}
 
-<div className="max-w-[1400px] mx-auto px-4">
-  {/* Display Recipes Using HomeCard */}
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-24">
-    {oppskrifter
-      .filter((recipe) => recipe.title.toLowerCase().includes(searchQuery))
-      .map((recipe) => (
-        <HomeCard key={recipe.id} post={recipe} />
-      ))}
-  </div>
-</div>
-
-
+      <div className="max-w-[1400px] mx-auto px-4">
+        {/* Display Recipes Using HomeCard */}
+        {filteredRecipes.length === 0 && searchQuery ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">Ingen oppskrifter funnet. Prøv et annet søk.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-24">
+            {filteredRecipes.map((recipe) => (
+              <HomeCard key={recipe.id} post={recipe} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
