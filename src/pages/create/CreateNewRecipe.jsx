@@ -392,8 +392,8 @@ function CreateNewRecipe() {
                   if (value === "" || /^\d+$/.test(value)) {
                     setPortions(value);
                     const numValue = parseInt(value);
-                    if (!isNaN(numValue) && numValue > 999) {
-                      setPortions("999");
+                    if (!isNaN(numValue) && numValue > 99) {
+                      setPortions("99");
                     }
                   }
                 }}
@@ -405,7 +405,7 @@ function CreateNewRecipe() {
                 }}
                 className="w-full p-2 border border-[#438407] rounded-md"
                 required
-                title="Maksimalt antall porsjoner er 999"
+                title="Maksimalt antall porsjoner er 99"
               />
             </div>
 
