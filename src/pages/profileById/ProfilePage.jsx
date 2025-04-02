@@ -10,7 +10,7 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import RecipeCard from "../../components/Profile/RecipeCardProfile";
 
 export default function ProfilePage() {
@@ -27,7 +27,6 @@ export default function ProfilePage() {
   const db = getFirestore();
   const auth = getAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -84,28 +83,10 @@ export default function ProfilePage() {
     fetchUserData();
   }, [userId]);
 
-  const handleDeleteRecipe = async (recipeId) => {
-    const isOwnProfile = currentUserId === userId;
-    if (!isAdmin && !isOwnProfile) {
-      alert("You do not have permission to delete this recipe.");
-      return;
-    }
-
-    try {
-      await deleteDoc(doc(db, "recipes", recipeId));
-      setUserRecipes((prevRecipes) => prevRecipes.filter((recipe) => recipe.id !== recipeId));
-      alert("Recipe deleted successfully.");
-    } catch (error) {
-      console.error("Error deleting recipe:", error);
-      alert("Failed to delete recipe.");
-    }
-  };
-
   const fetchUsers = async () => {
     try {
       const usersQuery = query(collection(db, "users"));
       const usersSnapshot = await getDocs(usersQuery);
-      console.log(usersSnapshot);
       const users = usersSnapshot.docs.map((doc) => ({
         id: doc.id,
         email: doc.data().email,
@@ -113,7 +94,6 @@ export default function ProfilePage() {
         displayName: doc.data().displayName,
       }));
       setUserList(users);
-      console.log(users)
     } catch (err) {
       console.error("Error fetching users:", err);
     }
@@ -131,7 +111,6 @@ export default function ProfilePage() {
 
   const isOwnProfile = currentUserId === userId;
   const handleEditProfile = () => navigate(`/edit-profile/${userId}`);
-
 
   return (
     <div className="min-h-screen bg-BGcolor p-6">
@@ -172,12 +151,12 @@ export default function ProfilePage() {
             >
               Brukere
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Display the active view (Recipes or Users) */}
-      {isRecipesView ? (
+      {/* Show recipes only if it's their profile or the user is an admin */}
+      {isRecipesView && (
         <div className="mt-8">
           <h2 className="text-2xl font-semibold mb-4 text-center">
             {isOwnProfile ? "Dine oppskrifter" : `${userData?.displayName}'s oppskrifter`}
@@ -193,10 +172,6 @@ export default function ProfilePage() {
                   <RecipeCard
                     key={recipe.id}
                     recipe={recipe}
-                    onEdit={isOwnProfile ? () => console.log(`Edit recipe ${recipe.id}`) : null}
-                    onDelete={isAdmin || isOwnProfile ? () => handleDeleteRecipe(recipe.id) : null}
-                    isAdmin={isAdmin}
-                    isOwnProfile={isOwnProfile}
                     onClick={() => navigate(`/recipe/${recipe.id}`)}
                   />
                 ))}
@@ -204,6 +179,7 @@ export default function ProfilePage() {
             </div>
           )}
         </div>
+
       ) : (
         isAdmin && (
           <div className="mt-8">
@@ -233,6 +209,5 @@ export default function ProfilePage() {
         )
       )}
     </div>
-    
   );
 }
