@@ -39,7 +39,7 @@ function Header() {
   }, [auth]);
 
   useEffect(() => {
-    const handleResize = () => setIsLargeScreen(window.innerWidth > 1280);
+    const handleResize = () => setIsLargeScreen(window.innerWidth > 1279);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -133,7 +133,16 @@ function Header() {
             activePath === (userLoggedIn && userId ? `/profile/${userId}` : "/login") ? "text-PMgreen" : ""
           }`}
         >
-          <PiUserLight /> {isLargeScreen ? (userLoggedIn ? "Profil" : "Logg inn") : ""}
+          {!isLargeScreen && userLoggedIn ? (
+            <img
+              className="w-10 h-10 rounded-full object-cover"
+              src={userData?.avatarUrl || "/assets/avatar_placeholder.png"}
+              alt="User Avatar"
+            />
+          ) : (
+            <PiUserLight />
+          )}
+          {isLargeScreen ? (userLoggedIn ? "Profil" : "Logg inn") : ""}
         </Link>
 
         {isLargeScreen && userLoggedIn && (
