@@ -82,21 +82,16 @@ const LoginComponent = () => {
             } catch (error) {
                 // Handle different types of authentication errors
                 console.error('Firebase auth error:', error.code);
-                switch (error.code) {
-                    case 'auth/user-not-found':
-                        setErrorMessage('Ingen bruker funnet med denne e-postadressen');
-                        break;
-                    case 'auth/wrong-password':
-                        setErrorMessage('Feil passord');
-                        break;
-                    case 'auth/invalid-email':
-                        setErrorMessage('Ugyldig e-postadresse');
-                        break;
-                    case 'auth/invalid-credential':
-                        setErrorMessage('Ingen bruker funnet med denne e-postadressen');
-                        break;
-                    default:
-                        setErrorMessage('Det oppstod en feil ved innlogging');
+                
+                // For security reasons, show a generic error message for all authentication errors
+                if (error.code === 'auth/invalid-credential' || 
+                    error.code === 'auth/user-not-found' || 
+                    error.code === 'auth/wrong-password') {
+                    setErrorMessage('Feil brukernavn eller passord');
+                } else if (error.code === 'auth/invalid-email') {
+                    setErrorMessage('Ugyldig e-postadresse');
+                } else {
+                    setErrorMessage('Det oppstod en feil ved innlogging');
                 }
             } finally {
                 setIsSigningIn(false);
