@@ -105,7 +105,6 @@ export default function ProfilePage() {
     try {
       const usersQuery = query(collection(db, "users"));
       const usersSnapshot = await getDocs(usersQuery);
-      console.log(usersSnapshot);
       const users = usersSnapshot.docs.map((doc) => ({
         id: doc.id,
         email: doc.data().email,
@@ -113,7 +112,6 @@ export default function ProfilePage() {
         displayName: doc.data().displayName,
       }));
       setUserList(users);
-      console.log(users)
     } catch (err) {
       console.error("Error fetching users:", err);
     }
@@ -157,23 +155,23 @@ export default function ProfilePage() {
           </button>
         )}
 
-        {/* Toggle between Recipes and Users View */}
-        <div className="mt-6">
-          <button
-            onClick={() => toggleView("recipes")}
-            className={`px-4 py-2 ${isRecipesView ? "bg-green-btn" : "bg-gray-300"} text-white font-semibold rounded-lg hover:bg-green-btn-hover`}
-          >
-            Oppskrifter
-          </button>
-          {isAdmin && (
+                {/* Only show the toggle buttons if the user is an admin */}
+                {isAdmin && (
+          <div className="mt-6">
+            <button
+              onClick={() => toggleView("recipes")}
+              className={`px-4 py-2 mr-4 ${isRecipesView ? "font-black" : "font-normal"} text-2xl border-b-1 border-BGcolor text-black hover:border-b-1 hover:border-black`}
+            >
+              Recipes
+            </button>
             <button
               onClick={() => toggleView("users")}
-              className={`ml-4 px-4 py-2 ${!isRecipesView ? "bg-green-btn" : "bg-gray-300"} text-white font-semibold rounded-lg hover:bg-green-btn-hover`}
+              className={`ml-4 px-4 py-2 ${!isRecipesView ? "font-black" : "font-normal"} text-2xl text-black hover:border-b-1`}
             >
-              Brukere
+              Users
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Display the active view (Recipes or Users) */}
@@ -211,7 +209,7 @@ export default function ProfilePage() {
             {userList.length === 0 ? (
               <p className="text-center text-gray-500">Ingen brukere funnet</p>
             ) : (
-              <ul className="px-16 grid grid-cols-3 gap-8">
+              <ul className="px-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {userList.map((user) => (
                   <li
                     key={user.id}
