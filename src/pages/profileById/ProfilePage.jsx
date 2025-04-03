@@ -211,7 +211,7 @@ export default function ProfilePage() {
             {userList.length === 0 ? (
               <p className="text-center text-gray-500">Ingen brukere funnet</p>
             ) : (
-              <ul className="px-16 grid grid-cols-3 gap-8">
+              <ul className="px-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {userList.map((user) => (
                   <li
                     key={user.id}
