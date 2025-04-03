@@ -147,7 +147,7 @@ export default function ProfilePage() {
 
       <div className="text-center max-w-lg mx-auto">
         <h1 className="text-3xl font-bold">{userData?.displayName}</h1>
-        <p className="text-xl break-words">{userData?.bio || "No bio set."}</p>
+        <p className="text-xl break-words">{userData?.bio || ""}</p>
         {isOwnProfile && (
           <button
             className="mt-4 px-4 py-2 bg-green-btn text-BGwhite font-semibold rounded-lg hover:bg-green-btn-hover"
