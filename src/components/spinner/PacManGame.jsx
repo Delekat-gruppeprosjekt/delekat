@@ -1,12 +1,10 @@
 import React, { useRef, useEffect, useState } from "react";
 
-// **Bytt ut** til fix2-filer der de finnes.
+// Bruk fix2‑filene der de finnes:
 import hamburgerBunn from "./icons/hamburgerBunn-fix2.svg";
 import hamburgerTopp from "./icons/hamburgerTopp-fix2.svg";
 import kjottHel from "./icons/kjottHel.svg";
-// Det finnes ingen fix2-versjon for kjøttAvlang, så bruk original:
-import kjottAvlang from "./icons/kjottAvlang.svg";
-
+import kjottAvlang from "./icons/kjottAvlang.svg"; // Ingen fix2-versjon
 import ostHel from "./icons/ostHel.svg";
 import ostAvlang from "./icons/ostAvlang-fix2.svg";
 import salatHel from "./icons/salatHel.svg";
@@ -27,30 +25,29 @@ const BurgerGame = () => {
     direction: "right",
   });
 
-  // Ingredienser (HEL-ikoner) på brettet – plassert i hjørnene
+  // Ingredienser på brettet – plassert i hjørnene
   const [ingredients, setIngredients] = useState([
-    { x: 50, y: 50, type: "kjott", eaten: false },
-    { x: 350, y: 50, type: "ost", eaten: false },
-    { x: 50, y: 350, type: "salat", eaten: false },
+    { x: 50,  y: 50,  type: "kjott", eaten: false },
+    { x: 350, y: 50,  type: "ost",   eaten: false },
+    { x: 50,  y: 350, type: "salat", eaten: false },
     { x: 350, y: 350, type: "tomat", eaten: false },
   ]);
 
-  // Avlange ingredienser som er fanget
+  // Ingredienser som er samlet
   const [collectedIngredients, setCollectedIngredients] = useState([]);
 
-  // Topp-brødet animeres (litt opp og ned)
+  // Animasjon for toppbrødet (litt opp og ned)
   const [topYOffset, setTopYOffset] = useState(0);
   useEffect(() => {
     const interval = setInterval(() => {
-      const now = Date.now();
       const amplitude = 10;
       const period = 300;
-      setTopYOffset(amplitude * Math.sin(now / period));
+      setTopYOffset(amplitude * Math.sin(Date.now() / period));
     }, 30);
     return () => clearInterval(interval);
   }, []);
 
-  // Bilde-refs for canvas
+  // Bilde-refs
   const bottomBunRef = useRef(new Image());
   const topBunRef = useRef(new Image());
   const kjottHelRef = useRef(new Image());
@@ -77,12 +74,10 @@ const BurgerGame = () => {
     hamburgerHelRef.current.src = HamburgerHel;
   }, []);
 
-  // Gi fokus til containeren for piltastene
   useEffect(() => {
     if (containerRef.current) containerRef.current.focus();
   }, []);
 
-  // Oppsett for devicePixelRatio
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -95,7 +90,7 @@ const BurgerGame = () => {
     ctx.imageSmoothingQuality = "high";
   }, []);
 
-  // Flytt burgeren hvert 200 ms
+  // Beveg burgeren
   useEffect(() => {
     const interval = setInterval(() => {
       setBurger((prev) => {
@@ -103,9 +98,8 @@ const BurgerGame = () => {
         let { x, y, direction } = prev;
         if (direction === "right") x += step;
         if (direction === "left") x -= step;
-        if (direction === "up") y -= step;
+        if (direction === "up")   y -= step;
         if (direction === "down") y += step;
-        // Begrens posisjon innenfor 0 - 400
         x = Math.max(0, Math.min(x, 400));
         y = Math.max(0, Math.min(y, 400));
         return { x, y, direction };
@@ -119,7 +113,6 @@ const BurgerGame = () => {
     let newIngredients = [...ingredients];
     let newCollected = [...collectedIngredients];
     let changed = false;
-
     newIngredients.forEach((ing, idx) => {
       if (!ing.eaten) {
         const dx = burger.x - ing.x;
@@ -132,29 +125,53 @@ const BurgerGame = () => {
         }
       }
     });
-
     if (changed) {
       setIngredients(newIngredients);
       setCollectedIngredients(newCollected);
     }
   }, [burger]);
 
-  // Tegn alt på canvas – mål: alle elementene skal ligge tett inntil hverandre
+  // Bestem riktig rekkefølge for ingrediensene
+  const CORRECT_ORDER = ["kjott", "ost", "salat", "tomat"];
+  const sortedCollected = CORRECT_ORDER.filter((t) =>
+    collectedIngredients.includes(t)
+  );
+
+  // Tegn alt på canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Bakgrunn
     ctx.fillStyle = "#f9f9e8";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Tegn HEL-ikoner (for ingrediens-ikoner på brettet)
+    // Hvis alle ingredienser er spist, vis ferdig burger og melding
+    const allEaten = ingredients.every((ing) => ing.eaten);
+    if (allEaten) {
+      const finalSize = 300;
+      const dpr = window.devicePixelRatio || 1;
+      const centerX = (canvas.width / dpr) / 2;
+      const centerY = (canvas.height / dpr) / 2;
+      ctx.drawImage(
+        hamburgerHelRef.current,
+        centerX - finalSize / 2,
+        centerY - finalSize / 2,
+        finalSize,
+        finalSize
+      );
+      ctx.fillStyle = "black";
+      ctx.font = "24px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("Du vant!", centerX, centerY + finalSize / 2 + 30);
+      return;
+    }
+
+    // Tegn ingrediens-ikoner (ikke spist)
     const ingSize = 150;
     ingredients.forEach((ing) => {
       if (!ing.eaten) {
         let icon = kjottHelRef.current;
-        if (ing.type === "ost") icon = ostHelRef.current;
+        if (ing.type === "ost")   icon = ostHelRef.current;
         if (ing.type === "salat") icon = salatHelRef.current;
         if (ing.type === "tomat") icon = tomatHelRef.current;
         ctx.drawImage(
@@ -167,75 +184,46 @@ const BurgerGame = () => {
       }
     });
 
-    // Tegn burgeren – stabling av bunn, ingredienser og topp tett sammen
+    // Tegn den delvise burgeren (bunn, ingredienser, topp) i riktig rekkefølge
     ctx.save();
     ctx.translate(burger.x, burger.y);
 
-    // Dimensjoner for burger-elementene – juster etter behov
     const bunW = 50;
     const bunH = 50;
     const ingW = 50;
     const ingH = 60;
-    // Negativ overlapp: for eksempel -10 tvinger elementene til å ligge litt over hverandre
-    const overlap = -45;
 
-    if (collectedIngredients.length === 0) {
-      // Ingen ingredienser: tegn bunn og topp tett sammen
-      ctx.drawImage(
-        bottomBunRef.current,
-        -bunW / 2,
-        -bunH,
-        bunW,
-        bunH
-      );
-      ctx.drawImage(
-        topBunRef.current,
-        -bunW / 2,
-        -bunH,
-        bunW,
-        bunH
-      );
+    // Overlapp: for ingrediensene og for toppbrødet
+    const overlapIngredients = -45; // For ingrediensene
+    const overlapTop = 45;          // For toppbrødet
+
+    if (sortedCollected.length === 0) {
+      // Ingen ingredienser: tegn bunn og topp med en liten offset slik at de ikke ligger helt oppå hverandre
+      const topOffsetNoIngredients = 10; // Endre denne verdien for å få ønsket visuell effekt
+      ctx.drawImage(bottomBunRef.current, -bunW / 2, -bunH, bunW, bunH);
+      ctx.drawImage(topBunRef.current, -bunW / 2, -bunH - topOffsetNoIngredients, bunW, bunH);
     } else {
-      // Tegn bunnbrødet
-      ctx.drawImage(
-        bottomBunRef.current,
-        -bunW / 2,
-        -bunH,
-        bunW,
-        bunH
-      );
-
-      // Stable ingrediensene tett oppå bunnbrødet
+      // Tegn bunn
+      ctx.drawImage(bottomBunRef.current, -bunW / 2, -bunH, bunW, bunH);
+      // Stable ingrediensene i riktig rekkefølge
       let stackY = -bunH;
-      collectedIngredients.forEach((type) => {
+      sortedCollected.forEach((type) => {
         let avImg;
         if (type === "kjott") avImg = kjottAvlangRef.current;
         else if (type === "ost") avImg = ostAvlangRef.current;
         else if (type === "salat") avImg = salatAvlangRef.current;
         else if (type === "tomat") avImg = tomatAvlangRef.current;
-        // Trekk fra ingH med negativ overlapp slik at lagene overlapper
-        stackY -= (ingH + overlap);
+        stackY -= (ingH + overlapIngredients);
         ctx.drawImage(avImg, -ingW / 2, stackY, ingW, ingH);
       });
-
-      // Tegn toppbrødet slik at bunnen møter den øverste ingrediensen tett
-      ctx.drawImage(
-        topBunRef.current,
-        -bunW / 2,
-        stackY - bunH,
-        bunW,
-        bunH
-      );
+      // Tegn topp med sitt eget overlapp slik at den ligger riktig over den øverste ingrediensen
+      ctx.drawImage(topBunRef.current, -bunW / 2, stackY - bunH + overlapTop, bunW, bunH);
     }
-
     ctx.restore();
   }, [burger, ingredients, collectedIngredients, topYOffset]);
 
-  // Piltaster for å styre burgeren
   const handleKeyDown = (e) => {
-    if (
-      ["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown"].includes(e.key)
-    ) {
+    if (["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown"].includes(e.key)) {
       e.preventDefault();
     }
     if (e.key === "ArrowRight") {

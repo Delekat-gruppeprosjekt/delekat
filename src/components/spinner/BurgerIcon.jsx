@@ -13,8 +13,8 @@ const BurgerIcon = ({ ingredients }) => {
   const required = ["kjott", "ost", "salat", "tomat"];
   const harAlle = required.every((ing) => ingredients.includes(ing));
 
-  // Hvis alle ingredienser er fanget, vis komplett burger
   if (harAlle) {
+    // Vinner-tilstand: vis kun den komplette burgeren
     return (
       <img
         src={HamburgerHel}
@@ -28,15 +28,13 @@ const BurgerIcon = ({ ingredients }) => {
   const bunWidth = 100;  // bredde på brødene
   const bunHeight = 100; // høyde på hvert brød
   const ingH = 100;      // høyde på hver ingrediens
-  const overlapMargin = 0; // ingen overlap
+  const overlapMargin = 0; // ingen overlap (kan justeres om nødvendig)
 
-  // Bestem containerhøyden:
   const containerHeight =
     ingredients.length === 0
       ? bunHeight
       : bunHeight + ingredients.length * ingH - overlapMargin;
 
-  // Felles stil for alle bilder – beskjær eventuelt unødvendig whitespace
   const commonImgStyle = {
     position: "absolute",
     left: 0,
@@ -61,14 +59,12 @@ const BurgerIcon = ({ ingredients }) => {
         <img src={hamburgerBunn} alt="Burgerbunn" style={commonImgStyle} />
       </div>
       {ingredients.length > 0 &&
-        // Tegn ingrediensene, stables tett oppå bunnen
         ingredients.map((type, index) => {
           let src;
           if (type === "kjott") src = kjottAvlang;
           else if (type === "ost") src = ostAvlang;
           else if (type === "salat") src = salatAvlang;
           else if (type === "tomat") src = tomatAvlang;
-          // Plasserer første ingrediens rett oppå bunnen, deretter stablet
           const offset = bunHeight + index * ingH;
           return (
             <div
