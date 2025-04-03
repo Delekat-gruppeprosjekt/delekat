@@ -82,21 +82,16 @@ const LoginComponent = () => {
             } catch (error) {
                 // Handle different types of authentication errors
                 console.error('Firebase auth error:', error.code);
-                switch (error.code) {
-                    case 'auth/user-not-found':
-                        setErrorMessage('Ingen bruker funnet med denne e-postadressen');
-                        break;
-                    case 'auth/wrong-password':
-                        setErrorMessage('Feil passord');
-                        break;
-                    case 'auth/invalid-email':
-                        setErrorMessage('Ugyldig e-postadresse');
-                        break;
-                    case 'auth/invalid-credential':
-                        setErrorMessage('Ingen bruker funnet med denne e-postadressen');
-                        break;
-                    default:
-                        setErrorMessage('Det oppstod en feil ved innlogging');
+                
+                // For security reasons, show a generic error message for all authentication errors
+                if (error.code === 'auth/invalid-credential' || 
+                    error.code === 'auth/user-not-found' || 
+                    error.code === 'auth/wrong-password') {
+                    setErrorMessage('Feil brukernavn eller passord');
+                } else if (error.code === 'auth/invalid-email') {
+                    setErrorMessage('Ugyldig e-postadresse');
+                } else {
+                    setErrorMessage('Det oppstod en feil ved innlogging');
                 }
             } finally {
                 setIsSigningIn(false);
@@ -139,8 +134,10 @@ const LoginComponent = () => {
                         value={email}
                         onChange={handleEmailChange}
                         required
-                        className={`w-full px-4 py-3 rounded-full bg-BGwhite border ${
-                            emailError ? 'border-red-btn' : 'border-gray-200'
+
+                        className={`w-full px-4 py-3 rounded-md bg-white border ${
+                            emailError ? 'border-red-500' : 'border-[#438407]'
+
                         } focus:outline-none focus:border-[#3C5A3C] text-lg`}
                     />
                     {emailError && (
@@ -158,7 +155,9 @@ const LoginComponent = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        className="w-full px-4 py-3 rounded-full bg-BGwhite border border-gray-200 focus:outline-none focus:border-PMgreen text-lg pr-12"
+
+                        className="w-full px-4 py-3 rounded-md bg-white border border-[#438407] focus:outline-none focus:border-[#3C5A3C] text-lg pr-12"
+
                     />
                     <button
                         type="button"
@@ -182,13 +181,6 @@ const LoginComponent = () => {
                     {isSigningIn ? "Logger inn..." : "Logg inn"}
                 </button>
             </form>
-
-            {/* Reset password link */}
-            <div className="mt-6 text-center">
-                <Link to="/reset-password" className="text-PMgreen hover:underline text-lg">
-                    Glemt passord?
-                </Link>
-            </div>
 
             {/* Sign up link */}
             <div className="mt-8 text-center">

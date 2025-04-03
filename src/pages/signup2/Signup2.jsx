@@ -25,6 +25,7 @@ const Signup = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [emailError, setEmailError] = useState("");
     const [usernameError, setUsernameError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
 
     // Initialize Firestore database
     const db = getFirestore();
@@ -58,6 +59,18 @@ const Signup = () => {
     const validateEmail = (email) => {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         return emailRegex.test(email);
+    };
+
+    /**
+     * Validates password requirements
+     * @param {string} password - The password to validate
+     * @returns {boolean} - True if password meets requirements, false otherwise
+     */
+    const validatePassword = (password) => {
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasNumber = /\d/.test(password);
+        const hasMinLength = password.length >= 8;
+        return hasUpperCase && hasNumber && hasMinLength;
     };
 
     /**
@@ -96,6 +109,20 @@ const Signup = () => {
     };
 
     /**
+     * Handles password input changes and validates in real-time
+     * @param {Event} e - The input change event
+     */
+    const handlePasswordChange = (e) => {
+        const newPassword = e.target.value;
+        setPassword(newPassword);
+        if (newPassword && !validatePassword(newPassword)) {
+            setPasswordError("Passordet må inneholde minst 8 tegn, én stor bokstav og ett tall");
+        } else {
+            setPasswordError("");
+        }
+    };
+
+    /**
      * Creates a new user document in Firestore with default values
      * @param {Object} user - The Firebase auth user object
      */
@@ -124,6 +151,7 @@ const Signup = () => {
         setErrorMessage("");
         setEmailError("");
         setUsernameError("");
+        setPasswordError("");
 
         // Validate username
         if (!username.trim()) {
@@ -147,6 +175,12 @@ const Signup = () => {
         // Validate email
         if (!validateEmail(email)) {
             setEmailError("Vennligst skriv inn en gyldig e-postadresse");
+            return;
+        }
+
+        // Validate password
+        if (!validatePassword(password)) {
+            setPasswordError("Passordet må inneholde minst 8 tegn, én stor bokstav og ett tall");
             return;
         }
 
@@ -223,9 +257,9 @@ const Signup = () => {
                             value={username}
                             onChange={handleUsernameChange}
                             required
-                            className={`w-full px-4 py-3 rounded-full bg-BGwhite border ${
-                                usernameError ? 'border-red-btn' : 'border-gray-200'
-                            } focus:outline-none focus:border-PMgreen text-lg`}
+                            className={`w-full px-4 py-3 rounded-md bg-white border ${
+                                usernameError ? 'border-red-500' : 'border-[#438407]'
+                            } focus:outline-none focus:border-[#3C5A3C] text-lg`}
                         />
                         {usernameError && (
                             <p className="mt-2 text-sm text-red-btn pl-4">
@@ -242,9 +276,9 @@ const Signup = () => {
                             value={email}
                             onChange={handleEmailChange}
                             required
-                            className={`w-full px-4 py-3 rounded-full bg-BGwhite border ${
-                                emailError ? 'border-red-btn' : 'border-gray-200'
-                            } focus:outline-none focus:border-PMgreen text-lg`}
+                            className={`w-full px-4 py-3 rounded-md bg-white border ${
+                                emailError ? 'border-red-500' : 'border-[#438407]'
+                            } focus:outline-none focus:border-[#3C5A3C] text-lg`}
                         />
                         {emailError && (
                             <p className="mt-2 text-sm text-red-btn pl-4">
@@ -259,9 +293,12 @@ const Signup = () => {
                             type={showPassword ? "text" : "password"}
                             placeholder="Passord"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={handlePasswordChange}
                             required
-                            className="w-full px-4 py-3 rounded-full bg-BGwhite border border-gray-200 focus:outline-none focus:border-PMgreen text-lg pr-12"
+
+                            className={`w-full px-4 py-3 rounded-md bg-white border ${
+                                passwordError ? 'border-red-500' : 'border-[#438407]'
+                            } focus:outline-none focus:border-[#3C5A3C] text-lg pr-12`}
                         />
                         <button
                             type="button"
@@ -270,6 +307,11 @@ const Signup = () => {
                         >
                             {showPassword ? <AiOutlineEyeInvisible size={24} /> : <AiOutlineEye size={24} />}
                         </button>
+                        {passwordError && (
+                            <p className="mt-2 text-sm text-red-600 pl-4">
+                                {passwordError}
+                            </p>
+                        )}
                     </div>
 
                     {/* Confirm password input field with show/hide toggle */}
@@ -280,7 +322,7 @@ const Signup = () => {
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             required
-                            className="w-full px-4 py-3 rounded-full bg-BGwhite border border-gray-200 focus:outline-none focus:border-PMgreen text-lg pr-12"
+                            className="w-full px-4 py-3 rounded-md bg-white border border-[#438407] focus:outline-none focus:border-[#3C5A3C] text-lg pr-12"
                         />
                         <button
                             type="button"

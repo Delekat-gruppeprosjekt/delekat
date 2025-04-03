@@ -274,6 +274,12 @@ function EditRecipe() {
     }
   };
 
+  const handlePortionChange = (newPortions) => {
+    if (newPortions >= 1 && newPortions <= 99) {
+      setPortions(newPortions);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-BGcolor p-6">
       <div className="max-w-3xl mx-auto">
@@ -358,34 +364,50 @@ function EditRecipe() {
 
             <div className="flex flex-col">
               <label className="text-lg font-semibold" htmlFor="portions">Antall porsjoner</label>
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                id="portions"
-                name="portions"
-                value={portions}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  // Only allow numeric values
-                  if (value === "" || /^\d+$/.test(value)) {
-                    setPortions(value);
-                    const numValue = parseInt(value);
-                    if (!isNaN(numValue) && numValue > 999) {
-                      setPortions("999");
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => handlePortionChange(portions - 1)}
+                  className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#3C5A3C] text-[#3C5A3C] hover:bg-[#3C5A3C] hover:text-white transition-colors ${portions <= 1 ? "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-[#3C5A3C]" : ""}`}
+                  disabled={portions <= 1}
+                >
+                  -
+                </button>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  id="portions"
+                  name="portions"
+                  value={portions}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Only allow numeric values
+                    if (value === "" || /^\d+$/.test(value)) {
+                      setPortions(value);
+                      const numValue = parseInt(value);
+                      if (!isNaN(numValue) && numValue > 99) {
+                        setPortions("99");
+                      }
                     }
-                  }
-                }}
-                onBlur={() => {
-                  const numValue = parseInt(portions);
-                  if (portions === "" || isNaN(numValue) || numValue < 1) {
-                    setPortions("1");
-                  }
-                }}
-                className="w-full p-2 border border-PMgreen rounded-md"
-                required
-                title="Maksimalt antall porsjoner er 999"
-              />
+                  }}
+                  onBlur={() => {
+                    const numValue = parseInt(portions);
+                    if (portions === "" || isNaN(numValue) || numValue < 1) {
+                      setPortions("1");
+                    }
+                  }}
+                  className="w-16 p-2 border border-[#438407] rounded-md text-center"
+                  required
+                  title="Maksimalt antall porsjoner er 99"
+                />
+                <button
+                  onClick={() => handlePortionChange(portions + 1)}
+                  className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#3C5A3C] text-[#3C5A3C] hover:bg-[#3C5A3C] hover:text-white transition-colors ${portions >= 99 ? "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-[#3C5A3C]" : ""}`}
+                  disabled={portions >= 99}
+                >
+                  +
+                </button>
+              </div>
             </div>
 
             <div className="flex flex-col">

@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import HomeCard from "../../components/home/HomeCard2.jsx"; // Import HomeCard
-import { PiMagnifyingGlass } from "react-icons/pi";
+import { PiMagnifyingGlass, PiX } from "react-icons/pi";
 import { PiSignOutLight } from "react-icons/pi";
 import { useAuth } from "../../contexts/authContext/auth.jsx";
 import { firestore } from "../../../firebase";
-import { getDocs, collection } from "@firebase/firestore";
+import { getDocs, collection, query, orderBy, limit, startAfter } from "@firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 
 export default function Home() {
@@ -15,32 +15,86 @@ export default function Home() {
   const [oppskrifter, setOppskrifter] = useState([]);
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1280);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  // State variables for infinite scrolling functionality
+  const [lastVisible, setLastVisible] = useState(null); // Stores the last document reference for pagination
+  const [hasMore, setHasMore] = useState(true); // Indicates if there are more posts available to load
+  const [isLoading, setIsLoading] = useState(false); // Prevents multiple simultaneous loading requests
   const searchInputRef = useRef(null);
+  const observerRef = useRef(null); // Reference for the intersection observer target element
 
-  useEffect(() => {
-    const fetchRecipes = async () => {
-      try {
-        const ref = collection(firestore, "recipes");
-        const snapshot = await getDocs(ref);
-        const recipes = snapshot.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-          authorAvatarUrl: doc.data().authorAvatarUrl || "", // Ensure avatar URL is included
-        }));
-        // Sort recipes by createdAt timestamp in descending order (newest first)
-        const sortedRecipes = recipes.sort((a, b) => {
-          const dateA = a.createdAt?.toDate() || new Date(0);
-          const dateB = b.createdAt?.toDate() || new Date(0);
-          return dateB - dateA;
-        });
-        setOppskrifter(sortedRecipes);
-      } catch (error) {
-        console.error("Error fetching recipes:", error);
+  // Function to fetch recipes with pagination support
+  const fetchRecipes = async (isInitialLoad = false) => {
+    // Prevent loading if already in progress or no more posts available
+    if (isLoading || (!hasMore && !isInitialLoad)) return;
+    
+    setIsLoading(true);
+    try {
+      let q;
+      // Configure query based on whether it's initial load or subsequent load
+      if (isInitialLoad) {
+        // Initial load: Get first batch of 24 posts
+        q = query(
+          collection(firestore, "recipes"),
+          orderBy("createdAt", "desc"),
+          limit(24)
+        );
+      } else {
+        // Subsequent load: Get next batch of 24 posts after the last visible document
+        q = query(
+          collection(firestore, "recipes"),
+          orderBy("createdAt", "desc"),
+          startAfter(lastVisible),
+          limit(24)
+        );
       }
-    };
 
-    fetchRecipes();
+      const snapshot = await getDocs(q);
+      const recipes = snapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+        authorAvatarUrl: doc.data().authorAvatarUrl || "",
+      }));
+
+      if (recipes.length > 0) {
+        // Update pagination state
+        setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+        // Append new recipes or replace for initial load
+        setOppskrifter(prev => isInitialLoad ? recipes : [...prev, ...recipes]);
+        // Check if more posts are available
+        setHasMore(snapshot.docs.length === 24);
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error("Error fetching recipes:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Initial load of recipes when component mounts
+  useEffect(() => {
+    fetchRecipes(true);
   }, []);
+
+  // Set up intersection observer for infinite scrolling
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Load more posts when the observer target becomes visible
+        if (entries[0].isIntersecting && hasMore && !isLoading) {
+          fetchRecipes();
+        }
+      },
+      { threshold: 0.1 } // Trigger when 10% of the target is visible
+    );
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore, isLoading]);
 
   // Handle clicks outside of the search input to collapse it
   useEffect(() => {
@@ -179,17 +233,19 @@ export default function Home() {
       )}
 
       <div className="max-w-[1400px] mx-auto px-4">
-        {/* Display Recipes Using HomeCard */}
         {filteredRecipes.length === 0 && searchQuery ? (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">Ingen oppskrifter funnet. Prøv et annet søk.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-24">
-            {filteredRecipes.map((recipe) => (
-              <HomeCard key={recipe.id} post={recipe} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-24">
+              {filteredRecipes.map((recipe) => (
+                <HomeCard key={recipe.id} post={recipe} />
+              ))}
+            </div>
+            <div ref={observerRef} className="h-10" />
+          </>
         )}
       </div>
     </div>
