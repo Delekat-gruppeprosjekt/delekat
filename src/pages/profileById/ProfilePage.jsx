@@ -10,7 +10,7 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import RecipeCard from "../../components/Profile/RecipeCardProfile";
 
 export default function ProfilePage() {
@@ -27,6 +27,7 @@ export default function ProfilePage() {
   const db = getFirestore();
   const auth = getAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -83,10 +84,28 @@ export default function ProfilePage() {
     fetchUserData();
   }, [userId]);
 
+  const handleDeleteRecipe = async (recipeId) => {
+    const isOwnProfile = currentUserId === userId;
+    if (!isAdmin && !isOwnProfile) {
+      alert("You do not have permission to delete this recipe.");
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, "recipes", recipeId));
+      setUserRecipes((prevRecipes) => prevRecipes.filter((recipe) => recipe.id !== recipeId));
+      alert("Recipe deleted successfully.");
+    } catch (error) {
+      console.error("Error deleting recipe:", error);
+      alert("Failed to delete recipe.");
+    }
+  };
+
   const fetchUsers = async () => {
     try {
       const usersQuery = query(collection(db, "users"));
       const usersSnapshot = await getDocs(usersQuery);
+      console.log(usersSnapshot);
       const users = usersSnapshot.docs.map((doc) => ({
         id: doc.id,
         email: doc.data().email,
@@ -94,6 +113,7 @@ export default function ProfilePage() {
         displayName: doc.data().displayName,
       }));
       setUserList(users);
+      console.log(users)
     } catch (err) {
       console.error("Error fetching users:", err);
     }
@@ -111,6 +131,7 @@ export default function ProfilePage() {
 
   const isOwnProfile = currentUserId === userId;
   const handleEditProfile = () => navigate(`/edit-profile/${userId}`);
+
 
   return (
     <div className="min-h-screen bg-BGcolor p-6">
@@ -136,27 +157,27 @@ export default function ProfilePage() {
           </button>
         )}
 
-        {/* Only show the toggle buttons if the user is an admin */}
-        {isAdmin && (
-          <div className="mt-6">
-            <button
-              onClick={() => toggleView("recipes")}
-              className={`px-4 py-2 mr-4 ${isRecipesView ? "font-black" : "font-normal"} text-2xl border-b-1 border-BGcolor text-black hover:border-b-1 hover:border-black`}
-            >
-              Recipes
-            </button>
+        {/* Toggle between Recipes and Users View */}
+        <div className="mt-6">
+          <button
+            onClick={() => toggleView("recipes")}
+            className={`px-4 py-2 ${isRecipesView ? "bg-blue-500" : "bg-gray-300"} text-white font-semibold rounded-lg hover:bg-blue-600`}
+          >
+            Recipes
+          </button>
+          {isAdmin && (
             <button
               onClick={() => toggleView("users")}
-              className={`ml-4 px-4 py-2 ${!isRecipesView ? "font-black" : "font-normal"} text-2xl text-black hover:border-b-1`}
+              className={`ml-4 px-4 py-2 ${!isRecipesView ? "bg-blue-500" : "bg-gray-300"} text-white font-semibold rounded-lg hover:bg-blue-600`}
             >
               Users
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Show recipes only if it's their profile or the user is an admin */}
-      {isRecipesView && (
+      {/* Display the active view (Recipes or Users) */}
+      {isRecipesView ? (
         <div className="mt-8">
           <h2 className="text-2xl font-semibold mb-4 text-center">
             {isOwnProfile ? "Your Recipes" : `${userData?.displayName}'s Recipes`}
@@ -172,6 +193,10 @@ export default function ProfilePage() {
                   <RecipeCard
                     key={recipe.id}
                     recipe={recipe}
+                    onEdit={isOwnProfile ? () => console.log(`Edit recipe ${recipe.id}`) : null}
+                    onDelete={isAdmin || isOwnProfile ? () => handleDeleteRecipe(recipe.id) : null}
+                    isAdmin={isAdmin}
+                    isOwnProfile={isOwnProfile}
                     onClick={() => navigate(`/recipe/${recipe.id}`)}
                   />
                 ))}
@@ -179,33 +204,35 @@ export default function ProfilePage() {
             </div>
           )}
         </div>
-      )}
-
-      {/* Only show the Users section if the user is an admin */}
-      {!isRecipesView && isAdmin && (
-        <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4 text-center">All Users</h2>
-          {userList.length === 0 ? (
-            <p className="text-center text-gray-500">No users found.</p>
-          ) : (
-            <ul className="px-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {userList.map((user) => (
-                <li
-                  key={user.id}
-                  className="mb-2 px-4 py-1 text-center cursor-pointer hover:bg-Secondary flex flex-row items-center justify-center border-1 border-Secondary"
-                  onClick={() => navigate(`/profile/${user.id}`)}
-                >
-                  <p className="w-full">{user.displayName}</p>
-                  <img
+      ) : (
+        isAdmin && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-semibold mb-4 text-center">All Users</h2>
+            {userList.length === 0 ? (
+              <p className="text-center text-gray-500">No users found.</p>
+            ) : (
+              <ul className="px-16 grid grid-cols-3 gap-8">
+                {userList.map((user) => (
+                  <li
+                    key={user.id}
+                    className="mb-2 p-2 text-center cursor-pointer hover:bg-Secondary flex flex-row items-center justify-center border-1 border-Secondary"
+                    onClick={() => navigate(`/profile/${user.id}`)}
+                  >
+                    <p
+                    className="w-2/3"
+                    >{user.displayName}</p>
+                    <img
                     src={user.avatarUrl}
-                    className="ml-4 min-w-16 min-h-16 max-h-16 max-w-16 object-cover rounded-full border-1 border-white"
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                    className="ml-4 w-16 h-16 object-cover rounded-full border-1 border-white"
+                    ></img>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )
       )}
     </div>
+    
   );
 }
