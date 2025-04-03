@@ -268,7 +268,6 @@ const BurgerGame = () => {
       }
     });
 
-    // Tegn den delvise burgeren (bunn, ingredienser, topp) i riktig rekkefølge
     ctx.save();
     ctx.translate(burger.x, burger.y);
     const bunW = 50;
