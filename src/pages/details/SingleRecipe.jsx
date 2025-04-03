@@ -127,6 +127,7 @@ export default function SingleRecipe() {
               </Link>
             )}
           </div>
+
         </div>
 
         <img
@@ -142,14 +143,14 @@ export default function SingleRecipe() {
         </div>
 
         <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
-          <div className="flex flex-wrap items-center text-[#3C5A3C] gap-2">
+          <div className="flex flex-wrap items-center text-PMgreen gap-2">
             <BiTime className="text-xl flex-shrink-0" />
             <span className="text-lg">{recipe.cookingTime || "10 - 15 min"}</span>
             <div className="flex items-center">
               {[...Array(3)].map((_, index) => (
                 <PiChefHat
                   key={index}
-                  className={`text-xl mr-1 ${index < (recipe.difficulty === "vanskelig" ? 3 : recipe.difficulty === "medium" ? 2 : 1) ? "text-black" : "text-gray-300"}`}
+                  className={`text-xl mr-1 ${index < (recipe.difficulty === "vanskelig" ? 3 : recipe.difficulty === "medium" ? 2 : 1) ? "text-black-500" : "text-gray-300"}`}
                 />
               ))}
               <span className="text-lg capitalize ml-2">
@@ -162,27 +163,28 @@ export default function SingleRecipe() {
           
           <div className="flex items-center gap-4">
             <div className="flex items-center">
-              <FaHeart className="text-xl" />
-              <span className="ml-2 text-lg">{recipe.likes || 0}</span>
+              <FaHeart className="text-xl text-PMgreen" />
+              <span className="ml-2 text-lg text-PMgreen">{recipe.likes || 0}</span>
             </div>
             <div className="flex items-center">
-              <IoChatbubbleOutline className="text-xl" />
-              <span className="ml-2 text-lg">{recipe.comments ? recipe.comments.length : 0}</span>
+              <IoChatbubbleOutline className="text-xl text-PMgreen" />
+              <span className="ml-2 text-lg text-PMgreen">{recipe.comments ? recipe.comments.length : 0}</span>
             </div>
           </div>
         </div>
 
         <div className="w-full h-[1px] bg-gray-200 my-6" />
 
-        <p className="text-gray-700 text-lg mb-6 break-words whitespace-pre-wrap">{recipe.description}</p>
+        <p className="text-gray-500 text-lg mb-6 break-words whitespace-pre-wrap">{recipe.description}</p>
         
-        <div className="w-full h-[1px] bg-gray-200 my-6" />
+        <div className="w-full h-[1px] bg-gray-300 my-6" />
 
         <div className="mb-8 flex flex-col items-center">
           <h2 className="text-2xl font-thin mb-4">Porsjoner</h2>
           <div className="flex items-center gap-4">
             <button
               onClick={() => handlePortionChange(portions - 1)}
+
               className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#3C5A3C] text-[#3C5A3C] hover:bg-[#3C5A3C] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[#3C5A3C]"
               disabled={portions <= 1}
             >

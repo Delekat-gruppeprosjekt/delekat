@@ -39,7 +39,7 @@ function Header() {
   }, [auth]);
 
   useEffect(() => {
-    const handleResize = () => setIsLargeScreen(window.innerWidth > 1280);
+    const handleResize = () => setIsLargeScreen(window.innerWidth > 1279);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -105,7 +105,7 @@ function Header() {
 
         {isLargeScreen && userLoggedIn && (
           <div className="flex flex-col items-center justify-center my-8">
-             <div className="w-36 h-36 rounded-full border-BGwhite border-4 overflow-hidden">
+             <div className="w-36 h-36 rounded-full overflow-hidden">
           <img
             className="w-full h-full rounded-full object-cover"
             src={userData?.avatarUrl || "/assets/avatar_placeholder.png"}
@@ -133,14 +133,23 @@ function Header() {
             activePath === (userLoggedIn && userId ? `/profile/${userId}` : "/login") ? "text-PMgreen" : ""
           }`}
         >
-          <PiUserLight /> {isLargeScreen ? (userLoggedIn ? "Profil" : "Logg inn") : ""}
+          {!isLargeScreen && userLoggedIn ? (
+            <img
+              className="w-10 h-10 rounded-full object-cover"
+              src={userData?.avatarUrl || "/assets/avatar_placeholder.png"}
+              alt="User Avatar"
+            />
+          ) : (
+            <PiUserLight />
+          )}
+          {isLargeScreen ? (userLoggedIn ? "Profil" : "Logg inn") : ""}
         </Link>
 
         {isLargeScreen && userLoggedIn && (
           <div className="absolute bottom-8 space-y-4">
           <button
           id="editProfile"
-          className="flex  items-center gap-2 hover:scale-110 transition duration-150 w-max cursor-pointer"
+          className="flex items-center gap-2 hover:scale-110 transition duration-150 w-max cursor-pointer"
           onClick={handleEditProfile}
         >
           <PiGearSixLight /> Rediger Profil
@@ -148,7 +157,7 @@ function Header() {
 
         <button 
         onClick={handleLogout} 
-        className="flex items-center gap-2 hover:scale-110 hover:text-[#BD081C] transition duration-150 w-max cursor-pointer" >
+        className="flex items-center gap-2 hover:scale-110 hover:text-red-btn-hover transition duration-150 w-max cursor-pointer" >
           <PiSignOutLight /> Logg ut 
           </button>
         </div>

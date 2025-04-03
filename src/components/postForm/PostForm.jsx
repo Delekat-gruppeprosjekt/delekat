@@ -54,7 +54,7 @@ export default function CreatePostForm() {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-4 space-y-4">
-      {error && <div className="bg-red-100 text-red-700 p-2 rounded">{error}</div>}
+      {error && <div className="bg-red-100 text-red-btn p-2 rounded">{error}</div>}
 
       <input
         type="text"
@@ -109,7 +109,7 @@ export default function CreatePostForm() {
           />
         </div>
       ))}
-      <button type="button" onClick={addIngredient} className="text-blue-500">
+      <button type="button" onClick={addIngredient} className="text-blue-btn">
         + Legg til ingrediens
       </button>
 
@@ -122,7 +122,7 @@ export default function CreatePostForm() {
 
       <button
         type="submit"
-        className="bg-blue-500 text-white py-2 px-4 rounded"
+        className="bg-blue-btn text-BGwhite py-2 px-4 rounded"
         disabled={loading}
       >
         {loading ? 'Lagrer...' : 'Lagre post'}
