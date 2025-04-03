@@ -85,7 +85,7 @@ export default function RecipeCardProfile({ recipe, onEdit, onDelete, isAdmin, i
         <div className="flex gap-2 mb-3 mx-3">
           {onEdit && (
   <button
-    className="bg-blue-btn text-BGwhite px-3 py-1 rounded-md hover:bg-blue-btn-hover transition"
+    className="bg-green-btn text-BGwhite px-3 py-1 rounded-md hover:bg-green-btn-hover transition"
     onClick={(e) => {
       e.stopPropagation(); // Prevent click event from propagating to the parent element
       handleEdit();
