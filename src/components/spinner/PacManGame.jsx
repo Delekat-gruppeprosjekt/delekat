@@ -13,27 +13,35 @@ import tomatAvlang from "./icons/tomatAvlang-fix2.svg";
 
 import HamburgerHel from "./icons/HamburgerHel.svg";
 
+const INITIAL_INGREDIENTS = [
+  { x: 50,  y: 50,  type: "kjott", eaten: false },
+  { x: 350, y: 50,  type: "ost",   eaten: false },
+  { x: 50,  y: 350, type: "salat", eaten: false },
+  { x: 350, y: 350, type: "tomat", eaten: false },
+];
+
 const BurgerGame = () => {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
 
-  // Burgerens posisjon og retning
+  // Spilstater
   const [burger, setBurger] = useState({
     x: 200,
     y: 200,
     direction: "right",
   });
-
-  // Ingredienser på brettet – plassert i hjørnene
-  const [ingredients, setIngredients] = useState([
-    { x: 50,  y: 50,  type: "kjott", eaten: false },
-    { x: 350, y: 50,  type: "ost",   eaten: false },
-    { x: 50,  y: 350, type: "salat", eaten: false },
-    { x: 350, y: 350, type: "tomat", eaten: false },
-  ]);
-
-  // Ingredienser som er samlet
+  const [ingredients, setIngredients] = useState(INITIAL_INGREDIENTS);
   const [collectedIngredients, setCollectedIngredients] = useState([]);
+
+  // Timer og game over
+  const [timeLeft, setTimeLeft] = useState(5); // 5 sekunders nedtelling
+  const [gameOver, setGameOver] = useState(false);
+
+  // Partikler for konfetti (brukes kun ved seier)
+  const [particles, setParticles] = useState([]);
+
+  // Beregn om spilleren har vunnet (alle ingredienser spist)
+  const hasWon = ingredients.every((ing) => ing.eaten);
 
   // Animasjon for toppbrødet (litt opp og ned)
   const [topYOffset, setTopYOffset] = useState(0);
@@ -89,26 +97,60 @@ const BurgerGame = () => {
     ctx.imageSmoothingQuality = "high";
   }, []);
 
-  // Beveg burgeren
+  // Timer: trekk fra ett sekund
   useEffect(() => {
+    if (gameOver || hasWon) return;
+    const timerInterval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerInterval);
+          setGameOver(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timerInterval);
+  }, [gameOver, hasWon]);
+
+  // Beveg burgeren med økt hastighet og bounce-effekt slik at den ikke går utenfor skjermen.
+  useEffect(() => {
+    if (gameOver || hasWon) return;
     const interval = setInterval(() => {
       setBurger((prev) => {
-        const step = 20;
+        const step = 50;
         let { x, y, direction } = prev;
+        // Oppdater posisjon basert på retning
         if (direction === "right") x += step;
         if (direction === "left") x -= step;
         if (direction === "up")   y -= step;
         if (direction === "down") y += step;
-        x = Math.max(0, Math.min(x, 400));
-        y = Math.max(0, Math.min(y, 400));
+        // Bounce logikk: snu retning og juster posisjon slik at den holder seg innenfor 0-400.
+        if (x < 0) {
+          x = 0;
+          direction = "right";
+        }
+        if (x > 400) {
+          x = 400;
+          direction = "left";
+        }
+        if (y < 0) {
+          y = 0;
+          direction = "down";
+        }
+        if (y > 400) {
+          y = 400;
+          direction = "up";
+        }
         return { x, y, direction };
       });
-    }, 200);
+    }, 100);
     return () => clearInterval(interval);
-  }, []);
+  }, [gameOver, hasWon]);
 
   // Kollisjon: sjekk om burgeren treffer ingredienser
   useEffect(() => {
+    if (gameOver || hasWon) return;
     let newIngredients = [...ingredients];
     let newCollected = [...collectedIngredients];
     let changed = false;
@@ -128,13 +170,43 @@ const BurgerGame = () => {
       setIngredients(newIngredients);
       setCollectedIngredients(newCollected);
     }
-  }, [burger]);
+  }, [burger, ingredients, collectedIngredients, gameOver, hasWon]);
 
-  // Bestem riktig rekkefølge for ingrediensene
-  const CORRECT_ORDER = ["kjott", "ost", , "tomat","salat"];
+  // Bestem rekkefølgen for ingrediensene (uendret)
+  const CORRECT_ORDER = ["kjott", "ost", , "tomat", "salat"];
   const sortedCollected = CORRECT_ORDER.filter((t) =>
     collectedIngredients.includes(t)
   );
+
+  // Konfetti-animasjon: Start når spilleren har vunnet
+  useEffect(() => {
+    if (!hasWon) return;
+    if (particles.length === 0) {
+      const initParticles = [];
+      const colors = ["#ff0", "#ff66cc", "#66ff66", "#66ccff", "#ff9966"];
+      for (let i = 0; i < 100; i++) {
+        initParticles.push({
+          x: Math.random() * 400,
+          y: Math.random() * -400, // start over skjermen
+          vy: 2 + Math.random() * 3,
+          color: colors[Math.floor(Math.random() * colors.length)],
+        });
+      }
+      setParticles(initParticles);
+    }
+    const confettiInterval = setInterval(() => {
+      setParticles((prevParticles) =>
+        prevParticles.map((p) => {
+          let newY = p.y + p.vy;
+          if (newY > 400) {
+            newY = -10;
+          }
+          return { ...p, y: newY };
+        })
+      );
+    }, 30);
+    return () => clearInterval(confettiInterval);
+  }, [hasWon, particles]);
 
   // Tegn alt på canvas
   useEffect(() => {
@@ -144,7 +216,7 @@ const BurgerGame = () => {
     ctx.fillStyle = "#f9f9e8";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Hvis alle ingredienser er spist, vis ferdig burger og melding
+    // Hvis spilleren har vunnet, vis burgeren, vinnermelding og konfetti
     const allEaten = ingredients.every((ing) => ing.eaten);
     if (allEaten) {
       const finalSize = 300;
@@ -162,6 +234,19 @@ const BurgerGame = () => {
       ctx.font = "24px Arial";
       ctx.textAlign = "center";
       ctx.fillText("Du vant!", centerX, centerY + finalSize / 2 + 30);
+      particles.forEach((p) => {
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, 5, 5);
+      });
+      return;
+    }
+
+    // Hvis spillet er over (tiden har gått ut) og man ikke har vunnet
+    if (gameOver) {
+      ctx.fillStyle = "black";
+      ctx.font = "24px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("Game Over!", 200, 200);
       return;
     }
 
@@ -183,25 +268,20 @@ const BurgerGame = () => {
       }
     });
 
-    // Tegn den delvise burgeren (bunn, ingredienser, topp) i riktig rekkefølge
+    // Tegn den delvise burgeren (bunn, ingredienser, topp) i riktig rekkefølge – uendret
     ctx.save();
     ctx.translate(burger.x, burger.y);
-
     const bunW = 50;
     const bunH = 50;
     const ingW = 50;
     const ingH = 50;
-
-    // Overlapp: for ingrediensene og for toppbrødet
-    const overlapIngredients = -45; 
-    const overlapTop = 40;          
-
+    const overlapIngredients = -45;
+    const overlapTop = 40;
     if (sortedCollected.length === 0) {
-      const topOffsetNoIngredients = 20; 
+      const topOffsetNoIngredients = 20;
       ctx.drawImage(bottomBunRef.current, -bunW / 2, -bunH, bunW, bunH);
       ctx.drawImage(topBunRef.current, -bunW / 2, -bunH - topOffsetNoIngredients, bunW, bunH);
     } else {
-      // Tegn bunn
       ctx.drawImage(bottomBunRef.current, -bunW / 2, -bunH, bunW, bunH);
       let stackY = -bunH;
       sortedCollected.forEach((type) => {
@@ -210,19 +290,26 @@ const BurgerGame = () => {
         else if (type === "ost") avImg = ostAvlangRef.current;
         else if (type === "salat") avImg = salatAvlangRef.current;
         else if (type === "tomat") avImg = tomatAvlangRef.current;
-        else if (type === "salat") avImg = salatAvlangRef.current;
         stackY -= (ingH + overlapIngredients);
         ctx.drawImage(avImg, -ingW / 2, stackY, ingW, ingH);
       });
       ctx.drawImage(topBunRef.current, -bunW / 2, stackY - bunH + overlapTop, bunW, bunH);
     }
     ctx.restore();
-  }, [burger, ingredients, collectedIngredients, topYOffset]);
 
+    // Tegn timeren øverst til høyre
+    ctx.fillStyle = "black";
+    ctx.font = "18px Arial";
+    ctx.textAlign = "right";
+    ctx.fillText(`Tid: ${timeLeft}s`, 390, 20);
+  }, [burger, ingredients, collectedIngredients, topYOffset, gameOver, timeLeft, particles]);
+
+  // Bruk piltastene for å endre retning manuelt
   const handleKeyDown = (e) => {
     if (["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown"].includes(e.key)) {
       e.preventDefault();
     }
+    if (gameOver || hasWon) return;
     if (e.key === "ArrowRight") {
       setBurger((prev) => ({ ...prev, direction: "right" }));
     } else if (e.key === "ArrowLeft") {
@@ -232,6 +319,16 @@ const BurgerGame = () => {
     } else if (e.key === "ArrowDown") {
       setBurger((prev) => ({ ...prev, direction: "down" }));
     }
+  };
+
+  // Reset-funksjon for å starte spillet på nytt
+  const handleReset = () => {
+    setBurger({ x: 200, y: 200, direction: "right" });
+    setIngredients(INITIAL_INGREDIENTS);
+    setCollectedIngredients([]);
+    setTimeLeft(5);
+    setGameOver(false);
+    setParticles([]);
   };
 
   return (
@@ -257,6 +354,11 @@ const BurgerGame = () => {
       <div style={{ textAlign: "center", marginTop: "10px" }}>
         Bruk piltastene for å styre burgeren og fange ingrediensene!
       </div>
+      {gameOver && !hasWon && (
+        <div style={{ textAlign: "center", marginTop: "10px" }}>
+          <button onClick={handleReset}>Retry</button>
+        </div>
+      )}
     </div>
   );
 };
