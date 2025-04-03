@@ -7,6 +7,7 @@ import { firestore } from "../../../firebase";
 import { getDocs, collection } from "@firebase/firestore";
 import { getAuth, signOut } from "firebase/auth"; // Import signOut from Firebase Auth
 import BurgerGame from "../../components/spinner/PacManGame.jsx";
+import LoaderModal from "../../components/spinner/LoaderModal.jsx";
 
 
 export default function Home() {
@@ -71,10 +72,9 @@ export default function Home() {
         La deg friste
       </h1>
       {/* Plasser PacManGame her for en synlig effekt */}
-    <div className="flex justify-center mb-6">
-      <BurgerGame />
+      <div>
+      <LoaderModal />
     </div>
-
       {/* Search and Logout Buttons */}
       <div className="absolute right-0 top-0 m-8 flex space-x-4">
         {/* Magnifying Glass Search Icon */}

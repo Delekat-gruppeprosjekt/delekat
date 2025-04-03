@@ -172,8 +172,8 @@ const BurgerGame = () => {
     }
   }, [burger, ingredients, collectedIngredients, gameOver, hasWon]);
 
-  // Bestem rekkefølgen for ingrediensene (uendret)
-  const CORRECT_ORDER = ["kjott", "ost", , "tomat", "salat"];
+  // Bestem rekkefølgen for ingrediensene
+  const CORRECT_ORDER = ["kjott", "ost", "tomat", "salat"];
   const sortedCollected = CORRECT_ORDER.filter((t) =>
     collectedIngredients.includes(t)
   );
@@ -268,7 +268,7 @@ const BurgerGame = () => {
       }
     });
 
-    // Tegn den delvise burgeren (bunn, ingredienser, topp) i riktig rekkefølge – uendret
+    // Tegn den delvise burgeren (bunn, ingredienser, topp) i riktig rekkefølge
     ctx.save();
     ctx.translate(burger.x, burger.y);
     const bunW = 50;
@@ -354,7 +354,7 @@ const BurgerGame = () => {
       <div style={{ textAlign: "center", marginTop: "10px" }}>
         Bruk piltastene for å styre burgeren og fange ingrediensene!
       </div>
-      {gameOver && !hasWon && (
+      {(gameOver && !hasWon) && (
         <div style={{ textAlign: "center", marginTop: "10px" }}>
           <button onClick={handleReset}>Retry</button>
         </div>
