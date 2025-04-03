@@ -139,8 +139,8 @@ const LoginComponent = () => {
                         value={email}
                         onChange={handleEmailChange}
                         required
-                        className={`w-full px-4 py-3 rounded-full bg-white border ${
-                            emailError ? 'border-red-500' : 'border-gray-200'
+                        className={`w-full px-4 py-3 rounded-md bg-white border ${
+                            emailError ? 'border-red-500' : 'border-[#438407]'
                         } focus:outline-none focus:border-[#3C5A3C] text-lg`}
                     />
                     {emailError && (
@@ -158,7 +158,7 @@ const LoginComponent = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        className="w-full px-4 py-3 rounded-full bg-white border border-gray-200 focus:outline-none focus:border-[#3C5A3C] text-lg pr-12"
+                        className="w-full px-4 py-3 rounded-md bg-white border border-[#438407] focus:outline-none focus:border-[#3C5A3C] text-lg pr-12"
                     />
                     <button
                         type="button"
