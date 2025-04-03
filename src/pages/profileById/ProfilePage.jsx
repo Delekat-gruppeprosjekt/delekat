@@ -87,17 +87,17 @@ export default function ProfilePage() {
   const handleDeleteRecipe = async (recipeId) => {
     const isOwnProfile = currentUserId === userId;
     if (!isAdmin && !isOwnProfile) {
-      alert("You do not have permission to delete this recipe.");
+      alert("Du har ikke retigheter til å slette denne oppskriften.");
       return;
     }
 
     try {
       await deleteDoc(doc(db, "recipes", recipeId));
       setUserRecipes((prevRecipes) => prevRecipes.filter((recipe) => recipe.id !== recipeId));
-      alert("Recipe deleted successfully.");
+      alert("Oppskriften ble slettet.");
     } catch (error) {
       console.error("Error deleting recipe:", error);
-      alert("Failed to delete recipe.");
+      alert("Kunne ikke slette oppskriften.");
     }
   };
 
@@ -126,7 +126,7 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div>Laster...</div>;
   if (error) return <div>Error: {error}</div>;
 
   const isOwnProfile = currentUserId === userId;
@@ -150,10 +150,10 @@ export default function ProfilePage() {
         <p className="text-xl break-words">{userData?.bio || "No bio set."}</p>
         {isOwnProfile && (
           <button
-            className="mt-4 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600"
+            className="mt-4 px-4 py-2 bg-green-btn text-BGwhite font-semibold rounded-lg hover:bg-green-btn-hover"
             onClick={handleEditProfile}
           >
-            Edit Profile
+            Rediger profil
           </button>
         )}
 
@@ -161,16 +161,16 @@ export default function ProfilePage() {
         <div className="mt-6">
           <button
             onClick={() => toggleView("recipes")}
-            className={`px-4 py-2 ${isRecipesView ? "bg-blue-500" : "bg-gray-300"} text-white font-semibold rounded-lg hover:bg-blue-600`}
+            className={`px-4 py-2 ${isRecipesView ? "bg-green-btn" : "bg-gray-300"} text-white font-semibold rounded-lg hover:bg-green-btn-hover`}
           >
-            Recipes
+            Oppskrifter
           </button>
           {isAdmin && (
             <button
               onClick={() => toggleView("users")}
-              className={`ml-4 px-4 py-2 ${!isRecipesView ? "bg-blue-500" : "bg-gray-300"} text-white font-semibold rounded-lg hover:bg-blue-600`}
+              className={`ml-4 px-4 py-2 ${!isRecipesView ? "bg-green-btn" : "bg-gray-300"} text-white font-semibold rounded-lg hover:bg-green-btn-hover`}
             >
-              Users
+              Brukere
             </button>
           )}
         </div>
@@ -180,11 +180,11 @@ export default function ProfilePage() {
       {isRecipesView ? (
         <div className="mt-8">
           <h2 className="text-2xl font-semibold mb-4 text-center">
-            {isOwnProfile ? "Your Recipes" : `${userData?.displayName}'s Recipes`}
+            {isOwnProfile ? "Dine oppskrifter" : `${userData?.displayName}'s oppskrifter`}
           </h2>
           {userRecipes.length === 0 ? (
             <p className="text-center text-gray-500">
-              {isOwnProfile ? "You have no recipes yet." : "This user has no recipes yet."}
+              {isOwnProfile ? "Du har ingen oppskrifter" : "Denne brukeren har ingen oppskrifter."}
             </p>
           ) : (
             <div className="max-w-[1400px] mx-auto px-4">
@@ -207,9 +207,9 @@ export default function ProfilePage() {
       ) : (
         isAdmin && (
           <div className="mt-8">
-            <h2 className="text-2xl font-semibold mb-4 text-center">All Users</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-center">Alle brukere</h2>
             {userList.length === 0 ? (
-              <p className="text-center text-gray-500">No users found.</p>
+              <p className="text-center text-gray-500">Ingen brukere funnet</p>
             ) : (
               <ul className="px-16 grid grid-cols-3 gap-8">
                 {userList.map((user) => (
@@ -223,7 +223,7 @@ export default function ProfilePage() {
                     >{user.displayName}</p>
                     <img
                     src={user.avatarUrl}
-                    className="ml-4 w-16 h-16 object-cover rounded-full border-1 border-white"
+                    className="ml-4 w-16 h-16 object-cover rounded-full border-1 border-BGwhite"
                     ></img>
                   </li>
                 ))}
