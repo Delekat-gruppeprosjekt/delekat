@@ -89,7 +89,7 @@ export default function SingleRecipe() {
         <div className="mb-6">
           <button
             onClick={handleBack}
-            className="px-4 py-2 bg-[#3C5A3C] text-white rounded hover:bg-[#2C432C] transition-colors"
+            className="px-4 py-2 bg-green-btn text-BGwhite rounded hover:bg-green-btn-hover transition-colors"
           >
             Tilbake
           </button>
@@ -121,7 +121,7 @@ export default function SingleRecipe() {
             ) : (
               <Link 
                 to={`/profile/${recipe.userId}`}
-                className="font-semibold text-lg hover:text-[#3C5A3C] transition-colors"
+                className="font-semibold text-lg hover:text-green-btn-hover transition-colors"
               >
                 {author?.displayName || 'Anonym'}
               </Link>
