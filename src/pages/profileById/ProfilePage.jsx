@@ -105,7 +105,6 @@ export default function ProfilePage() {
     try {
       const usersQuery = query(collection(db, "users"));
       const usersSnapshot = await getDocs(usersQuery);
-      console.log(usersSnapshot);
       const users = usersSnapshot.docs.map((doc) => ({
         id: doc.id,
         email: doc.data().email,
@@ -113,7 +112,6 @@ export default function ProfilePage() {
         displayName: doc.data().displayName,
       }));
       setUserList(users);
-      console.log(users)
     } catch (err) {
       console.error("Error fetching users:", err);
     }
