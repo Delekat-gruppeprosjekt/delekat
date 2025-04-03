@@ -1,10 +1,9 @@
 import React, { useRef, useEffect, useState } from "react";
 
-// Bruk fix2‑filene der de finnes:
 import hamburgerBunn from "./icons/hamburgerBunn-fix2.svg";
 import hamburgerTopp from "./icons/hamburgerTopp-fix2.svg";
 import kjottHel from "./icons/kjottHel.svg";
-import kjottAvlang from "./icons/kjottAvlang.svg"; // Ingen fix2-versjon
+import kjottAvlang from "./icons/kjottAvlangt-fix2.svg"; 
 import ostHel from "./icons/ostHel.svg";
 import ostAvlang from "./icons/ostAvlang-fix2.svg";
 import salatHel from "./icons/salatHel.svg";
@@ -132,7 +131,7 @@ const BurgerGame = () => {
   }, [burger]);
 
   // Bestem riktig rekkefølge for ingrediensene
-  const CORRECT_ORDER = ["kjott", "ost", "salat", "tomat"];
+  const CORRECT_ORDER = ["kjott", "ost", , "tomat","salat"];
   const sortedCollected = CORRECT_ORDER.filter((t) =>
     collectedIngredients.includes(t)
   );
@@ -191,21 +190,19 @@ const BurgerGame = () => {
     const bunW = 50;
     const bunH = 50;
     const ingW = 50;
-    const ingH = 60;
+    const ingH = 50;
 
     // Overlapp: for ingrediensene og for toppbrødet
-    const overlapIngredients = -45; // For ingrediensene
-    const overlapTop = 45;          // For toppbrødet
+    const overlapIngredients = -45; 
+    const overlapTop = 40;          
 
     if (sortedCollected.length === 0) {
-      // Ingen ingredienser: tegn bunn og topp med en liten offset slik at de ikke ligger helt oppå hverandre
-      const topOffsetNoIngredients = 10; // Endre denne verdien for å få ønsket visuell effekt
+      const topOffsetNoIngredients = 20; 
       ctx.drawImage(bottomBunRef.current, -bunW / 2, -bunH, bunW, bunH);
       ctx.drawImage(topBunRef.current, -bunW / 2, -bunH - topOffsetNoIngredients, bunW, bunH);
     } else {
       // Tegn bunn
       ctx.drawImage(bottomBunRef.current, -bunW / 2, -bunH, bunW, bunH);
-      // Stable ingrediensene i riktig rekkefølge
       let stackY = -bunH;
       sortedCollected.forEach((type) => {
         let avImg;
@@ -213,10 +210,10 @@ const BurgerGame = () => {
         else if (type === "ost") avImg = ostAvlangRef.current;
         else if (type === "salat") avImg = salatAvlangRef.current;
         else if (type === "tomat") avImg = tomatAvlangRef.current;
+        else if (type === "salat") avImg = salatAvlangRef.current;
         stackY -= (ingH + overlapIngredients);
         ctx.drawImage(avImg, -ingW / 2, stackY, ingW, ingH);
       });
-      // Tegn topp med sitt eget overlapp slik at den ligger riktig over den øverste ingrediensen
       ctx.drawImage(topBunRef.current, -bunW / 2, stackY - bunH + overlapTop, bunW, bunH);
     }
     ctx.restore();
