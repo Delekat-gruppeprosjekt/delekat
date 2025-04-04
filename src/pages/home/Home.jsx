@@ -1,23 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import HomeCard from "../../components/home/HomeCard2.jsx"; // Import HomeCard
-import { PiMagnifyingGlass, PiX } from "react-icons/pi";
-import { PiSignOutLight } from "react-icons/pi";
+import HomeCard from "../../components/home/HomeCard2.jsx";
+import { PiMagnifyingGlass, PiX, PiSignOutLight } from "react-icons/pi";
 import { useAuth } from "../../contexts/authContext/auth.jsx";
 import { firestore } from "../../../firebase";
 import { getDocs, collection, query, orderBy, limit, startAfter } from "@firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 
-// Spinner-komponentene
+// SPINNER-KOMPONENTER FRA PETRINE-SPINNER2
 import Spinner2Burger from "../../components/spinner/Spinner2Burger.jsx";
-import HomeGame from "../../components/spinner/HomeGame.jsx"; // Den nye komponenten
+import HomeGame from "../../components/spinner/HomeGame.jsx";
 
 export default function Home() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [oppskrifter, setOppskrifter] = useState([]);
-  // Justert terskel for mobil (her 1280px – juster etter behov)
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1280);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [lastVisible, setLastVisible] = useState(null);
@@ -26,21 +24,16 @@ export default function Home() {
   const searchInputRef = useRef(null);
   const observerRef = useRef(null);
 
-  // State for å styre visning av HomeGame (spill) – vises kun hvis flagget "homeGameClosed" ikke er satt
+  // Viser/spiller kun hvis localStorage-flagget IKKE er satt
   const [showGame, setShowGame] = useState(() => localStorage.getItem("homeGameClosed") !== "true");
 
-  // Funksjon for å hente oppskrifter med paginering
   const fetchRecipes = async (isInitialLoad = false) => {
     if (isLoading || (!hasMore && !isInitialLoad)) return;
     setIsLoading(true);
     try {
       let q;
       if (isInitialLoad) {
-        q = query(
-          collection(firestore, "recipes"),
-          orderBy("createdAt", "desc"),
-          limit(24)
-        );
+        q = query(collection(firestore, "recipes"), orderBy("createdAt", "desc"), limit(24));
       } else {
         q = query(
           collection(firestore, "recipes"),
@@ -73,6 +66,7 @@ export default function Home() {
     fetchRecipes(true);
   }, []);
 
+  // Intersection-observer for infinite scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -88,6 +82,7 @@ export default function Home() {
     return () => observer.disconnect();
   }, [hasMore, isLoading]);
 
+  // Klikk utenfor search => lukker
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -104,6 +99,7 @@ export default function Home() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isSearchExpanded, searchQuery]);
 
+  // Fokus på søkeinput når ekspandert
   useEffect(() => {
     if (isSearchExpanded && searchInputRef.current) {
       searchInputRef.current.focus();
@@ -114,6 +110,7 @@ export default function Home() {
     setSearchQuery(event.target.value.toLowerCase());
   };
 
+  // Lytter på resize for å bestemme mobil/desktop
   useEffect(() => {
     const handleResize = () => setIsSmallScreen(window.innerWidth < 1280);
     window.addEventListener("resize", handleResize);
@@ -142,18 +139,17 @@ export default function Home() {
     recipe.title.toLowerCase().includes(searchQuery)
   );
 
-  // Hvis isLoading er true, vis vanlig spinner/spinning-tekst.
-  // Vi lar HomeGame vises over resten av siden hvis showGame er true.
+  // Laster?
+  // - mobil => Spinner2Burger
+  // - desktop => "Loading..."
   if (isLoading) {
     return isSmallScreen ? <Spinner2Burger /> : <div className="flex items-center justify-center">Loading...</div>;
   }
 
   return (
     <div className="min-h-screen p-6 bg-BGcolor">
-      {/* Dersom showGame er true, vis HomeGame (spill) som en modal over siden */}
-      {showGame && (
-        <HomeGame onFinish={() => setShowGame(false)} />
-      )}
+      {/* Viser HomeGame hvis showGame er true */}
+      {showGame && <HomeGame onFinish={() => setShowGame(false)} />}
 
       <div className="flex items-center justify-start ml-1">
         <img
@@ -168,11 +164,12 @@ export default function Home() {
         La deg friste
       </h1>
 
-      {/* Search and Logout Buttons */}
       <div className="absolute right-0 top-0 m-8 flex items-center space-x-4">
         <div className="relative flex items-center" ref={searchInputRef}>
           <div
-            className={`flex items-center transition-all duration-300 ease-in-out ${isSearchExpanded ? "w-56" : "w-8"} overflow-hidden`}
+            className={`flex items-center transition-all duration-300 ease-in-out ${
+              isSearchExpanded ? "w-56" : "w-8"
+            } overflow-hidden`}
           >
             <input
               type="text"
@@ -223,9 +220,7 @@ export default function Home() {
       <div className="max-w-[1400px] mx-auto px-4">
         {filteredRecipes.length === 0 && searchQuery ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">
-              Ingen oppskrifter funnet. Prøv et annet søk.
-            </p>
+            <p className="text-gray-500 text-lg">Ingen oppskrifter funnet. Prøv et annet søk.</p>
           </div>
         ) : (
           <>
@@ -241,3 +236,4 @@ export default function Home() {
     </div>
   );
 }
+
