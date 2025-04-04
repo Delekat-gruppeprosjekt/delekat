@@ -4,6 +4,7 @@ import { doCreateUserWithEmailAndPassword } from "../../../auth";
 import { useAuth } from "../../contexts/authContext/auth";
 import { getFirestore, doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
+import { useToast } from "../../contexts/toastContext/toast";
 
 /**
  * Signup component that handles new user registration
@@ -13,6 +14,7 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 const Signup = () => {
     // Get authentication state
     const { userLoggedIn } = useAuth();
+    const { showToast } = useToast();
 
     // State management for form fields and UI states
     const [username, setUsername] = useState("");
@@ -20,12 +22,11 @@ const Signup = () => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [isSigningUp, setIsSigningUp] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [emailError, setEmailError] = useState("");
     const [usernameError, setUsernameError] = useState("");
     const [passwordError, setPasswordError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     // Initialize Firestore database
     const db = getFirestore();
@@ -138,6 +139,7 @@ const Signup = () => {
             });
         } catch (error) {
             console.error("Error adding user to Firestore: ", error);
+            throw error;
         }
     };
 
@@ -148,14 +150,15 @@ const Signup = () => {
      */
     const onSubmit = async (e) => {
         e.preventDefault();
-        setErrorMessage("");
+        
+        // Clear existing error states
         setEmailError("");
         setUsernameError("");
         setPasswordError("");
 
         // Validate username
         if (!username.trim()) {
-            setErrorMessage("Brukernavn er påkrevd!");
+            showToast("Brukernavn er påkrevd!", "error");
             return;
         }
 
@@ -164,57 +167,58 @@ const Signup = () => {
             const usernameExists = await checkUsernameExists(username);
             if (usernameExists) {
                 setUsernameError("Dette brukernavnet er allerede i bruk");
+                showToast("Dette brukernavnet er allerede i bruk", "error");
                 return;
             }
         } catch (error) {
             console.error("Error checking username:", error);
-            setErrorMessage("Det oppstod en feil ved sjekk av brukernavn");
+            showToast("Det oppstod en feil ved sjekk av brukernavn", "error");
             return;
         }
 
         // Validate email
         if (!validateEmail(email)) {
             setEmailError("Vennligst skriv inn en gyldig e-postadresse");
+            showToast("Vennligst skriv inn en gyldig e-postadresse", "error");
             return;
         }
 
         // Validate password
         if (!validatePassword(password)) {
             setPasswordError("Passordet må inneholde minst 8 tegn, én stor bokstav og ett tall");
+            showToast("Passordet oppfyller ikke kravene", "error");
             return;
         }
 
         // Validate password match
         if (password !== confirmPassword) {
-            setErrorMessage("Passordene matcher ikke!");
+            showToast("Passordene matcher ikke!", "error");
             return;
         }
 
         if (!isSigningUp) {
             setIsSigningUp(true);
             try {
-                // Create new user account
                 const result = await doCreateUserWithEmailAndPassword(email, password, username);
-                // Store user data in localStorage
                 localStorage.setItem("username", username);
                 localStorage.setItem("email", email);
-                // Create user document in Firestore
                 await createUserInFirestore(result.user);
+                showToast("Registrering vellykket! Du er nå logget inn.", "success");
             } catch (error) {
-                // Handle different types of registration errors
                 switch (error.code) {
                     case 'auth/email-already-in-use':
-                        setErrorMessage('E-postadressen er allerede i bruk');
+                        showToast('E-postadressen er allerede i bruk', 'error');
                         break;
                     case 'auth/invalid-email':
-                        setErrorMessage('Ugyldig e-postadresse');
+                        showToast('Ugyldig e-postadresse', 'error');
                         break;
                     case 'auth/weak-password':
-                        setErrorMessage('Passordet er for svakt');
+                        showToast('Passordet er for svakt', 'error');
                         break;
                     default:
-                        setErrorMessage('Det oppstod en feil ved registrering');
+                        showToast('Det oppstod en feil ved registrering', 'error');
                 }
+            } finally {
                 setIsSigningUp(false);
             }
         }
@@ -230,24 +234,6 @@ const Signup = () => {
         <div id="signup-container" className="min-h-screen bg-BGcolor flex flex-col items-center justify-center p-6">
             <h1 className="text-4xl font-semibold mb-12">Registrer deg</h1>
             <div className="w-full max-w-md">
-                {/* Error message display */}
-                {errorMessage && (
-                    <div className="bg-red-50 border-l-4 border-red-btn p-4 mb-6">
-                        <div className="flex">
-                            <div className="flex-shrink-0">
-                                <svg className="h-5 w-5 text-red-btn" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                                </svg>
-                            </div>
-                            <div className="ml-3">
-                                <p className="text-sm text-red-btn">
-                                    {errorMessage}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
                 <form onSubmit={onSubmit} className="space-y-6">
                     {/* Username input field */}
                     <div>
