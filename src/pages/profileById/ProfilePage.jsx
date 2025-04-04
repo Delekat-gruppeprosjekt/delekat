@@ -209,7 +209,7 @@ export default function ProfilePage() {
             {userList.length === 0 ? (
               <p className="text-center text-gray-500">Ingen brukere funnet</p>
             ) : (
-              <ul className="px-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <ul className="px-0 xs:px-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {userList.map((user) => (
                   <li
                     key={user.id}
@@ -221,7 +221,7 @@ export default function ProfilePage() {
                     >{user.displayName}</p>
                     <img
                     src={user.avatarUrl}
-                    className="ml-4 w-16 h-16 object-cover rounded-full border-1 border-BGwhite"
+                    className="ml-4 max-w-16 max-h-16 min-w-16 min-h-16 object-cover rounded-full border-1 border-BGwhite"
                     ></img>
                   </li>
                 ))}
