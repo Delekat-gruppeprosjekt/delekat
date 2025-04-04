@@ -153,8 +153,10 @@ function CreateNewRecipe() {
     }
   };
 
-  const handleAddIngredient = () => {
-    setIngredients([...ingredients, { ingredient: "", amount: "", unit: "" }]);
+  const handleAddIngredient = (index) => {
+    const newIngredients = [...ingredients];
+    newIngredients.splice(index + 1, 0, { ingredient: "", amount: "", unit: "" });
+    setIngredients(newIngredients);
   };
 
   const handleRemoveIngredient = (index) => {
@@ -167,8 +169,10 @@ function CreateNewRecipe() {
     });
   };
 
-  const handleAddInstruction = () => {
-    setInstructions([...instructions, ""]);
+  const handleAddInstruction = (index) => {
+    const newInstructions = [...instructions];
+    newInstructions.splice(index + 1, 0, "");
+    setInstructions(newInstructions);
   };
 
   const handleRemoveInstruction = (index) => {
@@ -432,7 +436,7 @@ function CreateNewRecipe() {
             <div className="flex flex-col">
               <label className="text-lg font-semibold">Ingredienser</label>
               {ingredients.map((ingredient, index) => (
-                <div key={index} className="flex items-start gap-4 mb-4">
+                <div key={index} className="flex items-center gap-4 mb-4">
                   <div className="flex-1">
                     <div className="flex flex-col">
                       <textarea
@@ -449,9 +453,6 @@ function CreateNewRecipe() {
                         maxLength={100}
                         rows={1}
                       />
-                      <span className="text-sm text-gray-500 mt-1">
-                        {ingredient.ingredient.length}/100 tegn
-                      </span>
                     </div>
                   </div>
                   <div className="w-24">
@@ -501,22 +502,27 @@ function CreateNewRecipe() {
                       </option>
                     ))}
                   </select>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveIngredient(index)}
-                    className="text-red-btn mt-1 hover:text-red-btn-hover cursor-pointer"
-                  >
-                    Fjern
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveIngredient(index)}
+                      className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#3C5A3C] text-[#3C5A3C] hover:bg-[#3C5A3C] hover:text-white transition-colors"
+                    >
+                      -
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleAddIngredient(index)}
+                      className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#3C5A3C] text-[#3C5A3C] hover:bg-[#3C5A3C] hover:text-white transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
               ))}
-              <button
-                type="button"
-                onClick={handleAddIngredient}
-                className="text-blue-btn mt-2 hover:text-blue-btn-hover cursor-pointer"
-              >
-                + Legg til ingrediens
-              </button>
+              <div className="text-sm text-gray-500 mt-1">
+                {ingredients[ingredients.length - 1].ingredient.length}/100 tegn
+              </div>
             </div>
 
             <div className="flex flex-col">
@@ -539,18 +545,27 @@ function CreateNewRecipe() {
                         maxLength={300}
                         rows={1}
                       />
-                      <span className="text-sm text-gray-500 mt-1">
+                      <span className="text-sm text-gray-500 mt-0.5">
                         {step.length}/300 tegn
                       </span>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveInstruction(index)}
-                    className="text-red-btn hover:text-red-btn-hover cursor-pointer"
-                  >
-                    Fjern
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveInstruction(index)}
+                      className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#3C5A3C] text-[#3C5A3C] hover:bg-[#3C5A3C] hover:text-white transition-colors"
+                    >
+                      -
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleAddInstruction(index)}
+                      className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#3C5A3C] text-[#3C5A3C] hover:bg-[#3C5A3C] hover:text-white transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
               ))}
               <button
