@@ -7,9 +7,8 @@ import { firestore } from "../../../firebase";
 import { getDocs, collection, query, orderBy, limit, startAfter } from "@firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 
-
 import Spinner2Burger from "../../components/spinner/Spinner2Burger.jsx";
-import HomeGame from "../../components/spinner/HomeGame.jsx"; 
+import HomeGame from "../../components/spinner/HomeGame.jsx";
 
 export default function Home() {
   const { currentUser } = useAuth();
@@ -24,10 +23,9 @@ export default function Home() {
   const searchInputRef = useRef(null);
   const observerRef = useRef(null);
 
-  // Vis/spill kun hvis localStorage-flagget IKKE er satt
+  // Viser/spiller kun hvis localStorage-flagget IKKE er satt
   const [showGame, setShowGame] = useState(() => localStorage.getItem("homeGameClosed") !== "true");
 
-  // Hent oppskrifter (paginering)
   const fetchRecipes = async (isInitialLoad = false) => {
     if (isLoading || (!hasMore && !isInitialLoad)) return;
     setIsLoading(true);
@@ -49,7 +47,6 @@ export default function Home() {
         id: doc.id,
         authorAvatarUrl: doc.data().authorAvatarUrl || "",
       }));
-
       if (recipes.length > 0) {
         setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
         setOppskrifter((prev) => (isInitialLoad ? recipes : [...prev, ...recipes]));
@@ -137,16 +134,12 @@ export default function Home() {
     recipe.title.toLowerCase().includes(searchQuery)
   );
 
-  // Hvis isLoading er true:
-  // - mobil => Spinner2Burger
-  // - desktop => "Loading..."
   if (isLoading) {
     return isSmallScreen ? <Spinner2Burger /> : <div className="flex items-center justify-center">Loading...</div>;
   }
 
   return (
     <div className="min-h-screen p-6 bg-BGcolor">
-      {/* Viser HomeGame hvis showGame er true */}
       {showGame && <HomeGame onFinish={() => setShowGame(false)} />}
 
       <div className="flex items-center justify-start ml-1">
@@ -162,7 +155,6 @@ export default function Home() {
         La deg friste
       </h1>
 
-      {/* Search and Logout Buttons */}
       <div className="absolute right-0 top-0 m-8 flex items-center space-x-4">
         <div className="relative flex items-center" ref={searchInputRef}>
           <div
@@ -179,7 +171,7 @@ export default function Home() {
               value={searchQuery}
               onChange={handleSearch}
             />
-            <div 
+            <div
               className={`absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 z-10 ${
                 isSearchExpanded ? "text-xl" : "text-2xl hover:scale-110"
               }`}
@@ -188,7 +180,7 @@ export default function Home() {
               <PiMagnifyingGlass />
             </div>
             {searchQuery && isSearchExpanded && (
-              <div 
+              <div
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700"
                 onClick={clearSearch}
               >
@@ -199,8 +191,8 @@ export default function Home() {
         </div>
 
         {currentUser && isSmallScreen && (
-          <button 
-            onClick={handleLogout} 
+          <button
+            onClick={handleLogout}
             className="text-xl flex gap-2 items-center hover:scale-110 hover:text-red-btn-hover duration-150 cursor-pointer"
           >
             <PiSignOutLight /> Logg ut
@@ -219,9 +211,7 @@ export default function Home() {
       <div className="max-w-[1400px] mx-auto px-4">
         {filteredRecipes.length === 0 && searchQuery ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">
-              Ingen oppskrifter funnet. Prøv et annet søk.
-            </p>
+            <p className="text-gray-500 text-lg">Ingen oppskrifter funnet. Prøv et annet søk.</p>
           </div>
         ) : (
           <>
