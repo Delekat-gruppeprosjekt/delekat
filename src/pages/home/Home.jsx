@@ -8,15 +8,17 @@ import { firestore } from "../../../firebase";
 import { getDocs, collection, query, orderBy, limit, startAfter } from "@firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 
+// Spinner-komponentene
 import LoaderModal from "../../components/spinner/LoaderModal.jsx";
-
+import Spinner2Burger from "../../components/spinner/Spinner2Burger.jsx";
 
 export default function Home() {
   const { currentUser } = useAuth(); // Get currentUser from context
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [oppskrifter, setOppskrifter] = useState([]);
-  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1280);
+  // Endret terskel for mobil til 768px
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   // State variables for infinite scrolling functionality
   const [lastVisible, setLastVisible] = useState(null); // Stores the last document reference for pagination
@@ -131,9 +133,9 @@ export default function Home() {
     setSearchQuery(event.target.value.toLowerCase());
   };
 
-
+  // Oppdaterer skjermstørrelse basert på resize-event
   useEffect(() => {
-    const handleResize = () => setIsSmallScreen(window.innerWidth < 1280);
+    const handleResize = () => setIsSmallScreen(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -144,7 +146,6 @@ export default function Home() {
       searchInputRef.current.focus();
     }
   };
-
 
   const handleLogout = async () => {
     const auth = getAuth(); // Get Firebase Auth instance
@@ -176,12 +177,21 @@ export default function Home() {
       <h1 className="text-3xl font-thin mb-6 flex justify-center mt-8">
         La deg friste
       </h1>
-    
-   
-      <LoaderModal />
-   
-      {/* Search and Logout Buttons */}
 
+      {/* 
+          Vis spinner basert på skjermstørrelse:
+          - Hvis skjermen er veldig liten (mobil, <768px), pakk Spinner2Burger inn i en wrapper med margin.
+          - Ellers vis LoaderModal.
+      */}
+      {isSmallScreen ? (
+        <div className="mb-4">
+          <Spinner2Burger />
+        </div>
+      ) : (
+        <LoaderModal />
+      )}
+
+      {/* Search and Logout Buttons */}
       <div className="absolute right-0 top-0 m-8 flex items-center space-x-4">
         {/* Expandable Search Bar */}
         <div className="relative flex items-center" ref={searchInputRef}>
@@ -218,13 +228,14 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Logg ut button only shows if user is logged in */}
-        {currentUser && isSmallScreen &&(
+        {/* Logg ut-knapp vises kun hvis bruker er logget inn og skjermen er mobil */}
+        {currentUser && isSmallScreen && (
           <button 
-          onClick={handleLogout} 
-          className=" text-xl flex gap-2 items-center hover:scale-110 hover:text-red-btn-hover duration-150 cursor-pointer" >
-           <PiSignOutLight /> Logg ut
-            </button>
+            onClick={handleLogout} 
+            className="text-xl flex gap-2 items-center hover:scale-110 hover:text-red-btn-hover duration-150 cursor-pointer"
+          >
+            <PiSignOutLight /> Logg ut
+          </button>
         )}
       </div>
 
@@ -235,7 +246,6 @@ export default function Home() {
             ? "Ingen oppskrifter funnet" 
             : `${filteredRecipes.length} oppskrift${filteredRecipes.length !== 1 ? 'er' : ''} funnet`
           }
-
         </div>
       )}
 
