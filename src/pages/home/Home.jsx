@@ -8,6 +8,9 @@ import { firestore } from "../../../firebase";
 import { getDocs, collection, query, orderBy, limit, startAfter } from "@firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 
+import LoaderModal from "../../components/spinner/LoaderModal.jsx";
+
+
 export default function Home() {
   const { currentUser } = useAuth(); // Get currentUser from context
   const navigate = useNavigate();
@@ -173,7 +176,10 @@ export default function Home() {
       <h1 className="text-3xl font-thin mb-6 flex justify-center mt-8">
         La deg friste
       </h1>
-
+    
+   
+      <LoaderModal />
+   
       {/* Search and Logout Buttons */}
 
       <div className="absolute right-0 top-0 m-8 flex items-center space-x-4">
@@ -229,6 +235,7 @@ export default function Home() {
             ? "Ingen oppskrifter funnet" 
             : `${filteredRecipes.length} oppskrift${filteredRecipes.length !== 1 ? 'er' : ''} funnet`
           }
+
         </div>
       )}
 
