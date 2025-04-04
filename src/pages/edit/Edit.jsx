@@ -287,68 +287,87 @@ function EditRecipe() {
           <h1 className="text-3xl font-bold mb-6">Rediger oppskrift</h1>
           <form onSubmit={handleUpdateRecipe} className="space-y-6">
             <div className="flex flex-col">
-              <label className="text-lg font-semibold" htmlFor="title">Tittel</label>
-              <input 
-                type="text" 
-                id="title" 
-                name="title" 
-                value={title} 
+              <label className="text-lg font-semibold" htmlFor="title">
+                Tittel
+              </label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                value={title}
                 onChange={(e) => {
                   if (e.target.value.length <= 60) {
                     setTitle(e.target.value);
                   }
                 }}
-                required 
+                required
                 maxLength={60}
-                className={`w-full p-2 border border-PMgreen rounded-md ${formErrors.title ? 'border-red-btn' : ''}`}
-                placeholder="Oppskriftens tittel" 
+                className={`w-full p-2 border border-PMgreen rounded-md ${
+                  formErrors.title ? "border-red-btn" : ""
+                }`}
+                placeholder="Oppskriftens tittel"
               />
               <span className="text-sm text-gray-500 mt-1">
                 {title.length}/60 tegn
               </span>
               {formErrors.title && (
-                <span className="text-red-btn text-sm mt-1">{formErrors.title}</span>
+                <span className="text-red-btn text-sm mt-1">
+                  {formErrors.title}
+                </span>
               )}
             </div>
 
             <div className="flex flex-col">
-              <label className="text-lg font-semibold" htmlFor="imageUrl">Bilde-URL</label>
-              <input 
-                type="text" 
-                id="imageUrl" 
-                name="imageUrl" 
-                value={imageUrl} 
-                onChange={(e) => handleImageUrlChange(e.target.value)} 
-                required 
-                className={`w-full p-2 border border-PMgreen rounded-md ${imageError ? 'border-red-btn' : ''}`} 
-                placeholder="Skriv inn bilde-URL" 
+              <label className="text-lg font-semibold" htmlFor="imageUrl">
+                Bilde-URL
+              </label>
+              <input
+                type="text"
+                id="imageUrl"
+                name="imageUrl"
+                value={imageUrl}
+                onChange={(e) => handleImageUrlChange(e.target.value)}
+                required
+                className={`w-full p-2 border border-PMgreen rounded-md ${
+                  imageError ? "border-red-btn" : ""
+                }`}
+                placeholder="Skriv inn bilde-URL"
               />
               {imageError && (
-                <span className="text-red-btn text-sm mt-1">Ugyldig bilde-URL. Vennligst sjekk at URL-en er korrekt og at den peker til et bilde.</span>
+                <span className="text-red-btn text-sm mt-1">
+                  Ugyldig bilde-URL. Vennligst sjekk at URL-en er korrekt og at
+                  den peker til et bilde.
+                </span>
               )}
             </div>
 
             <div className="flex flex-col">
-              <label className="text-lg font-semibold" htmlFor="description">Beskrivelse</label>
-              <textarea 
-                id="description" 
-                name="description" 
-                value={description} 
+              <label className="text-lg font-semibold" htmlFor="description">
+                Beskrivelse
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                value={description}
                 onChange={(e) => {
                   if (e.target.value.length <= 1000) {
                     setDescription(e.target.value);
                   }
-                }} 
-                required 
-                className="w-full p-2 border border-PMgreen rounded-md" 
+                }}
+                required
+                className="w-full p-2 border border-PMgreen rounded-md"
                 placeholder="Skriv en beskrivelse av oppskriften"
                 maxLength={1000}
               />
-              <span className="text-sm text-gray-500 mt-1">{description.length}/1000 tegn</span>
+              <span className="text-sm text-gray-500 mt-1">
+                {description.length}/1000 tegn
+              </span>
             </div>
 
             <div className="flex flex-col">
-              <label className="text-lg font-semibold" htmlFor="difficulty">Vanskelighetsgrad</label>
+              <label className="text-lg font-semibold" htmlFor="difficulty">
+                Vanskelighetsgrad
+              </label>
               <select
                 id="difficulty"
                 name="difficulty"
@@ -363,11 +382,18 @@ function EditRecipe() {
             </div>
 
             <div className="flex flex-col">
-              <label className="text-lg font-semibold" htmlFor="portions">Antall porsjoner</label>
+              <label className="text-lg font-semibold" htmlFor="portions">
+                Antall porsjoner
+              </label>
               <div className="flex items-center gap-4">
                 <button
+                  type="button"
                   onClick={() => handlePortionChange(portions - 1)}
-                  className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#3C5A3C] text-[#3C5A3C] hover:bg-[#3C5A3C] hover:text-white transition-colors ${portions <= 1 ? "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-[#3C5A3C]" : ""}`}
+                  className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#3C5A3C] text-[#3C5A3C] hover:bg-[#3C5A3C] hover:text-white transition-colors ${
+                    portions <= 1
+                      ? "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-[#3C5A3C]"
+                      : ""
+                  }`}
                   disabled={portions <= 1}
                 >
                   -
@@ -401,8 +427,13 @@ function EditRecipe() {
                   title="Maksimalt antall porsjoner er 99"
                 />
                 <button
+                  type="button"
                   onClick={() => handlePortionChange(portions + 1)}
-                  className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#3C5A3C] text-[#3C5A3C] hover:bg-[#3C5A3C] hover:text-white transition-colors ${portions >= 99 ? "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-[#3C5A3C]" : ""}`}
+                  className={`w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#3C5A3C] text-[#3C5A3C] hover:bg-[#3C5A3C] hover:text-white transition-colors ${
+                    portions >= 99
+                      ? "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-[#3C5A3C]"
+                      : ""
+                  }`}
                   disabled={portions >= 99}
                 >
                   +
@@ -411,7 +442,9 @@ function EditRecipe() {
             </div>
 
             <div className="flex flex-col">
-              <label className="text-lg font-semibold" htmlFor="cookingTime">Tilberedningstid</label>
+              <label className="text-lg font-semibold" htmlFor="cookingTime">
+                Tilberedningstid
+              </label>
               <select
                 id="cookingTime"
                 name="cookingTime"
@@ -434,15 +467,15 @@ function EditRecipe() {
                 <div key={index} className="flex items-start gap-4 mb-4">
                   <div className="flex-1">
                     <div className="flex flex-col">
-                      <textarea 
-                        name="ingredient" 
-                        value={item.ingredient} 
+                      <textarea
+                        name="ingredient"
+                        value={item.ingredient}
                         onChange={(e) => {
                           if (e.target.value.length <= 100) {
                             handleInputChange(e, index, "ingredient");
                           }
                         }}
-                        className="w-full p-2 border border-PMgreen rounded-md resize-none min-h-[38px] max-h-[100px]" 
+                        className="w-full p-2 border border-PMgreen rounded-md resize-none min-h-[38px] max-h-[100px]"
                         placeholder="Ingrediens"
                         required
                         maxLength={100}
@@ -454,11 +487,11 @@ function EditRecipe() {
                     </div>
                   </div>
                   <div className="w-24">
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       inputMode="decimal"
-                      name="amount" 
-                      value={item.amount} 
+                      name="amount"
+                      value={item.amount}
                       onChange={(e) => {
                         const value = e.target.value;
                         // Allow numbers and single decimal point
@@ -474,22 +507,26 @@ function EditRecipe() {
                       }}
                       onBlur={() => {
                         const numValue = parseFloat(item.amount);
-                        if (item.amount === "" || isNaN(numValue) || numValue <= 0) {
+                        if (
+                          item.amount === "" ||
+                          isNaN(numValue) ||
+                          numValue <= 0
+                        ) {
                           const newIngredients = [...ingredients];
                           newIngredients[index].amount = "1";
                           setIngredients(newIngredients);
                         }
                       }}
-                      className="w-full p-2 border border-PMgreen rounded-md" 
+                      className="w-full p-2 border border-PMgreen rounded-md"
                       placeholder="Mengde"
                       required
                       title="Maksimal mengde er 9999"
                     />
                   </div>
-                  <select 
-                    name="unit" 
-                    value={item.unit} 
-                    onChange={(e) => handleInputChange(e, index, "ingredient")} 
+                  <select
+                    name="unit"
+                    value={item.unit}
+                    onChange={(e) => handleInputChange(e, index, "ingredient")}
                     className="w-1/4 p-2 border border-[PMgreen rounded-md"
                     required
                   >
@@ -500,10 +537,22 @@ function EditRecipe() {
                       </option>
                     ))}
                   </select>
-                  <button type="button" onClick={() => handleRemoveIngredient(index)} className="text-red-btn hover:text-red-btn-hover cursor-pointer mt-1">Fjern</button>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveIngredient(index)}
+                    className="text-red-btn hover:text-red-btn-hover cursor-pointer mt-1"
+                  >
+                    Fjern
+                  </button>
                 </div>
               ))}
-              <button type="button" onClick={handleAddIngredient} className="text-blue-btn hover:text-blue-btn-hover cursor-pointer mt-2">+ Legg til ingrediens</button>
+              <button
+                type="button"
+                onClick={handleAddIngredient}
+                className="text-blue-btn hover:text-blue-btn-hover cursor-pointer mt-2"
+              >
+                + Legg til ingrediens
+              </button>
             </div>
 
             <div className="flex flex-col">
@@ -513,15 +562,15 @@ function EditRecipe() {
                   <span className="font-bold">{index + 1}.</span>
                   <div className="flex-1">
                     <div className="flex flex-col">
-                      <textarea 
-                        value={step} 
+                      <textarea
+                        value={step}
                         onChange={(e) => {
                           if (e.target.value.length <= 300) {
                             handleInputChange(e, index, "instruction");
                           }
                         }}
-                        className="w-full p-2 border border-[#438407] rounded-md resize-none min-h-[38px] max-h-[150px]" 
-                        placeholder={`Trinn ${index + 1}`} 
+                        className="w-full p-2 border border-[#438407] rounded-md resize-none min-h-[38px] max-h-[150px]"
+                        placeholder={`Trinn ${index + 1}`}
                         required
                         maxLength={300}
                         rows={1}
@@ -531,10 +580,22 @@ function EditRecipe() {
                       </span>
                     </div>
                   </div>
-                  <button type="button" onClick={() => handleRemoveInstruction(index)} className="text-red-btn hover:text-red-btn-hover cursor-pointer">Fjern</button>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveInstruction(index)}
+                    className="text-red-btn hover:text-red-btn-hover cursor-pointer"
+                  >
+                    Fjern
+                  </button>
                 </div>
               ))}
-              <button type="button" onClick={handleAddInstruction} className="text-blue-btn hover:text-blue-btn-hover cursor-pointer mt-2">+ Legg til trinn</button>
+              <button
+                type="button"
+                onClick={handleAddInstruction}
+                className="text-blue-btn hover:text-blue-btn-hover cursor-pointer mt-2"
+              >
+                + Legg til trinn
+              </button>
             </div>
 
             <div className="flex justify-end space-x-4 mb-24">
@@ -545,9 +606,11 @@ function EditRecipe() {
               >
                 Avbryt
               </button>
-              <button 
-                type="submit" 
-                className={`bg-green-btn text-BGwhite px-4 py-2 rounded-md hover:bg-green-btn-hover ${loading ? "cursor-not-allowed opacity-50" : ""}`} 
+              <button
+                type="submit"
+                className={`bg-green-btn text-BGwhite px-4 py-2 rounded-md hover:bg-green-btn-hover ${
+                  loading ? "cursor-not-allowed opacity-50" : ""
+                }`}
                 disabled={loading}
               >
                 {loading ? "Lagrer..." : "Lagre endringer"}
