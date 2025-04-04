@@ -6,7 +6,6 @@ function Modal({ isOpen, onClose, children }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white p-6 rounded shadow-lg relative">
-     
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-white text-xl font-bold bg-red-500 px-2 py-1 rounded"
@@ -19,14 +18,24 @@ function Modal({ isOpen, onClose, children }) {
   );
 }
 
-export default function LoaderModal() {
-  // Åpner modalen direkte
+export default function LoaderModal({ onClose }) {
   const [modalOpen, setModalOpen] = useState(true);
+
+  const handleClose = () => {
+    // 👉 lagre at den er lukket
+    localStorage.setItem("homeGameClosed", "true");
+
+    setModalOpen(false);
+
+    // 👉 kall parent sin onClose hvis den finnes
+    if (onClose) onClose();
+  };
+
+  if (!modalOpen) return null;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
-      
+      <Modal isOpen={modalOpen} onClose={handleClose}>
         <BurgerGame />
       </Modal>
     </div>
