@@ -1,5 +1,5 @@
 import React from "react";
-import spinner2Burger from "./icons/Spinner2Burger.svg";
+import spinner2Burger from "./icons/spinner2Burger.svg";
 import spinner2hamburgerkjott from "./icons/Spinner2hamburgerkjott.svg";
 import spinner2Ost from "./icons/Spinner2Ost.svg";
 import spinner2Salat from "./icons/Spinner2Salat.svg";
