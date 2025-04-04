@@ -82,21 +82,16 @@ const LoginComponent = () => {
             } catch (error) {
                 // Handle different types of authentication errors
                 console.error('Firebase auth error:', error.code);
-                switch (error.code) {
-                    case 'auth/user-not-found':
-                        setErrorMessage('Ingen bruker funnet med denne e-postadressen');
-                        break;
-                    case 'auth/wrong-password':
-                        setErrorMessage('Feil passord');
-                        break;
-                    case 'auth/invalid-email':
-                        setErrorMessage('Ugyldig e-postadresse');
-                        break;
-                    case 'auth/invalid-credential':
-                        setErrorMessage('Ingen bruker funnet med denne e-postadressen');
-                        break;
-                    default:
-                        setErrorMessage('Det oppstod en feil ved innlogging');
+                
+                // For security reasons, show a generic error message for all authentication errors
+                if (error.code === 'auth/invalid-credential' || 
+                    error.code === 'auth/user-not-found' || 
+                    error.code === 'auth/wrong-password') {
+                    setErrorMessage('Feil brukernavn eller passord');
+                } else if (error.code === 'auth/invalid-email') {
+                    setErrorMessage('Ugyldig e-postadresse');
+                } else {
+                    setErrorMessage('Det oppstod en feil ved innlogging');
                 }
             } finally {
                 setIsSigningIn(false);
@@ -114,15 +109,15 @@ const LoginComponent = () => {
         <div className="w-full max-w-md">
             {/* Error message display */}
             {errorMessage && (
-                <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+                <div className="bg-red-50 border-l-4 border-red-btn p-4 mb-6">
                     <div className="flex">
                         <div className="flex-shrink-0">
-                            <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                            <svg className="h-5 w-5 text-red-btn" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                             </svg>
                         </div>
                         <div className="ml-3">
-                            <p className="text-sm text-red-700">
+                            <p className="text-sm text-red-btn">
                                 {errorMessage}
                             </p>
                         </div>
@@ -139,12 +134,14 @@ const LoginComponent = () => {
                         value={email}
                         onChange={handleEmailChange}
                         required
-                        className={`w-full px-4 py-3 rounded-full bg-white border ${
-                            emailError ? 'border-red-500' : 'border-gray-200'
+
+                        className={`w-full px-4 py-3 rounded-md bg-white border ${
+                            emailError ? 'border-red-500' : 'border-[#438407]'
+
                         } focus:outline-none focus:border-[#3C5A3C] text-lg`}
                     />
                     {emailError && (
-                        <p className="mt-2 text-sm text-red-600 pl-4">
+                        <p className="mt-2 text-sm text-red-btn pl-4">
                             {emailError}
                         </p>
                     )}
@@ -158,7 +155,9 @@ const LoginComponent = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        className="w-full px-4 py-3 rounded-full bg-white border border-gray-200 focus:outline-none focus:border-[#3C5A3C] text-lg pr-12"
+
+                        className="w-full px-4 py-3 rounded-md bg-white border border-[#438407] focus:outline-none focus:border-[#3C5A3C] text-lg pr-12"
+
                     />
                     <button
                         type="button"
@@ -173,27 +172,20 @@ const LoginComponent = () => {
                 <button
                     type="submit"
                     disabled={isSigningIn || emailError}
-                    className={`w-full py-3 text-white rounded-full text-lg font-medium transition-colors duration-200 ${
+                    className={`w-full py-3 text-BGwhite rounded-full text-lg font-medium transition-colors duration-200 ${
                         isSigningIn || emailError
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-[#3C5A3C] hover:bg-[#2C432C]'
+                        ? 'bg-gray-500 cursor-not-allowed'
+                        : 'bg-green-btn hover:bg-green-btn-hover'
                     }`}
                 >
                     {isSigningIn ? "Logger inn..." : "Logg inn"}
                 </button>
             </form>
 
-            {/* Reset password link */}
-            <div className="mt-6 text-center">
-                <Link to="/reset-password" className="text-[#3C5A3C] hover:underline">
-                    Glemt passord?
-                </Link>
-            </div>
-
             {/* Sign up link */}
             <div className="mt-8 text-center">
                 <p className="text-gray-600">Har du ikke en konto?</p>
-                <Link to="/signup" className="block mt-2 text-[#3C5A3C] hover:underline text-lg">
+                <Link to="/signup" className="block mt-2 text-PMgreen hover:underline text-lg">
                     Registrer deg
                 </Link>
             </div>

@@ -1,18 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 export default function EditProfilePage() {
   const { userId } = useParams();
   const navigate = useNavigate();
   const db = getFirestore();
+  const auth = getAuth();
 
   const [avatarUrl, setAvatarUrl] = useState("");
   const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [avatarError, setAvatarError] = useState(null);
 
   useEffect(() => {
+    // Redirect if logged-in user is not the same as userId in URL
+    if (auth.currentUser?.uid !== userId) {
+      navigate("/");
+      return;
+    }
+
     const fetchUserData = async () => {
       try {
         const userDocRef = doc(db, "users", userId);
@@ -32,9 +41,24 @@ export default function EditProfilePage() {
     };
 
     fetchUserData();
-  }, [userId, db]);
+  }, [userId, db, auth, navigate]);
+
+  const validateImageUrl = (url) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
+  };
 
   const handleSaveChanges = async () => {
+    const isValidImage = await validateImageUrl(avatarUrl);
+    if (!isValidImage) {
+      setAvatarError("URL-en peker ikke til et gyldig bilde.");
+      return;
+    }
+
     try {
       const userDocRef = doc(db, "users", userId);
       await updateDoc(userDocRef, {
@@ -49,7 +73,7 @@ export default function EditProfilePage() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Laster...</div>;
   }
 
   if (error) {
@@ -58,8 +82,8 @@ export default function EditProfilePage() {
 
   return (
     <div className="min-h-screen bg-BGcolor p-6">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Edit Profile</h1>
+      <div className="max-w-3xl mx-auto bg-BGwhite rounded-lg shadow-sm p-6">
+        <h1 className="text-3xl font-bold mb-6">Rediger Profil</h1>
         <div className="flex flex-col mb-4">
           <label className="text-lg font-semibold" htmlFor="avatarUrl">
             Avatar URL
@@ -68,10 +92,14 @@ export default function EditProfilePage() {
             type="text"
             id="avatarUrl"
             value={avatarUrl}
-            onChange={(e) => setAvatarUrl(e.target.value)}
-            className="w-full p-2 border rounded-md"
-            placeholder="Enter avatar URL"
+            onChange={(e) => {
+              setAvatarUrl(e.target.value);
+              setAvatarError(null); // Clear previous error
+            }}
+            className="w-full p-2 border border-PMgreen rounded-md"
+            placeholder="Fyll inn avatar URL"
           />
+          {avatarError && <p className="text-red-btn">{avatarError}</p>}
         </div>
         <div className="flex flex-col mb-4">
           <label className="text-lg font-semibold" htmlFor="bio">
@@ -85,26 +113,26 @@ export default function EditProfilePage() {
                 setBio(e.target.value);
               }
             }}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border border-PMgreen rounded-md"
             rows="4"
-            placeholder="Write your bio (max 150 characters)"
+            placeholder="Skriv en Bio (max 150 tegn)"
           ></textarea>
           <p className="text-sm text-gray-500 mt-1">
-            {bio.length}/150 characters
+            {bio.length}/150 Tegn
           </p>
         </div>
         <div className="flex justify-end space-x-4">
           <button
             onClick={() => navigate(`/profile/${userId}`)}
-            className="px-4 py-2 bg-gray-300 text-black rounded-lg"
+            className="px-4 py-2 bg-gray-500 text-BGwhite rounded-lg hover:bg-gray-600"
           >
-            Cancel
+            Avbryt
           </button>
           <button
             onClick={handleSaveChanges}
-            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+            className="px-4 py-2 bg-green-btn text-BGwhite rounded-lg hover:bg-green-btn-hover"
           >
-            Save Changes
+            Oppdater profil
           </button>
         </div>
       </div>

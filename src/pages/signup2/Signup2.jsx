@@ -25,6 +25,7 @@ const Signup = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [emailError, setEmailError] = useState("");
     const [usernameError, setUsernameError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
 
     // Initialize Firestore database
     const db = getFirestore();
@@ -58,6 +59,18 @@ const Signup = () => {
     const validateEmail = (email) => {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         return emailRegex.test(email);
+    };
+
+    /**
+     * Validates password requirements
+     * @param {string} password - The password to validate
+     * @returns {boolean} - True if password meets requirements, false otherwise
+     */
+    const validatePassword = (password) => {
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasNumber = /\d/.test(password);
+        const hasMinLength = password.length >= 8;
+        return hasUpperCase && hasNumber && hasMinLength;
     };
 
     /**
@@ -96,6 +109,20 @@ const Signup = () => {
     };
 
     /**
+     * Handles password input changes and validates in real-time
+     * @param {Event} e - The input change event
+     */
+    const handlePasswordChange = (e) => {
+        const newPassword = e.target.value;
+        setPassword(newPassword);
+        if (newPassword && !validatePassword(newPassword)) {
+            setPasswordError("Passordet må inneholde minst 8 tegn, én stor bokstav og ett tall");
+        } else {
+            setPasswordError("");
+        }
+    };
+
+    /**
      * Creates a new user document in Firestore with default values
      * @param {Object} user - The Firebase auth user object
      */
@@ -124,6 +151,7 @@ const Signup = () => {
         setErrorMessage("");
         setEmailError("");
         setUsernameError("");
+        setPasswordError("");
 
         // Validate username
         if (!username.trim()) {
@@ -147,6 +175,12 @@ const Signup = () => {
         // Validate email
         if (!validateEmail(email)) {
             setEmailError("Vennligst skriv inn en gyldig e-postadresse");
+            return;
+        }
+
+        // Validate password
+        if (!validatePassword(password)) {
+            setPasswordError("Passordet må inneholde minst 8 tegn, én stor bokstav og ett tall");
             return;
         }
 
@@ -198,15 +232,15 @@ const Signup = () => {
             <div className="w-full max-w-md">
                 {/* Error message display */}
                 {errorMessage && (
-                    <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+                    <div className="bg-red-50 border-l-4 border-red-btn p-4 mb-6">
                         <div className="flex">
                             <div className="flex-shrink-0">
-                                <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                                <svg className="h-5 w-5 text-red-btn" viewBox="0 0 20 20" fill="currentColor">
                                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                                 </svg>
                             </div>
                             <div className="ml-3">
-                                <p className="text-sm text-red-700">
+                                <p className="text-sm text-red-btn">
                                     {errorMessage}
                                 </p>
                             </div>
@@ -223,12 +257,12 @@ const Signup = () => {
                             value={username}
                             onChange={handleUsernameChange}
                             required
-                            className={`w-full px-4 py-3 rounded-full bg-white border ${
-                                usernameError ? 'border-red-500' : 'border-gray-200'
+                            className={`w-full px-4 py-3 rounded-md bg-white border ${
+                                usernameError ? 'border-red-500' : 'border-[#438407]'
                             } focus:outline-none focus:border-[#3C5A3C] text-lg`}
                         />
                         {usernameError && (
-                            <p className="mt-2 text-sm text-red-600 pl-4">
+                            <p className="mt-2 text-sm text-red-btn pl-4">
                                 {usernameError}
                             </p>
                         )}
@@ -242,12 +276,12 @@ const Signup = () => {
                             value={email}
                             onChange={handleEmailChange}
                             required
-                            className={`w-full px-4 py-3 rounded-full bg-white border ${
-                                emailError ? 'border-red-500' : 'border-gray-200'
+                            className={`w-full px-4 py-3 rounded-md bg-white border ${
+                                emailError ? 'border-red-500' : 'border-[#438407]'
                             } focus:outline-none focus:border-[#3C5A3C] text-lg`}
                         />
                         {emailError && (
-                            <p className="mt-2 text-sm text-red-600 pl-4">
+                            <p className="mt-2 text-sm text-red-btn pl-4">
                                 {emailError}
                             </p>
                         )}
@@ -259,9 +293,12 @@ const Signup = () => {
                             type={showPassword ? "text" : "password"}
                             placeholder="Passord"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={handlePasswordChange}
                             required
-                            className="w-full px-4 py-3 rounded-full bg-white border border-gray-200 focus:outline-none focus:border-[#3C5A3C] text-lg pr-12"
+
+                            className={`w-full px-4 py-3 rounded-md bg-white border ${
+                                passwordError ? 'border-red-500' : 'border-[#438407]'
+                            } focus:outline-none focus:border-[#3C5A3C] text-lg pr-12`}
                         />
                         <button
                             type="button"
@@ -270,6 +307,11 @@ const Signup = () => {
                         >
                             {showPassword ? <AiOutlineEyeInvisible size={24} /> : <AiOutlineEye size={24} />}
                         </button>
+                        {passwordError && (
+                            <p className="mt-2 text-sm text-red-600 pl-4">
+                                {passwordError}
+                            </p>
+                        )}
                     </div>
 
                     {/* Confirm password input field with show/hide toggle */}
@@ -280,7 +322,7 @@ const Signup = () => {
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             required
-                            className="w-full px-4 py-3 rounded-full bg-white border border-gray-200 focus:outline-none focus:border-[#3C5A3C] text-lg pr-12"
+                            className="w-full px-4 py-3 rounded-md bg-white border border-[#438407] focus:outline-none focus:border-[#3C5A3C] text-lg pr-12"
                         />
                         <button
                             type="button"
@@ -295,10 +337,10 @@ const Signup = () => {
                     <button
                         type="submit"
                         disabled={isSigningUp || emailError}
-                        className={`w-full py-3 text-white rounded-full text-lg font-medium transition-colors duration-200 ${
+                        className={`w-full py-3 text-BGwhite rounded-full text-lg font-medium transition-colors duration-200 ${
                             isSigningUp || emailError
                             ? 'bg-gray-400 cursor-not-allowed'
-                            : 'bg-[#3C5A3C] hover:bg-[#2C432C]'
+                            : 'bg-green-btn hover:bg-green-btn-hover'
                         }`}
                     >
                         {isSigningUp ? "Registrerer..." : "Registrer"}
@@ -308,7 +350,7 @@ const Signup = () => {
                 {/* Login link */}
                 <div className="mt-8 text-center">
                     <p className="text-gray-600">Har du allerede en bruker?</p>
-                    <Link to="/login" className="block mt-2 text-[#3C5A3C] hover:underline text-lg">
+                    <Link to="/login" className="block mt-2 text-PMgreen hover:underline text-lg">
                         Logg inn
                     </Link>
                 </div>

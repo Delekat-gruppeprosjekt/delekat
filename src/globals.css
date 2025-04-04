@@ -8,11 +8,33 @@
     --color-SGgreen: #93C572;
     --color-BGwhite: #FDFDFD;
     --color-navbar-border: #438407;
-  }  
+    --color-red-btn: #DC0922;
+    --color-red-btn-hover: #BD081C;
+    --color-green-btn: #719F46;
+    --color-green-btn-hover: #4C6B2F;
+    --color-blue-btn: #0059B3;
+    --color-blue-btn-hover: #003366;
+}  
 
 /* Development help tool -Frankie*/
 body {
-    
     font-family: "DM Sans", sans-serif;
-   
+    background-color: var(--color-BGcolor);
+}
+
+@media screen and (max-width: 1280px) {
+    main {
+        padding-bottom: 64px;
+    }
+    
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-in-out forwards;
 }
