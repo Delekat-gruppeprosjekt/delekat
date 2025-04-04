@@ -6,7 +6,7 @@ import kjottHel from "./icons/kjottHel.svg";
 import kjottAvlang from "./icons/kjottAvlangt-fix2.svg"; 
 import ostHel from "./icons/ostHel.svg";
 import ostAvlang from "./icons/ostAvlang-fix2.svg";
-import salatHel from "./icons/salatHel.svg";
+import salatHel from "./icons/salatHEL.svg";
 import salatAvlang from "./icons/salatAvlang-fix2.svg";
 import tomatHel from "./icons/tomatHel.svg";
 import tomatAvlang from "./icons/tomatAvlang-fix2.svg";
