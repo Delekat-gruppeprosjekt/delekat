@@ -4,11 +4,10 @@ import { PiUserLight } from "react-icons/pi";
 import { PiGearSixLight } from "react-icons/pi";
 import { PiSignOutLight } from "react-icons/pi";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-
 import { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc, getFirestore } from 'firebase/firestore';
-
+import { useToast } from '../contexts/toastContext/toast';
 
 function Header() {
   const [userLoggedIn, setUserLoggedIn] = useState(false);
@@ -17,25 +16,25 @@ function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const [activePath, setActivePath] = useState(location.pathname);
-  const db = getFirestore(); // Get Firestore instance
+  const db = getFirestore();
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState('');
+  const { showToast } = useToast();
   
-  const auth = getAuth(); // Get Firebase auth instance
+  const auth = getAuth();
 
-  // Fetch logged-in user data securely
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUserLoggedIn(true);
-        setUserId(user.uid); // Get secure user ID
+        setUserId(user.uid);
       } else {
         setUserLoggedIn(false);
         setUserId(null);
       }
     });
 
-    return () => unsubscribe(); // Cleanup listener
+    return () => unsubscribe();
   }, [auth]);
 
   useEffect(() => {
@@ -48,22 +47,17 @@ function Header() {
     setActivePath(location.pathname);
   }, [location.pathname]);
 
-
-/** dette er for å hente ut useriden til den innloggede brukeren */
-    const [userIden, setUserIden] = useState(null);
+  const [userIden, setUserIden] = useState(null);
   
-    useEffect(() => {
-      const id = localStorage.getItem("userId");
-      setUserIden(id);
-    }, []);
-
-   
+  useEffect(() => {
+    const id = localStorage.getItem("userId");
+    setUserIden(id);
+  }, []);
 
   const handleEditProfile = () => {
     navigate(`/edit-profile/${userIden}`);
   };
 
-  /** dette er for å hente ut brukerdataen fra apiet */
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -74,14 +68,18 @@ function Header() {
           setUserData(userDocSnap.data());
         } else {
           setError('User not found!');
+          showToast('Kunne ikke finne brukerdata', 'error');
         }
       } catch (err) {
         setError('Error fetching data: ' + err.message);
+        showToast('Kunne ikke hente brukerdata', 'error');
       } 
     };
 
-    fetchUserData();
-  }, [userId]);
+    if (userId) {
+      fetchUserData();
+    }
+  }, [userId, db, showToast]);
 
   /** Dette er for logg ut knappen */
 
@@ -89,11 +87,13 @@ function Header() {
     const auth = getAuth(); // Get Firebase Auth instance
 
     try {
-      await signOut(auth); // Sign the user out
-      localStorage.clear(); // Clear localStorage
-      navigate("/"); // Navigate to home page after logout
+      await signOut(auth);
+      localStorage.clear();
+      showToast('Du er nå logget ut', 'success');
+      navigate("/");
     } catch (err) {
       console.error("Error during logout:", err);
+      showToast('Det oppstod en feil ved utlogging', 'error');
     }
   };
 
@@ -106,13 +106,13 @@ function Header() {
         {isLargeScreen && userLoggedIn && (
           <div className="flex flex-col items-center justify-center my-8">
              <div className="w-36 h-36 rounded-full overflow-hidden">
-          <img
-            className="w-full h-full rounded-full object-cover"
-            src={userData?.avatarUrl || "/assets/avatar_placeholder.png"}
-            alt="User Avatar"
-          />
-        </div>
-        <h1 className="text-3xl font-bold">{userData?.displayName}</h1>
+              <img
+                className="w-full h-full rounded-full object-cover"
+                src={userData?.avatarUrl || "/assets/avatar_placeholder.png"}
+                alt="User Avatar"
+              />
+            </div>
+            <h1 className="text-3xl font-bold">{userData?.displayName}</h1>
           </div>
         )}
 
@@ -126,7 +126,6 @@ function Header() {
           </Link>
         )}
 
-        {/* Change link based on userLoggedIn status */}
         <Link
           to={userLoggedIn && userId ? `/profile/${userId}` : "/login"}
           className={`flex items-center gap-2 hover:scale-110 transition duration-150 w-max ${
@@ -147,20 +146,21 @@ function Header() {
 
         {isLargeScreen && userLoggedIn && (
           <div className="absolute bottom-8 space-y-4">
-          <button
-          id="editProfile"
-          className="flex items-center gap-2 hover:scale-110 transition duration-150 w-max cursor-pointer"
-          onClick={handleEditProfile}
-        >
-          <PiGearSixLight /> Rediger Profil
-        </button>
+            <button
+              id="editProfile"
+              className="flex items-center gap-2 hover:scale-110 transition duration-150 w-max cursor-pointer"
+              onClick={handleEditProfile}
+            >
+              <PiGearSixLight /> Rediger Profil
+            </button>
 
-        <button 
-        onClick={handleLogout} 
-        className="flex items-center gap-2 hover:scale-110 hover:text-red-btn-hover transition duration-150 w-max cursor-pointer" >
-          <PiSignOutLight /> Logg ut 
-          </button>
-        </div>
+            <button 
+              onClick={handleLogout} 
+              className="flex items-center gap-2 hover:scale-110 hover:text-red-btn-hover transition duration-150 w-max cursor-pointer"
+            >
+              <PiSignOutLight /> Logg ut 
+            </button>
+          </div>
         )}
      
       </nav>

@@ -3,6 +3,7 @@ import { Navigate, Link, useNavigate } from "react-router";
 import { doSignInWithEmailAndPassword } from "../../../auth";
 import { useAuth } from "../../contexts/authContext/auth";
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
+import { useToast } from "../../contexts/toastContext/toast";
 
 /**
  * Login component that handles user authentication
@@ -12,12 +13,12 @@ const LoginComponent = () => {
     // Get authentication state and navigation function
     const { userLoggedIn } = useAuth();
     const navigate = useNavigate();
+    const { showToast } = useToast();
 
     // State management for form fields and UI states
     const [email, setEmail] = useState(localStorage.getItem("email") || "");
     const [password, setPassword] = useState("");
     const [isSigningIn, setIsSigningIn] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [emailError, setEmailError] = useState("");
 
@@ -60,12 +61,11 @@ const LoginComponent = () => {
      */
     const onSubmit = async (e) => {
         e.preventDefault();
-        setErrorMessage("");
-        setEmailError("");
         
         // Validate email before attempting login
         if (!validateEmail(email)) {
             setEmailError("Vennligst skriv inn en gyldig e-postadresse");
+            showToast("Vennligst skriv inn en gyldig e-postadresse", "error");
             return;
         }
 
@@ -77,6 +77,8 @@ const LoginComponent = () => {
                 // Store user data in localStorage
                 localStorage.setItem("email", email);
                 localStorage.setItem("userId", result.user.uid);
+                // Show success toast notification
+                showToast("Du er nå logget inn!", "success");
                 // Navigate to home page on successful login
                 navigate("/");
             } catch (error) {
@@ -87,11 +89,11 @@ const LoginComponent = () => {
                 if (error.code === 'auth/invalid-credential' || 
                     error.code === 'auth/user-not-found' || 
                     error.code === 'auth/wrong-password') {
-                    setErrorMessage('Feil brukernavn eller passord');
+                    showToast('Feil brukernavn eller passord', 'error');
                 } else if (error.code === 'auth/invalid-email') {
-                    setErrorMessage('Ugyldig e-postadresse');
+                    showToast('Ugyldig e-postadresse', 'error');
                 } else {
-                    setErrorMessage('Det oppstod en feil ved innlogging');
+                    showToast('Det oppstod en feil ved innlogging', 'error');
                 }
             } finally {
                 setIsSigningIn(false);
@@ -107,24 +109,6 @@ const LoginComponent = () => {
     // Render login form with email/password inputs and error handling
     return (
         <div className="w-full max-w-md">
-            {/* Error message display */}
-            {errorMessage && (
-                <div className="bg-red-50 border-l-4 border-red-btn p-4 mb-6">
-                    <div className="flex">
-                        <div className="flex-shrink-0">
-                            <svg className="h-5 w-5 text-red-btn" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                            </svg>
-                        </div>
-                        <div className="ml-3">
-                            <p className="text-sm text-red-btn">
-                                {errorMessage}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             <form onSubmit={onSubmit} className="space-y-6">
                 {/* Email input field */}
                 <div>
@@ -134,10 +118,8 @@ const LoginComponent = () => {
                         value={email}
                         onChange={handleEmailChange}
                         required
-
                         className={`w-full px-4 py-3 rounded-md bg-white border ${
                             emailError ? 'border-red-500' : 'border-[#438407]'
-
                         } focus:outline-none focus:border-[#3C5A3C] text-lg`}
                     />
                     {emailError && (
@@ -155,9 +137,7 @@ const LoginComponent = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-
                         className="w-full px-4 py-3 rounded-md bg-white border border-[#438407] focus:outline-none focus:border-[#3C5A3C] text-lg pr-12"
-
                     />
                     <button
                         type="button"

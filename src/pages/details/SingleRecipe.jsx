@@ -72,11 +72,7 @@ export default function SingleRecipe() {
   };
 
   const handleBack = () => {
-    if (location.state?.from) {
-      navigate(location.state.from);
-    } else {
-      navigate("/"); // Default to home if no previous page
-    }
+    navigate(-1); // This will go back one step in the browser's history
   };
 
   if (loading) return <div>Loading...</div>;
@@ -130,11 +126,13 @@ export default function SingleRecipe() {
 
         </div>
 
-        <img
-          src={recipe.imageUrl || "/assets/avatar_placeholder.png"}
-          alt={recipe.title}
-          className="w-full h-64 object-cover rounded-lg mb-6"
-        />
+        <div className="relative w-full mb-6">
+          <img
+            src={recipe.imageUrl || "/assets/avatar_placeholder.png"}
+            alt={recipe.title}
+            className="w-full max-h-[600px] rounded-lg object-contain bg-gray-50"
+          />
+        </div>
 
         <div className="flex flex-col items-center mb-6">
           <h1 className="text-3xl font-thin text-center break-words px-4 w-full">

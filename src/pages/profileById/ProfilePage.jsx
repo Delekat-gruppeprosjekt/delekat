@@ -7,11 +7,11 @@ import {
   query,
   where,
   getDocs,
-  deleteDoc,
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import RecipeCard from "../../components/Profile/RecipeCardProfile";
+import { useToast } from "../../contexts/toastContext/toast";
 
 export default function ProfilePage() {
   const [userData, setUserData] = useState(null);
@@ -27,7 +27,7 @@ export default function ProfilePage() {
   const db = getFirestore();
   const auth = getAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+  const { showToast } = useToast();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -56,6 +56,7 @@ export default function ProfilePage() {
           setUserData(userDocSnap.data());
         } else {
           setError("User not found!");
+          showToast("Kunne ikke finne brukeren", "error");
         }
 
         const recipesQuery = query(
@@ -76,29 +77,24 @@ export default function ProfilePage() {
         setUserRecipes(sortedRecipes);
       } catch (err) {
         setError("Error fetching data: " + err.message);
+        showToast("Kunne ikke hente brukerdata", "error");
       } finally {
         setLoading(false);
       }
     };
 
     fetchUserData();
-  }, [userId]);
+  }, [userId, db, showToast]);
 
-  const handleDeleteRecipe = async (recipeId) => {
+  const handleDeleteRecipe = (recipeId) => {
     const isOwnProfile = currentUserId === userId;
     if (!isAdmin && !isOwnProfile) {
-      alert("Du har ikke retigheter til å slette denne oppskriften.");
+      showToast("Du har ikke retigheter til å slette denne oppskriften.", "error");
       return;
     }
-
-    try {
-      await deleteDoc(doc(db, "recipes", recipeId));
-      setUserRecipes((prevRecipes) => prevRecipes.filter((recipe) => recipe.id !== recipeId));
-      alert("Oppskriften ble slettet.");
-    } catch (error) {
-      console.error("Error deleting recipe:", error);
-      alert("Kunne ikke slette oppskriften.");
-    }
+    
+    // Update the local state after successful deletion
+    setUserRecipes((prevRecipes) => prevRecipes.filter((recipe) => recipe.id !== recipeId));
   };
 
   const fetchUsers = async () => {
@@ -130,7 +126,6 @@ export default function ProfilePage() {
   const isOwnProfile = currentUserId === userId;
   const handleEditProfile = () => navigate(`/edit-profile/${userId}`);
 
-
   return (
     <div className="min-h-screen bg-BGcolor p-6">
       <div className="flex justify-center items-center mb-6">
@@ -155,8 +150,7 @@ export default function ProfilePage() {
           </button>
         )}
 
-                {/* Only show the toggle buttons if the user is an admin */}
-                {isAdmin && (
+        {isAdmin && (
           <div className="mt-6">
             <button
               onClick={() => toggleView("recipes")}
@@ -174,7 +168,6 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Display the active view (Recipes or Users) */}
       {isRecipesView ? (
         <div className="mt-8">
           <h2 className="text-2xl font-semibold mb-4 text-center">
@@ -191,11 +184,10 @@ export default function ProfilePage() {
                   <RecipeCard
                     key={recipe.id}
                     recipe={recipe}
-                    onEdit={isOwnProfile ? () => console.log(`Edit recipe ${recipe.id}`) : null}
-                    onDelete={isAdmin || isOwnProfile ? () => handleDeleteRecipe(recipe.id) : null}
+                    onEdit={isOwnProfile ? () => navigate(`/edit/${recipe.id}`) : null}
+                    onDelete={isAdmin || isOwnProfile ? handleDeleteRecipe : null}
                     isAdmin={isAdmin}
                     isOwnProfile={isOwnProfile}
-                    onClick={() => navigate(`/recipe/${recipe.id}`)}
                   />
                 ))}
               </ul>
@@ -216,13 +208,12 @@ export default function ProfilePage() {
                     className="mb-2 p-2 text-center cursor-pointer hover:bg-Secondary flex flex-row items-center justify-center border-1 border-Secondary"
                     onClick={() => navigate(`/profile/${user.id}`)}
                   >
-                    <p
-                    className="w-2/3"
-                    >{user.displayName}</p>
+                    <p className="w-2/3">{user.displayName}</p>
                     <img
-                    src={user.avatarUrl}
-                    className="ml-4 w-16 h-16 object-cover rounded-full border-1 border-BGwhite"
-                    ></img>
+                      src={user.avatarUrl}
+                      className="ml-4 w-16 h-16 object-cover rounded-full border-1 border-BGwhite"
+                      alt={user.displayName}
+                    />
                   </li>
                 ))}
               </ul>
@@ -231,6 +222,5 @@ export default function ProfilePage() {
         )
       )}
     </div>
-    
   );
 }

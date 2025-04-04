@@ -14,6 +14,7 @@ import {
   startAfter,
 } from "@firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
+import { useToast } from "../../contexts/toastContext/toast";
 
 export default function Home() {
   const { currentUser } = useAuth(); // Get currentUser from context
@@ -31,6 +32,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false); // Prevents multiple simultaneous loading requests
   const searchInputRef = useRef(null);
   const observerRef = useRef(null); // Reference for the intersection observer target element
+  const { showToast } = useToast();
 
   // Function to fetch recipes with pagination support
   const fetchRecipes = async (isInitialLoad = false) => {
@@ -79,6 +81,7 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Error fetching recipes:", error);
+      showToast("Kunne ikke laste flere oppskrifter", "error");
     } finally {
       setIsLoading(false);
     }
@@ -165,9 +168,11 @@ export default function Home() {
     try {
       await signOut(auth); // Sign the user out
       localStorage.clear(); // Clear localStorage
+      showToast("Du er nå logget ut", "success");
       navigate("/"); // Navigate to home page after logout
     } catch (err) {
       console.error("Error during logout:", err);
+      showToast("Det oppstod en feil ved utlogging", "error");
     }
   };
 
@@ -284,7 +289,7 @@ export default function Home() {
       {searchQuery && (
         <div className="w-full text-center text-sm text-gray-600 mt-2 mb-4">
           {filteredRecipes.length === 0
-            ? "Ingen oppskrifter funnet"
+            ? ""
             : `${filteredRecipes.length} oppskrift${
                 filteredRecipes.length !== 1 ? "er" : ""
               } funnet`}
