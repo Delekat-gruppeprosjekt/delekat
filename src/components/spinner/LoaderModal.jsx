@@ -5,11 +5,11 @@ function Modal({ isOpen, onClose, children }) {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white p-8 rounded-lg shadow-2xl relative">
-        {/* Rund lukkeknapp med sort border, 3D-effekt og responsiv hover */}
+      <div className="bg-white p-6 rounded shadow-lg relative">
+     
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-12 h-12 rounded-full border-2 border-black text-2xl font-bold flex items-center justify-center shadow-md transition-all duration-200 ease-in-out transform hover:scale-110 hover:bg-red-500 hover:border-red-500 hover:text-white hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-red-500"
+          className="absolute top-2 right-2 text-white text-xl font-bold bg-red-500 px-2 py-1 rounded"
         >
           &times;
         </button>
@@ -20,12 +20,13 @@ function Modal({ isOpen, onClose, children }) {
 }
 
 export default function LoaderModal() {
+  // Åpner modalen direkte
   const [modalOpen, setModalOpen] = useState(true);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
-        {/* BurgerGame fungerer som loader */}
+      
         <BurgerGame />
       </Modal>
     </div>

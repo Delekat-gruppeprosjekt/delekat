@@ -118,7 +118,7 @@ const BurgerGame = () => {
     if (gameOver || hasWon) return;
     const interval = setInterval(() => {
       setBurger((prev) => {
-        const step = 70;
+        const step = 95;
         let { x, y, direction } = prev;
         if (direction === "right") x += step;
         if (direction === "left") x -= step;
