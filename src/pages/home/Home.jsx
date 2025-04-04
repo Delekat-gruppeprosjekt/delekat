@@ -9,42 +9,39 @@ import { getDocs, collection, query, orderBy, limit, startAfter } from "@firebas
 import { getAuth, signOut } from "firebase/auth";
 
 // Spinner-komponentene
-import LoaderModal from "../../components/spinner/LoaderModal.jsx";
 import Spinner2Burger from "../../components/spinner/Spinner2Burger.jsx";
+import HomeGame from "../../components/spinner/HomeGame.jsx"; // Den nye komponenten
 
 export default function Home() {
-  const { currentUser } = useAuth(); // Get currentUser from context
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [oppskrifter, setOppskrifter] = useState([]);
-  // Endret terskel for mobil til 768px
-  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
+  // Justert terskel for mobil (her 1280px – juster etter behov)
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1280);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  // State variables for infinite scrolling functionality
-  const [lastVisible, setLastVisible] = useState(null); // Stores the last document reference for pagination
-  const [hasMore, setHasMore] = useState(true); // Indicates if there are more posts available to load
-  const [isLoading, setIsLoading] = useState(false); // Prevents multiple simultaneous loading requests
+  const [lastVisible, setLastVisible] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const searchInputRef = useRef(null);
-  const observerRef = useRef(null); // Reference for the intersection observer target element
+  const observerRef = useRef(null);
 
-  // Function to fetch recipes with pagination support
+  // State for å styre visning av HomeGame (spill) – vises kun hvis flagget "homeGameClosed" ikke er satt
+  const [showGame, setShowGame] = useState(() => localStorage.getItem("homeGameClosed") !== "true");
+
+  // Funksjon for å hente oppskrifter med paginering
   const fetchRecipes = async (isInitialLoad = false) => {
-    // Prevent loading if already in progress or no more posts available
     if (isLoading || (!hasMore && !isInitialLoad)) return;
-    
     setIsLoading(true);
     try {
       let q;
-      // Configure query based on whether it's initial load or subsequent load
       if (isInitialLoad) {
-        // Initial load: Get first batch of 24 posts
         q = query(
           collection(firestore, "recipes"),
           orderBy("createdAt", "desc"),
           limit(24)
         );
       } else {
-        // Subsequent load: Get next batch of 24 posts after the last visible document
         q = query(
           collection(firestore, "recipes"),
           orderBy("createdAt", "desc"),
@@ -52,20 +49,15 @@ export default function Home() {
           limit(24)
         );
       }
-
       const snapshot = await getDocs(q);
       const recipes = snapshot.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
         authorAvatarUrl: doc.data().authorAvatarUrl || "",
       }));
-
       if (recipes.length > 0) {
-        // Update pagination state
         setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-        // Append new recipes or replace for initial load
-        setOppskrifter(prev => isInitialLoad ? recipes : [...prev, ...recipes]);
-        // Check if more posts are available
+        setOppskrifter((prev) => (isInitialLoad ? recipes : [...prev, ...recipes]));
         setHasMore(snapshot.docs.length === 24);
       } else {
         setHasMore(false);
@@ -77,52 +69,41 @@ export default function Home() {
     }
   };
 
-  // Initial load of recipes when component mounts
   useEffect(() => {
     fetchRecipes(true);
   }, []);
 
-  // Set up intersection observer for infinite scrolling
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        // Load more posts when the observer target becomes visible
         if (entries[0].isIntersecting && hasMore && !isLoading) {
           fetchRecipes();
         }
       },
-      { threshold: 0.1 } // Trigger when 10% of the target is visible
+      { threshold: 0.1 }
     );
-
     if (observerRef.current) {
       observer.observe(observerRef.current);
     }
-
     return () => observer.disconnect();
   }, [hasMore, isLoading]);
 
-  // Handle clicks outside of the search input to collapse it
   useEffect(() => {
     function handleClickOutside(event) {
       if (
         isSearchExpanded &&
-        searchInputRef.current && 
+        searchInputRef.current &&
         !searchInputRef.current.contains(event.target)
       ) {
-        // Only collapse if there's no text in the search
         if (!searchQuery) {
           setIsSearchExpanded(false);
         }
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isSearchExpanded, searchQuery]);
 
-  // Focus the input when expanded
   useEffect(() => {
     if (isSearchExpanded && searchInputRef.current) {
       searchInputRef.current.focus();
@@ -133,13 +114,12 @@ export default function Home() {
     setSearchQuery(event.target.value.toLowerCase());
   };
 
-  // Oppdaterer skjermstørrelse basert på resize-event
   useEffect(() => {
-    const handleResize = () => setIsSmallScreen(window.innerWidth < 768);
+    const handleResize = () => setIsSmallScreen(window.innerWidth < 1280);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  
+
   const clearSearch = () => {
     setSearchQuery("");
     if (searchInputRef.current) {
@@ -148,23 +128,33 @@ export default function Home() {
   };
 
   const handleLogout = async () => {
-    const auth = getAuth(); // Get Firebase Auth instance
+    const auth = getAuth();
     try {
-      await signOut(auth); // Sign the user out
-      localStorage.clear(); // Clear localStorage
-      navigate("/"); // Navigate to home page after logout
+      await signOut(auth);
+      localStorage.clear();
+      navigate("/");
     } catch (err) {
       console.error("Error during logout:", err);
     }
   };
 
-  // Filter recipes by title 
-  const filteredRecipes = oppskrifter.filter((recipe) => 
+  const filteredRecipes = oppskrifter.filter((recipe) =>
     recipe.title.toLowerCase().includes(searchQuery)
   );
 
+  // Hvis isLoading er true, vis vanlig spinner/spinning-tekst.
+  // Vi lar HomeGame vises over resten av siden hvis showGame er true.
+  if (isLoading) {
+    return isSmallScreen ? <Spinner2Burger /> : <div className="flex items-center justify-center">Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen p-6 bg-BGcolor">
+      {/* Dersom showGame er true, vis HomeGame (spill) som en modal over siden */}
+      {showGame && (
+        <HomeGame onFinish={() => setShowGame(false)} />
+      )}
+
       <div className="flex items-center justify-start ml-1">
         <img
           src="/assets/DelekatLogo.svg"
@@ -178,27 +168,11 @@ export default function Home() {
         La deg friste
       </h1>
 
-      {/* 
-          Vis spinner basert på skjermstørrelse:
-          - Hvis skjermen er veldig liten (mobil, <768px), pakk Spinner2Burger inn i en wrapper med margin.
-          - Ellers vis LoaderModal.
-      */}
-      {isSmallScreen ? (
-        <div className="mb-4">
-          <Spinner2Burger />
-        </div>
-      ) : (
-        <LoaderModal />
-      )}
-
       {/* Search and Logout Buttons */}
       <div className="absolute right-0 top-0 m-8 flex items-center space-x-4">
-        {/* Expandable Search Bar */}
         <div className="relative flex items-center" ref={searchInputRef}>
           <div
-            className={`flex items-center transition-all duration-300 ease-in-out ${
-              isSearchExpanded ? "w-56" : "w-8"
-            } overflow-hidden`}
+            className={`flex items-center transition-all duration-300 ease-in-out ${isSearchExpanded ? "w-56" : "w-8"} overflow-hidden`}
           >
             <input
               type="text"
@@ -209,7 +183,7 @@ export default function Home() {
               value={searchQuery}
               onChange={handleSearch}
             />
-            <div 
+            <div
               className={`absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 z-10 ${
                 isSearchExpanded ? "text-xl" : "text-2xl hover:scale-110"
               }`}
@@ -218,7 +192,7 @@ export default function Home() {
               <PiMagnifyingGlass />
             </div>
             {searchQuery && isSearchExpanded && (
-              <div 
+              <div
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700"
                 onClick={clearSearch}
               >
@@ -228,10 +202,9 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Logg ut-knapp vises kun hvis bruker er logget inn og skjermen er mobil */}
         {currentUser && isSmallScreen && (
-          <button 
-            onClick={handleLogout} 
+          <button
+            onClick={handleLogout}
             className="text-xl flex gap-2 items-center hover:scale-110 hover:text-red-btn-hover duration-150 cursor-pointer"
           >
             <PiSignOutLight /> Logg ut
@@ -239,20 +212,20 @@ export default function Home() {
         )}
       </div>
 
-      {/* Search results count - only shown when there's a search query */}
       {searchQuery && (
         <div className="w-full text-center text-sm text-gray-600 mt-2 mb-4">
-          {filteredRecipes.length === 0 
-            ? "Ingen oppskrifter funnet" 
-            : `${filteredRecipes.length} oppskrift${filteredRecipes.length !== 1 ? 'er' : ''} funnet`
-          }
+          {filteredRecipes.length === 0
+            ? "Ingen oppskrifter funnet"
+            : `${filteredRecipes.length} oppskrift${filteredRecipes.length !== 1 ? "er" : ""} funnet`}
         </div>
       )}
 
       <div className="max-w-[1400px] mx-auto px-4">
         {filteredRecipes.length === 0 && searchQuery ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">Ingen oppskrifter funnet. Prøv et annet søk.</p>
+            <p className="text-gray-500 text-lg">
+              Ingen oppskrifter funnet. Prøv et annet søk.
+            </p>
           </div>
         ) : (
           <>

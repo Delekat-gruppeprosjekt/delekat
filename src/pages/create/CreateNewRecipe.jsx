@@ -8,6 +8,7 @@ import {
   getDoc,
   doc,
 } from "firebase/firestore";
+import Spinner2Burger from "../../components/spinner/Spinner2Burger";
 
 function CreateNewRecipe() {
   const [title, setTitle] = useState("");
@@ -29,6 +30,7 @@ function CreateNewRecipe() {
   const [cookingTime, setCookingTime] = useState("10 - 15 min");
   const navigate = useNavigate();
 
+  if (loading) return <Spinner2Burger />;
   // Predefined units for the dropdown
   const units = [
     { value: "ss", label: "Spiseskje (ss)" },

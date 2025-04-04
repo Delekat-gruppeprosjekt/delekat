@@ -18,15 +18,24 @@ function Modal({ isOpen, onClose, children }) {
   );
 }
 
-export default function LoaderModal() {
+export default function LoaderModal({ onClose }) {
   const [modalOpen, setModalOpen] = useState(true);
 
-  // Hvis modal er lukket, returner null – dermed unngås at det tomme rommet tar opp plass
+  const handleClose = () => {
+    // 👉 lagre at den er lukket
+    localStorage.setItem("homeGameClosed", "true");
+
+    setModalOpen(false);
+
+    // 👉 kall parent sin onClose hvis den finnes
+    if (onClose) onClose();
+  };
+
   if (!modalOpen) return null;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
+      <Modal isOpen={modalOpen} onClose={handleClose}>
         <BurgerGame />
       </Modal>
     </div>

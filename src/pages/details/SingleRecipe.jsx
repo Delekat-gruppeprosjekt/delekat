@@ -4,9 +4,9 @@ import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { FaHeart } from "react-icons/fa";
 import { IoChatbubbleOutline } from "react-icons/io5";
 import { BiTime } from "react-icons/bi";
-import { motion, AnimatePresence } from "framer-motion";
 import { PiChefHat } from "react-icons/pi";
 import { Link } from "react-router-dom";
+import Spinner2Burger from "../../components/spinner/Spinner2Burger";
 
 export default function SingleRecipe() {
   const { recipeId } = useParams();
@@ -24,7 +24,6 @@ export default function SingleRecipe() {
       const db = getFirestore();
       const userDocRef = doc(db, "users", userId);
       const userDocSnap = await getDoc(userDocRef);
-
       if (userDocSnap.exists()) {
         setAuthor(userDocSnap.data());
       }
@@ -75,17 +74,16 @@ export default function SingleRecipe() {
     if (location.state?.from) {
       navigate(location.state.from);
     } else {
-      navigate("/"); // Default to home if no previous page
+      navigate("/");
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Spinner2Burger />;
   if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="min-h-screen bg-BGcolor p-6 pb-20">
       <div className="max-w-3xl mx-auto bg-white rounded-xl shadow p-6">
-        {/* Back button */}
         <div className="mb-6">
           <button
             onClick={handleBack}
@@ -95,7 +93,6 @@ export default function SingleRecipe() {
           </button>
         </div>
 
-        {/* Author information */}
         <div className="flex items-center gap-4 mb-6">
           {authorLoading ? (
             <div className="w-12 h-12 rounded-full bg-gray-300 animate-pulse" />
@@ -127,7 +124,6 @@ export default function SingleRecipe() {
               </Link>
             )}
           </div>
-
         </div>
 
         <img
@@ -160,7 +156,6 @@ export default function SingleRecipe() {
               </span>
             </div>
           </div>
-          
           <div className="flex items-center gap-4">
             <div className="flex items-center">
               <FaHeart className="text-xl text-PMgreen" />
@@ -176,7 +171,7 @@ export default function SingleRecipe() {
         <div className="w-full h-[1px] bg-gray-200 my-6" />
 
         <p className="text-gray-500 text-lg mb-6 break-words whitespace-pre-wrap">{recipe.description}</p>
-        
+
         <div className="w-full h-[1px] bg-gray-300 my-6" />
 
         <div className="mb-8 flex flex-col items-center">
@@ -184,7 +179,6 @@ export default function SingleRecipe() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => handlePortionChange(portions - 1)}
-
               className="w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#3C5A3C] text-[#3C5A3C] hover:bg-[#3C5A3C] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[#3C5A3C]"
               disabled={portions <= 1}
             >
@@ -200,7 +194,6 @@ export default function SingleRecipe() {
             </button>
           </div>
         </div>
-        
 
         <div className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">Ingredienser</h2>
@@ -212,7 +205,7 @@ export default function SingleRecipe() {
             ))}
           </ul>
         </div>
-        
+
         <div className="w-full h-[1px] bg-gray-200 my-6" />
 
         <div>

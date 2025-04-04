@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createPostInSanity } from './sanityApi';
+import Spinner2Burger from '../../components/spinner/Spinner2Burger.jsx';
 
 export default function CreatePostForm() {
   const [title, setTitle] = useState('');
@@ -51,6 +52,8 @@ export default function CreatePostForm() {
       setLoading(false);
     }
   };
+
+  if (loading) return <Spinner2Burger />;
 
   return (
     <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-4 space-y-4">
@@ -125,7 +128,7 @@ export default function CreatePostForm() {
         className="bg-blue-btn text-BGwhite py-2 px-4 rounded"
         disabled={loading}
       >
-        {loading ? 'Lagrer...' : 'Lagre post'}
+        Lagre post
       </button>
     </form>
   );

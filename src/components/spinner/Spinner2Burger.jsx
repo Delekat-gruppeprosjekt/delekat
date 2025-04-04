@@ -10,18 +10,14 @@ export default function Spinner2Burger() {
     spinner2hamburgerkjott,
     spinner2Ost,
     spinner2Salat,
- 
   ];
 
- 
-  const containerSize = 128; 
-  const iconSize = 40;      
-  
-  const radius = containerSize / 2; 
+  const containerSize = 90;
+  const iconSize = 25;
+  const radius = containerSize / 2;
 
   return (
-    <div className="flex items-center justify-center">
-    
+    <div className="min-h-screen flex items-center justify-center bg-BGcolor">
       <style>{`
         @keyframes iconOrbit {
           from {
@@ -32,12 +28,12 @@ export default function Spinner2Burger() {
           }
         }
       `}</style>
+
       <div
         style={{ width: `${containerSize}px`, height: `${containerSize}px` }}
         className="relative"
       >
         {spinnerImages.map((imgSrc, index) => {
-        
           const delay = -(index * (2 / spinnerImages.length)) + "s";
           const initialAngle = (360 / spinnerImages.length) * index;
           return (
