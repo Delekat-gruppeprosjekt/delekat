@@ -37,12 +37,13 @@ const BurgerGame = () => {
   const [timeLeft, setTimeLeft] = useState(5); // 5 sekunders nedtelling
   const [gameOver, setGameOver] = useState(false);
 
- 
+  // Partikler for konfetti (brukes kun ved seier)
   const [particles, setParticles] = useState([]);
 
-
+  // Beregn om spilleren har vunnet (alle ingredienser spist)
   const hasWon = ingredients.every((ing) => ing.eaten);
 
+  // Animasjon for toppbrødet (litt opp og ned)
   const [topYOffset, setTopYOffset] = useState(0);
   useEffect(() => {
     const interval = setInterval(() => {
@@ -112,6 +113,7 @@ const BurgerGame = () => {
     return () => clearInterval(timerInterval);
   }, [gameOver, hasWon]);
 
+  // Beveg burgeren med økt hastighet og bounce-effekt slik at den ikke går utenfor skjermen.
   useEffect(() => {
     if (gameOver || hasWon) return;
     const interval = setInterval(() => {
@@ -312,6 +314,7 @@ const BurgerGame = () => {
     }
   };
 
+  // Reset-funksjon som nullstiller alt ved å lage en dyp kopi av INITIAL_INGREDIENTS
   const handleReset = () => {
     setBurger({ x: 200, y: 200, direction: "right" });
     setIngredients(INITIAL_INGREDIENTS.map((ing) => ({ ...ing })));
