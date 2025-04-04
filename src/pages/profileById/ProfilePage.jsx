@@ -162,13 +162,13 @@ export default function ProfilePage() {
               onClick={() => toggleView("recipes")}
               className={`px-4 py-2 mr-4 ${isRecipesView ? "font-black" : "font-normal"} text-2xl border-b-1 border-BGcolor text-black hover:border-b-1 hover:border-black`}
             >
-              Recipes
+              Oppskrifter
             </button>
             <button
               onClick={() => toggleView("users")}
               className={`ml-4 px-4 py-2 ${!isRecipesView ? "font-black" : "font-normal"} text-2xl text-black hover:border-b-1`}
             >
-              Users
+              Brukere
             </button>
           </div>
         )}
