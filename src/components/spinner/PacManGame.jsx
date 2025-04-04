@@ -37,13 +37,12 @@ const BurgerGame = () => {
   const [timeLeft, setTimeLeft] = useState(5); // 5 sekunders nedtelling
   const [gameOver, setGameOver] = useState(false);
 
-  // Partikler for konfetti (brukes kun ved seier)
+ 
   const [particles, setParticles] = useState([]);
 
-  // Beregn om spilleren har vunnet (alle ingredienser spist)
+
   const hasWon = ingredients.every((ing) => ing.eaten);
 
-  // Animasjon for toppbrødet (litt opp og ned)
   const [topYOffset, setTopYOffset] = useState(0);
   useEffect(() => {
     const interval = setInterval(() => {
@@ -113,19 +112,16 @@ const BurgerGame = () => {
     return () => clearInterval(timerInterval);
   }, [gameOver, hasWon]);
 
-  // Beveg burgeren med økt hastighet og bounce-effekt slik at den ikke går utenfor skjermen.
   useEffect(() => {
     if (gameOver || hasWon) return;
     const interval = setInterval(() => {
       setBurger((prev) => {
-        const step = 50;
+        const step = 70;
         let { x, y, direction } = prev;
-        // Oppdater posisjon basert på retning
         if (direction === "right") x += step;
         if (direction === "left") x -= step;
         if (direction === "up")   y -= step;
         if (direction === "down") y += step;
-        // Bounce logikk: snu retning og juster posisjon slik at den holder seg innenfor 0-400.
         if (x < 0) {
           x = 0;
           direction = "right";
@@ -187,7 +183,7 @@ const BurgerGame = () => {
       for (let i = 0; i < 100; i++) {
         initParticles.push({
           x: Math.random() * 400,
-          y: Math.random() * -400, // start over skjermen
+          y: Math.random() * -400,
           vy: 2 + Math.random() * 3,
           color: colors[Math.floor(Math.random() * colors.length)],
         });
@@ -216,7 +212,6 @@ const BurgerGame = () => {
     ctx.fillStyle = "#f9f9e8";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Hvis spilleren har vunnet, vis burgeren, vinnermelding og konfetti
     const allEaten = ingredients.every((ing) => ing.eaten);
     if (allEaten) {
       const finalSize = 300;
@@ -241,7 +236,6 @@ const BurgerGame = () => {
       return;
     }
 
-    // Hvis spillet er over (tiden har gått ut) og man ikke har vunnet
     if (gameOver) {
       ctx.fillStyle = "black";
       ctx.font = "24px Arial";
@@ -250,12 +244,11 @@ const BurgerGame = () => {
       return;
     }
 
-    // Tegn ingrediens-ikoner (ikke spist)
     const ingSize = 150;
     ingredients.forEach((ing) => {
       if (!ing.eaten) {
         let icon = kjottHelRef.current;
-        if (ing.type === "ost")   icon = ostHelRef.current;
+        if (ing.type === "ost") icon = ostHelRef.current;
         if (ing.type === "salat") icon = salatHelRef.current;
         if (ing.type === "tomat") icon = tomatHelRef.current;
         ctx.drawImage(
@@ -296,7 +289,6 @@ const BurgerGame = () => {
     }
     ctx.restore();
 
-    // Tegn timeren øverst til høyre
     ctx.fillStyle = "black";
     ctx.font = "18px Arial";
     ctx.textAlign = "right";
@@ -320,42 +312,68 @@ const BurgerGame = () => {
     }
   };
 
-  // Reset-funksjon for å starte spillet på nytt
   const handleReset = () => {
     setBurger({ x: 200, y: 200, direction: "right" });
-    setIngredients(INITIAL_INGREDIENTS);
+    setIngredients(INITIAL_INGREDIENTS.map((ing) => ({ ...ing })));
     setCollectedIngredients([]);
     setTimeLeft(5);
     setGameOver(false);
     setParticles([]);
+    if (containerRef.current) containerRef.current.focus();
   };
 
   return (
     <div
       ref={containerRef}
       tabIndex="0"
+      autoFocus
       onKeyDown={handleKeyDown}
       style={{
         outline: "none",
-        width: "500px",
-        margin: "0 auto",
-        backgroundColor: "#f9f9e8",
-        padding: "20px",
+        width: "100%",
+        maxWidth: "500px",
+        margin: "20px auto",
+        backgroundColor: "#fff",
+        padding: "30px",
+        borderRadius: "20px",
+        boxShadow: "0 8px 16px rgba(0,0,0,0.2)",
       }}
     >
-      <h2 style={{ textAlign: "center" }}>BurgerGame</h2>
+      <h2 style={{ textAlign: "center", marginBottom: "15px" }}>BurgerGame</h2>
+      <p style={{
+          textAlign: "center",
+          fontSize: "16px",
+          marginBottom: "20px",
+          color: "#333"
+        }}>
+        Siden loader, prøv vårt burger spill mens du venter. Styr med piltastene.
+      </p>
       <canvas
         ref={canvasRef}
         width={400}
         height={400}
-        style={{ border: "1px solid #ccc", width: "400px", height: "400px" }}
+        style={{ 
+          border: "1px solid #ccc", 
+          width: "100%", 
+          maxWidth: "400px", 
+          aspectRatio: "1 / 1",
+          display: "block",
+          margin: "0 auto"
+        }}
       />
-      <div style={{ textAlign: "center", marginTop: "10px" }}>
-        Bruk piltastene for å styre burgeren og fange ingrediensene!
-      </div>
-      {(gameOver && !hasWon) && (
-        <div style={{ textAlign: "center", marginTop: "10px" }}>
-          <button onClick={handleReset}>Retry</button>
+      {(gameOver || hasWon) && (
+        <div style={{ textAlign: "center", marginTop: "15px" }}>
+          <button onClick={handleReset} style={{
+            padding: "10px 20px",
+            fontSize: "16px",
+            borderRadius: "5px",
+            border: "none",
+            backgroundColor: "#f44336",
+            color: "#fff",
+            cursor: "pointer"
+          }}>
+            Retry
+          </button>
         </div>
       )}
     </div>
