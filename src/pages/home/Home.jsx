@@ -4,8 +4,16 @@ import HomeCard from "../../components/home/HomeCard2.jsx";
 import { PiMagnifyingGlass, PiX, PiSignOutLight } from "react-icons/pi";
 import { useAuth } from "../../contexts/authContext/auth.jsx";
 import { firestore } from "../../../firebase";
-import { getDocs, collection, query, orderBy, limit, startAfter } from "@firebase/firestore";
+import {
+  getDocs,
+  collection,
+  query,
+  orderBy,
+  limit,
+  startAfter,
+} from "@firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
+import { useToast } from "../../contexts/toastContext/toast";
 
 import Spinner2Burger from "../../components/spinner/Spinner2Burger.jsx";
 import HomeGame from "../../components/spinner/HomeGame.jsx";
@@ -16,18 +24,24 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [oppskrifter, setOppskrifter] = useState([]);
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 1280);
+  const [isVerySmallScreen, setIsVerySmallScreen] = useState(
+    window.innerWidth < 600
+  );
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [lastVisible, setLastVisible] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const searchInputRef = useRef(null);
+
   const observerRef = useRef(null);
 
   // Viser/spiller kun hvis localStorage-flagget IKKE er satt
   const [showGame, setShowGame] = useState(() => localStorage.getItem("homeGameClosed") !== "true");
 
+
   const fetchRecipes = async (isInitialLoad = false) => {
     if (isLoading || (!hasMore && !isInitialLoad)) return;
+
     setIsLoading(true);
     try {
       let q;
@@ -49,6 +63,7 @@ export default function Home() {
       }));
       if (recipes.length > 0) {
         setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+
         setOppskrifter((prev) => (isInitialLoad ? recipes : [...prev, ...recipes]));
         setHasMore(snapshot.docs.length === 24);
       } else {
@@ -56,6 +71,7 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Error fetching recipes:", error);
+      showToast("Kunne ikke laste flere oppskrifter", "error");
     } finally {
       setIsLoading(false);
     }
@@ -107,7 +123,14 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const handleResize = () => setIsSmallScreen(window.innerWidth < 1280);
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth < 1280);
+      setIsVerySmallScreen(window.innerWidth < 600);
+    };
+
+    // Set initial values
+    handleResize();
+
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -122,13 +145,17 @@ export default function Home() {
   const handleLogout = async () => {
     const auth = getAuth();
     try {
+
       await signOut(auth);
       localStorage.clear();
       navigate("/");
+
     } catch (err) {
       console.error("Error during logout:", err);
+      showToast("Det oppstod en feil ved utlogging", "error");
     }
   };
+
 
   const filteredRecipes = oppskrifter.filter((recipe) =>
     recipe.title.toLowerCase().includes(searchQuery)
@@ -140,6 +167,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen p-6 bg-BGcolor">
+
       {showGame && <HomeGame onFinish={() => setShowGame(false)} />}
 
       <div className="flex items-center justify-start ml-1">
@@ -161,16 +189,25 @@ export default function Home() {
             className={`flex items-center transition-all duration-300 ease-in-out ${
               isSearchExpanded ? "w-56" : "w-8"
             } overflow-hidden`}
+
           >
+            <PiSignOutLight size={20} /> Logg ut
+          </button>
+        )}
+      </div>
+
+      {/* For very small screens, show a centered search bar */}
+      {isVerySmallScreen && (
+        <div className="flex justify-center items-center my-4">
+          <div className="relative w-3/4">
             <input
               type="text"
-              className={`bg-BGwhite border border-PMgreen rounded-full py-2 px-3 pl-9 outline-none transition-all duration-300 ${
-                isSearchExpanded ? "w-full opacity-100" : "w-0 opacity-0"
-              }`}
+              className="w-full bg-BGwhite border border-PMgreen rounded-full py-2 px-4 pl-9 outline-none"
               placeholder="Søk"
               value={searchQuery}
               onChange={handleSearch}
             />
+
             <div
               className={`absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 z-10 ${
                 isSearchExpanded ? "text-xl" : "text-2xl hover:scale-110"
@@ -182,6 +219,14 @@ export default function Home() {
             {searchQuery && isSearchExpanded && (
               <div
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700"
+
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+              <PiMagnifyingGlass />
+            </div>
+            {searchQuery && (
+              <div
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700"
+
                 onClick={clearSearch}
               >
                 <PiX size={18} />
@@ -189,6 +234,50 @@ export default function Home() {
             )}
           </div>
         </div>
+      )}
+
+      <h1 className="text-3xl font-thin mb-6 flex justify-center mt-8">
+        La deg friste
+      </h1>
+
+      {/* Search and Logout Buttons - Only visible for non-very-small screens */}
+      {!isVerySmallScreen && (
+        <div className="absolute right-0 top-0 m-8 flex items-center space-x-4">
+          {/* Expandable Search Bar */}
+          <div className="relative flex items-center" ref={searchInputRef}>
+            <div
+              className={`flex items-center transition-all duration-300 ease-in-out ${
+                isSearchExpanded ? "w-56" : "w-8"
+              } overflow-hidden`}
+            >
+              <input
+                type="text"
+                className={`bg-BGwhite border border-PMgreen rounded-full py-2 px-3 pl-9 outline-none transition-all duration-300 ${
+                  isSearchExpanded ? "w-full opacity-100" : "w-0 opacity-0"
+                }`}
+                placeholder="Søk"
+                value={searchQuery}
+                onChange={handleSearch}
+              />
+              <div
+                className={`absolute left-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 z-10 ${
+                  isSearchExpanded ? "text-xl" : "text-2xl hover:scale-110"
+                }`}
+                onClick={() => setIsSearchExpanded(true)}
+              >
+                <PiMagnifyingGlass />
+              </div>
+              {searchQuery && isSearchExpanded && (
+                <div
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500 hover:text-gray-700"
+                  onClick={clearSearch}
+                >
+                  <PiX size={18} />
+                </div>
+              )}
+            </div>
+          </div>
+
 
         {currentUser && isSmallScreen && (
           <button
@@ -200,18 +289,23 @@ export default function Home() {
         )}
       </div>
 
+
       {searchQuery && (
         <div className="w-full text-center text-sm text-gray-600 mt-2 mb-4">
           {filteredRecipes.length === 0
+
             ? "Ingen oppskrifter funnet"
             : `${filteredRecipes.length} oppskrift${filteredRecipes.length !== 1 ? "er" : ""} funnet`}
+
         </div>
       )}
 
       <div className="max-w-[1400px] mx-auto px-4">
         {filteredRecipes.length === 0 && searchQuery ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">Ingen oppskrifter funnet. Prøv et annet søk.</p>
+            <p className="text-gray-500 text-lg">
+              Ingen oppskrifter funnet. Prøv et annet søk.
+            </p>
           </div>
         ) : (
           <>

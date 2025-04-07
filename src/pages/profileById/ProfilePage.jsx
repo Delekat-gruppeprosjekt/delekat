@@ -7,12 +7,13 @@ import {
   query,
   where,
   getDocs,
-  deleteDoc,
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import RecipeCard from "../../components/Profile/RecipeCardProfile";
+
 import Spinner2Burger from "../../components/spinner/Spinner2Burger.jsx"; // Kun spinneren lagt inn
+
 
 export default function ProfilePage() {
   const [userData, setUserData] = useState(null);
@@ -28,7 +29,7 @@ export default function ProfilePage() {
   const db = getFirestore();
   const auth = getAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+  const { showToast } = useToast();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -57,6 +58,7 @@ export default function ProfilePage() {
           setUserData(userDocSnap.data());
         } else {
           setError("User not found!");
+          showToast("Kunne ikke finne brukeren", "error");
         }
 
         const recipesQuery = query(
@@ -77,20 +79,24 @@ export default function ProfilePage() {
         setUserRecipes(sortedRecipes);
       } catch (err) {
         setError("Error fetching data: " + err.message);
+        showToast("Kunne ikke hente brukerdata", "error");
       } finally {
         setLoading(false);
       }
     };
 
     fetchUserData();
+
   }, [userId, db]);
 
-  const handleDeleteRecipe = async (recipeId) => {
+
+  const handleDeleteRecipe = (recipeId) => {
     const isOwnProfile = currentUserId === userId;
     if (!isAdmin && !isOwnProfile) {
-      alert("Du har ikke retigheter til å slette denne oppskriften.");
+      showToast("Du har ikke retigheter til å slette denne oppskriften.", "error");
       return;
     }
+
 
     try {
       await deleteDoc(doc(db, "recipes", recipeId));
@@ -102,6 +108,7 @@ export default function ProfilePage() {
       console.error("Error deleting recipe:", error);
       alert("Kunne ikke slette oppskriften.");
     }
+
   };
 
   const fetchUsers = async () => {
@@ -158,7 +165,7 @@ export default function ProfilePage() {
           </button>
         )}
 
-        {/* Only show the toggle buttons if the user is an admin */}
+
         {isAdmin && (
           <div className="mt-6">
             <button
@@ -181,7 +188,6 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Display the active view (Recipes or Users) */}
       {isRecipesView ? (
         <div className="mt-8">
           <h2 className="text-2xl font-semibold mb-4 text-center">
@@ -202,6 +208,7 @@ export default function ProfilePage() {
                   <RecipeCard
                     key={recipe.id}
                     recipe={recipe}
+
                     onEdit={
                       isOwnProfile
                         ? () => console.log(`Edit recipe ${recipe.id}`)
@@ -212,9 +219,9 @@ export default function ProfilePage() {
                         ? () => handleDeleteRecipe(recipe.id)
                         : null
                     }
+
                     isAdmin={isAdmin}
                     isOwnProfile={isOwnProfile}
-                    onClick={() => navigate(`/recipe/${recipe.id}`)}
                   />
                 ))}
               </ul>
@@ -239,7 +246,9 @@ export default function ProfilePage() {
                     <img
                       src={user.avatarUrl}
                       className="ml-4 w-16 h-16 object-cover rounded-full border-1 border-BGwhite"
+
                       alt="User Avatar"
+
                     />
                   </li>
                 ))}
