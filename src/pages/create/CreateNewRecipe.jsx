@@ -1,8 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { auth } from "../../../firebase";
-import { getFirestore, collection, addDoc, getDoc, doc } from "firebase/firestore";
-import { useToast } from "../../contexts/toastContext/toast";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDoc,
+  doc,
+} from "firebase/firestore";
+import Spinner2Burger from "../../components/spinner/Spinner2Burger";
+
 
 function CreateNewRecipe() {
   const [title, setTitle] = useState("");
@@ -25,6 +33,7 @@ function CreateNewRecipe() {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
+  if (loading) return <Spinner2Burger />;
   // Predefined units for the dropdown
   const units = [
     { value: "ss", label: "Spiseskje (ss)" },

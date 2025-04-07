@@ -11,7 +11,9 @@ import {
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import RecipeCard from "../../components/Profile/RecipeCardProfile";
-import { useToast } from "../../contexts/toastContext/toast";
+
+import Spinner2Burger from "../../components/spinner/Spinner2Burger.jsx"; // Kun spinneren lagt inn
+
 
 export default function ProfilePage() {
   const [userData, setUserData] = useState(null);
@@ -45,7 +47,7 @@ export default function ProfilePage() {
     });
 
     return () => unsubscribe();
-  }, [auth]);
+  }, [auth, db]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -84,7 +86,9 @@ export default function ProfilePage() {
     };
 
     fetchUserData();
-  }, [userId, db, showToast]);
+
+  }, [userId, db]);
+
 
   const handleDeleteRecipe = (recipeId) => {
     const isOwnProfile = currentUserId === userId;
@@ -92,9 +96,19 @@ export default function ProfilePage() {
       showToast("Du har ikke retigheter til å slette denne oppskriften.", "error");
       return;
     }
-    
-    // Update the local state after successful deletion
-    setUserRecipes((prevRecipes) => prevRecipes.filter((recipe) => recipe.id !== recipeId));
+
+
+    try {
+      await deleteDoc(doc(db, "recipes", recipeId));
+      setUserRecipes((prevRecipes) =>
+        prevRecipes.filter((recipe) => recipe.id !== recipeId)
+      );
+      alert("Oppskriften ble slettet.");
+    } catch (error) {
+      console.error("Error deleting recipe:", error);
+      alert("Kunne ikke slette oppskriften.");
+    }
+
   };
 
   const fetchUsers = async () => {
@@ -120,7 +134,8 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) return <div>Laster...</div>;
+  // Bruk kun spinneren som loading-indikator
+  if (loading) return <Spinner2Burger />;
   if (error) return <div>Error: {error}</div>;
 
   const isOwnProfile = currentUserId === userId;
@@ -150,17 +165,22 @@ export default function ProfilePage() {
           </button>
         )}
 
+
         {isAdmin && (
           <div className="mt-6">
             <button
               onClick={() => toggleView("recipes")}
-              className={`px-4 py-2 mr-4 ${isRecipesView ? "font-black" : "font-normal"} text-2xl border-b-1 border-BGcolor text-black hover:border-b-1 hover:border-black`}
+              className={`px-4 py-2 mr-4 ${
+                isRecipesView ? "font-black" : "font-normal"
+              } text-2xl border-b-1 border-BGcolor text-black hover:border-b-1 hover:border-black`}
             >
               Recipes
             </button>
             <button
               onClick={() => toggleView("users")}
-              className={`ml-4 px-4 py-2 ${!isRecipesView ? "font-black" : "font-normal"} text-2xl text-black hover:border-b-1`}
+              className={`ml-4 px-4 py-2 ${
+                !isRecipesView ? "font-black" : "font-normal"
+              } text-2xl text-black hover:border-b-1`}
             >
               Users
             </button>
@@ -171,11 +191,15 @@ export default function ProfilePage() {
       {isRecipesView ? (
         <div className="mt-8">
           <h2 className="text-2xl font-semibold mb-4 text-center">
-            {isOwnProfile ? "Dine oppskrifter" : `${userData?.displayName}'s oppskrifter`}
+            {isOwnProfile
+              ? "Dine oppskrifter"
+              : `${userData?.displayName}'s oppskrifter`}
           </h2>
           {userRecipes.length === 0 ? (
             <p className="text-center text-gray-500">
-              {isOwnProfile ? "Du har ingen oppskrifter" : "Denne brukeren har ingen oppskrifter."}
+              {isOwnProfile
+                ? "Du har ingen oppskrifter"
+                : "Denne brukeren har ingen oppskrifter."}
             </p>
           ) : (
             <div className="max-w-[1400px] mx-auto px-4">
@@ -184,8 +208,18 @@ export default function ProfilePage() {
                   <RecipeCard
                     key={recipe.id}
                     recipe={recipe}
-                    onEdit={isOwnProfile ? () => navigate(`/edit/${recipe.id}`) : null}
-                    onDelete={isAdmin || isOwnProfile ? handleDeleteRecipe : null}
+
+                    onEdit={
+                      isOwnProfile
+                        ? () => console.log(`Edit recipe ${recipe.id}`)
+                        : null
+                    }
+                    onDelete={
+                      isAdmin || isOwnProfile
+                        ? () => handleDeleteRecipe(recipe.id)
+                        : null
+                    }
+
                     isAdmin={isAdmin}
                     isOwnProfile={isOwnProfile}
                   />
@@ -212,7 +246,9 @@ export default function ProfilePage() {
                     <img
                       src={user.avatarUrl}
                       className="ml-4 w-16 h-16 object-cover rounded-full border-1 border-BGwhite"
-                      alt={user.displayName}
+
+                      alt="User Avatar"
+
                     />
                   </li>
                 ))}

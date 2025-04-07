@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { useToast } from "../../contexts/toastContext/toast";
+
+import Spinner2Burger from "../../components/spinner/Spinner2Burger.jsx";
+
 
 export default function EditProfilePage() {
   const { userId } = useParams();
@@ -18,7 +20,6 @@ export default function EditProfilePage() {
   const [avatarError, setAvatarError] = useState(null);
 
   useEffect(() => {
-    // Redirect if logged-in user is not the same as userId in URL
     if (auth.currentUser?.uid !== userId) {
       showToast("Du har ikke tilgang til denne siden", "error");
       navigate("/");
@@ -81,7 +82,7 @@ export default function EditProfilePage() {
   };
 
   if (loading) {
-    return <div>Laster...</div>;
+    return <Spinner2Burger />;
   }
 
   if (error) {
@@ -125,9 +126,7 @@ export default function EditProfilePage() {
             rows="4"
             placeholder="Skriv en Bio (max 150 tegn)"
           ></textarea>
-          <p className="text-sm text-gray-500 mt-1">
-            {bio.length}/150 Tegn
-          </p>
+          <p className="text-sm text-gray-500 mt-1">{bio.length}/150 Tegn</p>
         </div>
         <div className="flex justify-end space-x-4">
           <button

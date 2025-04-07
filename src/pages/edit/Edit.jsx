@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { auth, firestore } from "../../../firebase";
-import { useToast } from "../../contexts/toastContext/toast";
+
+import Spinner2Burger from "../../components/spinner/Spinner2Burger";
+
+
+
 
 function EditRecipe() {
   const { recipeId } = useParams();
@@ -14,7 +18,7 @@ function EditRecipe() {
   const [description, setDescription] = useState("");
   const [ingredients, setIngredients] = useState([{ ingredient: "", amount: "", unit: "" }]);
   const [instructions, setInstructions] = useState([""]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); 
   const [imageError, setImageError] = useState(false);
   const [amountErrors, setAmountErrors] = useState({});
   const [difficulty, setDifficulty] = useState("lett");
@@ -618,7 +622,7 @@ function EditRecipe() {
                 + Legg til trinn
               </button>
             </div>
-
+            if (loading) return <Spinner2Burger />;
             <div className="flex justify-end space-x-4 mb-24">
               <button
                 type="button"
@@ -636,6 +640,7 @@ function EditRecipe() {
               >
                 {loading ? "Lagrer..." : "Lagre endringer"}
               </button>
+              
             </div>
           </form>
         </div>
