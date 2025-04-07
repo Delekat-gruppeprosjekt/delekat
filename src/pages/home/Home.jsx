@@ -8,6 +8,8 @@ import { firestore } from "../../../firebase";
 import { getDocs, collection, query, orderBy, limit, startAfter } from "@firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 
+import LoaderModal from "../../components/spinner/LoaderModal.jsx";
+
 export default function Home() {
   const { currentUser } = useAuth(); // Get currentUser from context
   const navigate = useNavigate();
@@ -173,6 +175,8 @@ export default function Home() {
       <h1 className="text-3xl font-thin mb-6 flex justify-center mt-8">
         La deg friste
       </h1>
+
+      <LoaderModal />
 
       {/* Search and Logout Buttons */}
 
