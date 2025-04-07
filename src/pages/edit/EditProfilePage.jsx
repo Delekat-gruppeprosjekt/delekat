@@ -3,15 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
-import Spinner2Burger from "../../components/spinner/Spinner2Burger.jsx";
-
-
 export default function EditProfilePage() {
   const { userId } = useParams();
   const navigate = useNavigate();
   const db = getFirestore();
   const auth = getAuth();
-  const { showToast } = useToast();
 
   const [avatarUrl, setAvatarUrl] = useState("");
   const [bio, setBio] = useState("");
@@ -20,8 +16,8 @@ export default function EditProfilePage() {
   const [avatarError, setAvatarError] = useState(null);
 
   useEffect(() => {
+    // Redirect if logged-in user is not the same as userId in URL
     if (auth.currentUser?.uid !== userId) {
-      showToast("Du har ikke tilgang til denne siden", "error");
       navigate("/");
       return;
     }
@@ -35,19 +31,17 @@ export default function EditProfilePage() {
           setAvatarUrl(data.avatarUrl || "");
           setBio(data.bio || "");
         } else {
-          setError("Bruker ikke funnet!");
-          showToast("Bruker ikke funnet!", "error");
+          setError("User not found!");
         }
       } catch (err) {
         setError("Error fetching user data: " + err.message);
-        showToast("Kunne ikke hente brukerdata", "error");
       } finally {
         setLoading(false);
       }
     };
 
     fetchUserData();
-  }, [userId, db, auth, navigate, showToast]);
+  }, [userId, db, auth, navigate]);
 
   const validateImageUrl = (url) => {
     return new Promise((resolve) => {
@@ -62,7 +56,6 @@ export default function EditProfilePage() {
     const isValidImage = await validateImageUrl(avatarUrl);
     if (!isValidImage) {
       setAvatarError("URL-en peker ikke til et gyldig bilde.");
-      showToast("Ugyldig bilde-URL", "error");
       return;
     }
 
@@ -73,16 +66,14 @@ export default function EditProfilePage() {
         bio,
         updatedAt: new Date(),
       });
-      showToast("Profilen ble oppdatert!", "success");
       navigate(`/profile/${userId}`);
     } catch (err) {
       setError("Error saving changes: " + err.message);
-      showToast("Kunne ikke lagre endringene", "error");
     }
   };
 
   if (loading) {
-    return <Spinner2Burger />;
+    return <div>Laster...</div>;
   }
 
   if (error) {
@@ -103,7 +94,7 @@ export default function EditProfilePage() {
             value={avatarUrl}
             onChange={(e) => {
               setAvatarUrl(e.target.value);
-              setAvatarError(null);
+              setAvatarError(null); // Clear previous error
             }}
             className="w-full p-2 border border-PMgreen rounded-md"
             placeholder="Fyll inn avatar URL"
@@ -126,7 +117,9 @@ export default function EditProfilePage() {
             rows="4"
             placeholder="Skriv en Bio (max 150 tegn)"
           ></textarea>
-          <p className="text-sm text-gray-500 mt-1">{bio.length}/150 Tegn</p>
+          <p className="text-sm text-gray-500 mt-1">
+            {bio.length}/150 Tegn
+          </p>
         </div>
         <div className="flex justify-end space-x-4">
           <button
