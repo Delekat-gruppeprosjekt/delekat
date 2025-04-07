@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { auth, firestore } from "../../../firebase";
+import { useToast } from "../../contexts/toastContext/toast";
 
 function EditRecipe() {
   const { recipeId } = useParams();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [title, setTitle] = useState("");
   const [imageUrl, setImageUrl] = useState("");
@@ -205,7 +207,7 @@ function EditRecipe() {
     
     try {
       if (imageError) {
-        alert("Vennligst skriv inn en gyldig bilde-URL.");
+        showToast("Vennligst skriv inn en gyldig bilde-URL.", "error");
         setLoading(false);
         return;
       }
@@ -213,6 +215,7 @@ function EditRecipe() {
       // Validate title
       if (!title.trim()) {
         setFormErrors(prev => ({ ...prev, title: "Tittel er påkrevd" }));
+        showToast("Tittel er påkrevd", "error");
         setLoading(false);
         return;
       }
@@ -220,6 +223,7 @@ function EditRecipe() {
       // Validate description
       if (!description.trim()) {
         setFormErrors(prev => ({ ...prev, description: "Beskrivelse er påkrevd" }));
+        showToast("Beskrivelse er påkrevd", "error");
         setLoading(false);
         return;
       }
@@ -242,14 +246,14 @@ function EditRecipe() {
 
       if (hasIngredientErrors) {
         setAmountErrors(newAmountErrors);
-        alert("Vennligst fyll ut alle ingrediensfeltene");
+        showToast("Vennligst fyll ut alle ingrediensfeltene", "error");
         setLoading(false);
         return;
       }
 
       // Validate instructions
       if (instructions.some(step => !step.trim())) {
-        alert("Vennligst fyll ut alle trinnene i fremgangsmåten");
+        showToast("Vennligst fyll ut alle trinnene i fremgangsmåten", "error");
         setLoading(false);
         return;
       }
@@ -270,10 +274,12 @@ function EditRecipe() {
         updatedAt: new Date(),
       });
       
+      showToast("Oppskriften ble oppdatert!", "success");
       setLoading(false);
       navigate(`/profile/${auth.currentUser.uid}`);
     } catch (error) {
       console.error("Error updating recipe:", error);
+      showToast("Det oppstod en feil ved oppdatering av oppskriften", "error");
       setLoading(false);
     }
   };

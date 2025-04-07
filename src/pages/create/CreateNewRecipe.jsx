@@ -1,13 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { auth } from "../../../firebase";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDoc,
-  doc,
-} from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDoc, doc } from "firebase/firestore";
+import { useToast } from "../../contexts/toastContext/toast";
 
 function CreateNewRecipe() {
   const [title, setTitle] = useState("");
@@ -28,6 +23,7 @@ function CreateNewRecipe() {
   const [portions, setPortions] = useState(1);
   const [cookingTime, setCookingTime] = useState("10 - 15 min");
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   // Predefined units for the dropdown
   const units = [
@@ -186,7 +182,7 @@ function CreateNewRecipe() {
     try {
       // Validate image
       if (imageError) {
-        alert("Vennligst skriv inn en gyldig bilde-URL.");
+        showToast("Vennligst skriv inn en gyldig bilde-URL.", "error");
         setLoading(false);
         return;
       }
@@ -194,6 +190,7 @@ function CreateNewRecipe() {
       // Validate title
       if (!title.trim()) {
         setFormErrors((prev) => ({ ...prev, title: "Tittel er påkrevd" }));
+        showToast("Tittel er påkrevd", "error");
         setLoading(false);
         return;
       }
@@ -204,6 +201,7 @@ function CreateNewRecipe() {
           ...prev,
           description: "Beskrivelse er påkrevd",
         }));
+        showToast("Beskrivelse er påkrevd", "error");
         setLoading(false);
         return;
       }
@@ -215,11 +213,7 @@ function CreateNewRecipe() {
         if (!item.ingredient.trim()) {
           hasIngredientErrors = true;
         }
-        if (
-          !item.amount ||
-          isNaN(item.amount) ||
-          parseFloat(item.amount) <= 0
-        ) {
+        if (!item.amount || isNaN(item.amount) || parseFloat(item.amount) <= 0) {
           newAmountErrors[index] = "Mengde er påkrevd";
           hasIngredientErrors = true;
         }
@@ -230,14 +224,14 @@ function CreateNewRecipe() {
 
       if (hasIngredientErrors) {
         setAmountErrors(newAmountErrors);
-        alert("Vennligst fyll ut alle ingrediensfeltene");
+        showToast("Vennligst fyll ut alle ingrediensfeltene", "error");
         setLoading(false);
         return;
       }
 
       // Validate instructions
       if (instructions.some((step) => !step.trim())) {
-        alert("Vennligst fyll ut alle trinnene i fremgangsmåten");
+        showToast("Vennligst fyll ut alle trinnene i fremgangsmåten", "error");
         setLoading(false);
         return;
       }
@@ -268,11 +262,12 @@ function CreateNewRecipe() {
       // Save recipe to Firestore
       const db = getFirestore();
       await addDoc(collection(db, "recipes"), recipeData);
-
+      showToast("Oppskriften ble lagret!", "success");
       setLoading(false);
       navigate("/");
     } catch (error) {
       console.error("Feil ved lagring av oppskrift: ", error);
+      showToast("Det oppstod en feil ved lagring av oppskriften", "error");
       setLoading(false);
     }
   };
