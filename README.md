@@ -9,3 +9,8 @@
 
 2. Start the development server:
 **npm run dev**
+
+
+### Link to website
+
+https://delekat.netlify.app/
