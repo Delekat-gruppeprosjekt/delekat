@@ -1,0 +1,240 @@
+    17	BT <136116838+utviklern@users.noreply.github.com>
+    33	EPetrineLynghaug <136695793+EPetrineLynghaug@users.noreply.github.com>
+     7	Elisabeth Petrine Lynghaug <136695793+EPetrineLynghaug@users.noreply.github.com>
+    21	Frank Kristian Fosse <146066047+FrankieFosse@users.noreply.github.com>
+    47	FrankieFosse <146066047+FrankieFosse@users.noreply.github.com>
+     8	Hallotre <91545791+Hallotre@users.noreply.github.com>
+    12	Hallotre <haywood.toby@gmail.com>
+    15	Herman Jasser <146322568+HermanJasser@users.noreply.github.com>
+    13	HermanJasser <herjas00989@stud.noroff.no>
+    39	utviklern <136116838+utviklern@users.noreply.github.com>
+BT (17):
+      Merge pull request #10 from Delekat-gruppeprosjekt/Clerk-setup
+      Update main.jsx
+      Merge pull request #11 from Delekat-gruppeprosjekt/frankie-190325
+      Merge pull request #16 from Delekat-gruppeprosjekt/frankie-200325
+      Merge pull request #17 from Delekat-gruppeprosjekt/card-4
+      Merge pull request #20 from Delekat-gruppeprosjekt/frankie-firebase-210325
+      Merge branch 'main3' into design-fix
+      Merge pull request #34 from Delekat-gruppeprosjekt/design-fix
+      Merge pull request #38 from Delekat-gruppeprosjekt/rediger-profil-knapp
+      Merge pull request #39 from Delekat-gruppeprosjekt/frankie-010425
+      Merge pull request #40 from Delekat-gruppeprosjekt/style-rediger-profil
+      Merge branch 'main3' into profil-info-i-header
+      Merge pull request #44 from Delekat-gruppeprosjekt/profil-info-i-header
+      Merge branch 'main3' into home-loading
+      Merge pull request #54 from Delekat-gruppeprosjekt/frankie-admin2-030425
+      Merge pull request #55 from Delekat-gruppeprosjekt/frankie-fixing-profile-030425
+      Merge pull request #57 from Delekat-gruppeprosjekt/fikse-bio-placeholder
+
+EPetrineLynghaug (33):
+      card test, .env file, api is working
+      logo
+      styling card frontpage.
+      .
+      Fixed merge conflict, organized folders and filenames, and updated config files.
+      .
+      update styling.
+      clerk  code
+      .
+      update card comments.
+      refactoring
+      grid main
+      fixet en max på 1400px og på profil
+      klar.
+      startet med å lage spill desiger iconer jeg trenger
+      icons
+      bare en backup
+      litt bedre.
+      funker perf
+      working perf
+      modal in making
+      fix
+      snart ferdig må finpusses
+      fix
+      game done
+      .
+      loading.
+      netlify test.
+      fixer bugs
+      fixer
+      fix
+      netlify klager enda.
+      .
+
+Elisabeth Petrine Lynghaug (7):
+      Initial commit
+      Merge pull request #3 from Delekat-gruppeprosjekt/home-page-header
+      Merge pull request #33 from Delekat-gruppeprosjekt/bbtStylingLogin
+      Merge branch 'main3' into Petrine-spinner2
+      Merge pull request #62 from Delekat-gruppeprosjekt/bbtFix040425
+      Merge pull request #63 from Delekat-gruppeprosjekt/hallotre-jobber
+      Merge pull request #66 from Delekat-gruppeprosjekt/frankie-loading-game-070425
+
+Frank Kristian Fosse (21):
+      Merge pull request #1 from Delekat-gruppeprosjekt/download-dependencies
+      Merge pull request #2 from Delekat-gruppeprosjekt/folders
+      Merge pull request #7 from Delekat-gruppeprosjekt/sanity-put-trail-2
+      Merge pull request #13 from Delekat-gruppeprosjekt/bbt190325
+      Merge pull request #27 from Delekat-gruppeprosjekt/bbtCardEdit
+      Merge pull request #32 from Delekat-gruppeprosjekt/design-fix
+      Merge branch 'main3' into recipe-details-page
+      Merge pull request #35 from Delekat-gruppeprosjekt/recipe-details-page
+      Merge branch 'main3' into editRecipe
+      Merge pull request #36 from Delekat-gruppeprosjekt/editRecipe
+      Merge branch 'main3' into frankie-310325
+      Merge pull request #37 from Delekat-gruppeprosjekt/frankie-310325
+      Merge pull request #47 from Delekat-gruppeprosjekt/profile-show-new
+      Merge pull request #49 from Delekat-gruppeprosjekt/fikse-bugs-på-header
+      Merge pull request #53 from Delekat-gruppeprosjekt/home-loading
+      Merge pull request #56 from Delekat-gruppeprosjekt/fikse-tailwind-på-profilepage
+      Merge branch 'main3' into petrine-spinner-game
+      Merge pull request #59 from Delekat-gruppeprosjekt/petrine-spinner-game
+      Merge branch 'main3' into Petrine-spinner2
+      Merge pull request #64 from Delekat-gruppeprosjekt/Petrine-spinner2
+      Merge pull request #65 from Delekat-gruppeprosjekt/bbtFix070425
+
+FrankieFosse (47):
+      Tailwind, React Icons, Layout, Header, Home
+      Delete vite.config.js
+      Update Header
+      fix imports
+      Changes to router, header
+      Changes to Header, navbar, Layout margin
+      Fixed styling and moved Home.jsx to home folder
+      Update constants, navbar update and added Search function
+      Styled ProfilePage, updated navbar and search
+      Implement Firebase
+      Update Home.jsx
+      Created ProfileById page
+      Deleted Home2.jsx and updated App.jsx
+      Added Delete button and all recipes to Profile
+      Updated CreateNewRecipe
+      Added Edit.jsx page
+      Many updates to Profile page and more
+      Update main.jsx
+      Update ProfilePage.jsx
+      Fixed Profile Page
+      Merge branch 'frankie-profile-250325' of https://github.com/Delekat-gruppeprosjekt/delekat into frankie-profile-250325
+      Updated to mjs files
+      Update HomeCard2.jsx
+      Updated Home and added animation
+      Merge remote-tracking branch 'origin/bbtFrankie2' into main2
+      Update HomeCard2.jsx
+      Merge branch 'main2' of https://github.com/Delekat-gruppeprosjekt/delekat into main2
+      Implemented Admin ability to delete other posts
+      Updated Profile to show Users
+      Update ProfilePage.jsx
+      Update App.jsx
+      Fixed Profile Page recipes + Admin
+      Removed ability to edit other's profile/posts
+      Update styles on admin ability to view users
+      Update ProfilePage.jsx
+      Update ProfilePage.jsx
+      Update ProfilePage.jsx
+      Update ProfilePage.jsx
+      Update ProfilePage.jsx
+      Update ProfilePage.jsx
+      Update Home.jsx
+      Update ProfilePage.jsx
+      Update Home.jsx
+      Update CreateNewRecipe.jsx
+      Update Edit.jsx
+      Update EditProfilePage.jsx
+      Added LoadingGame to Home
+
+Hallotre (20):
+      Add authentication pages and integrate Clerk for user management
+      Merge pull request #12 from Delekat-gruppeprosjekt/add-constants
+      Merge branch 'main' into homecard-3
+      Merge pull request #15 from Delekat-gruppeprosjekt/homecard-3
+      Merge branch 'main' into frankie-200325
+      Merge pull request #18 from Delekat-gruppeprosjekt/frankie-200325
+      Merge pull request #19 from Delekat-gruppeprosjekt/frankie-profile-200325
+      refactor: update profile management and recipe components; remove old profile pages and add new edit functionality
+      fix: update recipe navigation to redirect to user's profile page with UID
+      refactor: enhance RecipeCard layout and styling; improve metadata display for cooking time and difficulty
+      feat: add SingleRecipe page and update routing; enhance ProfilePage
+      feat: enhance RecipeCard and ProfilePage; add delete functionality and improve navigation
+      Fikse homecard så de går til details side. added en hover effect på cards på profile page
+      Refactor Home component: enhance search functionality and improve UI interactions
+      Merge branch 'main3' into gjøre-tailwindkode-konsekvent
+      Merge pull request #51 from Delekat-gruppeprosjekt/gjøre-tailwindkode-konsekvent
+      Revert av profilpagebyid
+      update vite to version 6.2.5 in package-lock.json
+      refactor: improve code readability and formatting in Home component
+      feat: Implement toast notifications across the application
+
+Herman Jasser (15):
+      Create hei
+      Merge pull request #4 from Delekat-gruppeprosjekt/homecard-1
+      Merge branch 'main' into sanity-to
+      Merge pull request #5 from Delekat-gruppeprosjekt/sanity-to
+      Merge pull request #6 from Delekat-gruppeprosjekt/header-2-frankie
+      Merge pull request #9 from Delekat-gruppeprosjekt/createpost-form
+      Merge pull request #41 from Delekat-gruppeprosjekt/editCreateFix
+      Merge pull request #43 from Delekat-gruppeprosjekt/refactor-searchbar
+      Merge pull request #42 from Delekat-gruppeprosjekt/refactorhome-page-cards
+      Merge pull request #45 from Delekat-gruppeprosjekt/detFixBbt
+      Merge pull request #48 from Delekat-gruppeprosjekt/frankie-020425
+      Merge pull request #50 from Delekat-gruppeprosjekt/frankie-profile-020425
+      Merge pull request #52 from Delekat-gruppeprosjekt/fix-av-problems
+      Merge pull request #58 from Delekat-gruppeprosjekt/frankie-admin-030425
+      Merge pull request #60 from Delekat-gruppeprosjekt/frankie-fixing-home-040425
+
+HermanJasser (13):
+      dependencies
+      Laget ferdig alle schematypes og laget contants.js
+      lagt til noen nye constants
+      update to constants, prostform, createpost
+      createform, constant
+      constant.js
+      fikset rediger profil i header
+      redigerprofil side. stylet og validering av url fikset
+      profil info i header+logg ut btn
+      profil bilde mobil, bug fix header marg bottom
+      oversatt til norsk og gjort tailwind konsekvent på farger
+      ferdig
+      endret farger og språk
+
+utviklern (39):
+      Added general folders
+      knapper
+      sort on date and time added, newest first
+      updated img url validation, and avatar image round
+      updated unit to dropdown, amount to validate number
+      added dificulity on recipe, validating on form, time, limit description, styling home card with figma design,
+      updated login style and firebase error messages
+      removed console logs from home card
+      updated signup design to match login, email-validating, a check if username exist. firebase error
+      background update
+      regex update
+      added comments, fixed that users cant have the same name (case sensitivity)
+      updated edit recipe page yo match Create page
+      updated max "mengde", required on fields, max amount on portions and more
+      updated edit identical to create with requirements etc.
+      quantity fix, ingredients fix, max lenght and break, samen as the "steps" fields, added max characters allowed.
+      added decimal in quantity field
+      added abort button on both sites that takes you back to where you were before you clicked
+      added white background to create/edit, and save button to green, justify-end, space-x-4
+      fixed break words/sentences on details page
+      disablet "+" button when reached 999 portions
+      max length on title name on both create and edit
+      added border to input fields according to figma design (Details and edit page)
+      updated border color on input fields in profile page
+      added sorting on profile page (newest first), updated values in units (new/edit)
+      updated title lenght form 100 to 60
+      added load 24 cards on home, and when scroll down 24 more. without loading indicator
+      added autor and picture to details, moved the "back" button over
+      added title under image
+      changed the buttons for portions to match figma design, aswell where its centered
+      fixed navbar covering card (margin)
+      changed max portions from 999 to 99 on edit,create and details
+      removed "forgot password" from login
+      fixed password validation on sign up, changed border color to match all other input fields
+      updated error reply if wrong username or password
+      added "type" on portions buttons, formatted page
+      added "+" "-" to instructions so that we can add a step in between steps, as vell as "-" "+" on ingredients line
+      adding code from previous branch
+      added edit page as well
+
